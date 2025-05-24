@@ -1,0 +1,108 @@
+version: "3"
+
+tasks:
+  protoc:
+    desc: Generate grpc files from proto/shortugo.proto
+    cmds:
+      - protoc --go_out=. --go-grpc_out=. proto/shortugo.proto
+
+  gen-certs:
+    desc: Generate self-signed certs
+    cmds:
+      - mkdir -p certs
+      - |
+        openssl req -x509 -newkey rsa:4096 -nodes \
+        -keyout certs/cert.key \
+        -out certs/cert.crt \
+        -sha256 -days 365 \
+        -subj "/C=KZ/ST=Chicago/L=Chicago/O=Shortugo/OU=Dev/CN=localhost"
+    generates:
+      - certs/cert.crt
+      - certs/cert.key
+    silent: false
+
+  build-multichecker:
+    desc: Build the custom static linter
+    cmds:
+      - go build -o staticlint ./cmd/staticlint
+    sources:
+      - ./cmd/staticlint/**/*.go
+    generates:
+      - staticlint
+
+  multichecker:
+    desc: Run static analysis using the custom linter (excluding mocks, main, noexit, multichecker, proto)
+    deps:
+      - build-multichecker
+    cmds:
+      - >
+        for pkg in $(go list ./...); do
+          if [[ "$pkg" =~ mocks|main|noexit|multichecker|proto ]]; then
+            echo "Skipping $pkg"
+            continue
+          fi
+          go vet -vettool=$(pwd)/staticlint "$pkg"
+        done
+
+
+  lint:
+    desc: Run linters using golangci-lint
+    cmds:
+      - golangci-lint run --config .golangci2.yml
+    silent: true
+
+  cover:
+    desc: Check test coverage
+    cmds:
+      - go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
+      - grep -vE "/(mocks|main|noexit|multichecker|shortugo.pb.go|shortugo_grpc.pb.go)" cover.tmp.out > cover.out
+      - go-test-coverage --config=./.testcoverage.yml
+      - go tool cover -html=cover.out -o coverage.html
+    silent: true
+
+  statictest:
+    desc: yp statictest
+    cmds:
+      - go vet -vettool=./statictest ./...
+    silent: true
+
+  buildserver:
+    desc: build server
+    dir: cmd/server
+    cmds:
+      - |
+        go build -ldflags "\
+        -X 'gophkeeper/pkg/version.Version=1.0.0' \
+        -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+        -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+        -o bin/gophkeeper/cmd/server cmd/server/main.go
+      - echo "Doner"
+    silent: true
+
+  buildclient:
+    desc: build client
+    dir: cmd/client
+    cmds:
+      - |
+        go build -ldflags "\
+        -X 'gophkeeper/pkg/version.Version=1.0.0' \
+        -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+        -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+        -o bin/gophkeeper/cmd/client cmd/client/main.go
+      - echo "Doner"
+    silent: true
+
+  run:
+    desc: run project
+    cmds:
+      - wgo run cmd/shortugo/main.go -f="db.json" -d="postgres://postgres:postgres@localhost:5432/praktikum?sslmode=disable"
+    silent: true
+
+  test:
+    desc: build and run tests
+    deps:
+      - build
+    cmds:
+      - ./shortenertest -test.v -test.run=^TestIteration1$ -binary-path=cmd/shortugo/shortugo
+
+
