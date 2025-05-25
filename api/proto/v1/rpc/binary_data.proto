@@ -4,13 +4,21 @@ package api.proto.v1.rpc;
 
 option go_package = "gophkeeper/protogen/api/proto/v1/rpc";
 
-import "api/proto/v1/models/meta.proto";
+// Метаданные файла (отправляются один раз)
+message FileMetadata {
+  string file_name = 1;
+  string mime_type = 2;
+  string meta_json = 3;
+}
 
 message BinaryDataRequest {
-  bytes data = 1;
-  optional api.proto.v1.models.Meta meta = 2;
+  oneof data {
+    FileMetadata metadata = 1;
+    bytes chunk = 2;
+  }
 }
 
 message BinaryDataResponse {
-  string message = 1;
+  string file_id = 1;
+  int64 size_bytes = 2;
 }

@@ -26,15 +26,15 @@ var File_api_proto_v1_service_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a\"api/proto/v1/rpc/credentials.proto\x1a api/proto/v1/rpc/bank_card.proto\x1a\"api/proto/v1/rpc/binary_data.proto\x1a\x1cgoogle/api/annotations.proto2\xbf\x03\n" +
+	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a\"api/proto/v1/rpc/credentials.proto\x1a api/proto/v1/rpc/bank_card.proto\x1a\"api/proto/v1/rpc/binary_data.proto\x1a\x1cgoogle/api/annotations.proto2\xc1\x03\n" +
 	"\n" +
 	"GophKeeper\x12W\n" +
 	"\x04Ping\x12\x1d.api.proto.v1.rpc.PingRequest\x1a\x1e.api.proto.v1.rpc.PingResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/ping\x12v\n" +
 	"\vCredentials\x12$.api.proto.v1.rpc.CredentialsRequest\x1a%.api.proto.v1.rpc.CredentialsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/credentials\x12k\n" +
-	"\bBankCard\x12!.api.proto.v1.rpc.BankCardRequest\x1a\".api.proto.v1.rpc.BankCardResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/bank-card\x12s\n" +
+	"\bBankCard\x12!.api.proto.v1.rpc.BankCardRequest\x1a\".api.proto.v1.rpc.BankCardResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/bank-card\x12u\n" +
 	"\n" +
-	"BinaryData\x12#.api.proto.v1.rpc.BinaryDataRequest\x1a$.api.proto.v1.rpc.BinaryDataResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/binary-dataB\"Z gophkeeper/protogen/api/proto/v1b\x06proto3"
+	"BinaryData\x12#.api.proto.v1.rpc.BinaryDataRequest\x1a$.api.proto.v1.rpc.BinaryDataResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/binary-data(\x01B\"Z gophkeeper/protogen/api/proto/v1b\x06proto3"
 
 var file_api_proto_v1_service_proto_goTypes = []any{
 	(*rpc.PingRequest)(nil),         // 0: api.proto.v1.rpc.PingRequest

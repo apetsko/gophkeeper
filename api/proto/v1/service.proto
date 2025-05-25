@@ -32,7 +32,7 @@ service GophKeeper {
     };
   };
 
-  rpc BinaryData(api.proto.v1.rpc.BinaryDataRequest) returns (api.proto.v1.rpc.BinaryDataResponse) {
+  rpc BinaryData(stream api.proto.v1.rpc.BinaryDataRequest) returns (api.proto.v1.rpc.BinaryDataResponse) {
     option (google.api.http) = {
       post: "/v1/binary-data"
       body: "*"

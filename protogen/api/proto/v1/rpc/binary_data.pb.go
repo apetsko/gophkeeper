@@ -9,7 +9,6 @@ package rpc
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	models "gophkeeper/protogen/api/proto/v1/models"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,17 +21,81 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type BinaryDataRequest struct {
+// Метаданные файла (отправляются один раз)
+type FileMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	Meta          *models.Meta           `protobuf:"bytes,2,opt,name=meta,proto3,oneof" json:"meta,omitempty"`
+	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	MimeType      string                 `protobuf:"bytes,2,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	MetaJson      string                 `protobuf:"bytes,3,opt,name=meta_json,json=metaJson,proto3" json:"meta_json,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FileMetadata) Reset() {
+	*x = FileMetadata{}
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FileMetadata) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileMetadata) ProtoMessage() {}
+
+func (x *FileMetadata) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileMetadata.ProtoReflect.Descriptor instead.
+func (*FileMetadata) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *FileMetadata) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+func (x *FileMetadata) GetMimeType() string {
+	if x != nil {
+		return x.MimeType
+	}
+	return ""
+}
+
+func (x *FileMetadata) GetMetaJson() string {
+	if x != nil {
+		return x.MetaJson
+	}
+	return ""
+}
+
+type BinaryDataRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Data:
+	//
+	//	*BinaryDataRequest_Metadata
+	//	*BinaryDataRequest_Chunk
+	Data          isBinaryDataRequest_Data `protobuf_oneof:"data"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BinaryDataRequest) Reset() {
 	*x = BinaryDataRequest{}
-	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[0]
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +107,7 @@ func (x *BinaryDataRequest) String() string {
 func (*BinaryDataRequest) ProtoMessage() {}
 
 func (x *BinaryDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[0]
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,33 +120,61 @@ func (x *BinaryDataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BinaryDataRequest.ProtoReflect.Descriptor instead.
 func (*BinaryDataRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{0}
+	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *BinaryDataRequest) GetData() []byte {
+func (x *BinaryDataRequest) GetData() isBinaryDataRequest_Data {
 	if x != nil {
 		return x.Data
 	}
 	return nil
 }
 
-func (x *BinaryDataRequest) GetMeta() *models.Meta {
+func (x *BinaryDataRequest) GetMetadata() *FileMetadata {
 	if x != nil {
-		return x.Meta
+		if x, ok := x.Data.(*BinaryDataRequest_Metadata); ok {
+			return x.Metadata
+		}
 	}
 	return nil
 }
 
+func (x *BinaryDataRequest) GetChunk() []byte {
+	if x != nil {
+		if x, ok := x.Data.(*BinaryDataRequest_Chunk); ok {
+			return x.Chunk
+		}
+	}
+	return nil
+}
+
+type isBinaryDataRequest_Data interface {
+	isBinaryDataRequest_Data()
+}
+
+type BinaryDataRequest_Metadata struct {
+	Metadata *FileMetadata `protobuf:"bytes,1,opt,name=metadata,proto3,oneof"`
+}
+
+type BinaryDataRequest_Chunk struct {
+	Chunk []byte `protobuf:"bytes,2,opt,name=chunk,proto3,oneof"`
+}
+
+func (*BinaryDataRequest_Metadata) isBinaryDataRequest_Data() {}
+
+func (*BinaryDataRequest_Chunk) isBinaryDataRequest_Data() {}
+
 type BinaryDataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	FileId        string                 `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
+	SizeBytes     int64                  `protobuf:"varint,2,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BinaryDataResponse) Reset() {
 	*x = BinaryDataResponse{}
-	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[1]
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +186,7 @@ func (x *BinaryDataResponse) String() string {
 func (*BinaryDataResponse) ProtoMessage() {}
 
 func (x *BinaryDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[1]
+	mi := &file_api_proto_v1_rpc_binary_data_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,27 +199,40 @@ func (x *BinaryDataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BinaryDataResponse.ProtoReflect.Descriptor instead.
 func (*BinaryDataResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{1}
+	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *BinaryDataResponse) GetMessage() string {
+func (x *BinaryDataResponse) GetFileId() string {
 	if x != nil {
-		return x.Message
+		return x.FileId
 	}
 	return ""
+}
+
+func (x *BinaryDataResponse) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
 }
 
 var File_api_proto_v1_rpc_binary_data_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_rpc_binary_data_proto_rawDesc = "" +
 	"\n" +
-	"\"api/proto/v1/rpc/binary_data.proto\x12\x10api.proto.v1.rpc\x1a\x1eapi/proto/v1/models/meta.proto\"d\n" +
-	"\x11BinaryDataRequest\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\x122\n" +
-	"\x04meta\x18\x02 \x01(\v2\x19.api.proto.v1.models.MetaH\x00R\x04meta\x88\x01\x01B\a\n" +
-	"\x05_meta\".\n" +
-	"\x12BinaryDataResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB&Z$gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
+	"\"api/proto/v1/rpc/binary_data.proto\x12\x10api.proto.v1.rpc\"e\n" +
+	"\fFileMetadata\x12\x1b\n" +
+	"\tfile_name\x18\x01 \x01(\tR\bfileName\x12\x1b\n" +
+	"\tmime_type\x18\x02 \x01(\tR\bmimeType\x12\x1b\n" +
+	"\tmeta_json\x18\x03 \x01(\tR\bmetaJson\"q\n" +
+	"\x11BinaryDataRequest\x12<\n" +
+	"\bmetadata\x18\x01 \x01(\v2\x1e.api.proto.v1.rpc.FileMetadataH\x00R\bmetadata\x12\x16\n" +
+	"\x05chunk\x18\x02 \x01(\fH\x00R\x05chunkB\x06\n" +
+	"\x04data\"L\n" +
+	"\x12BinaryDataResponse\x12\x17\n" +
+	"\afile_id\x18\x01 \x01(\tR\x06fileId\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x02 \x01(\x03R\tsizeBytesB&Z$gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_binary_data_proto_rawDescOnce sync.Once
@@ -142,14 +246,14 @@ func file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP() []byte {
 	return file_api_proto_v1_rpc_binary_data_proto_rawDescData
 }
 
-var file_api_proto_v1_rpc_binary_data_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_proto_v1_rpc_binary_data_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_proto_v1_rpc_binary_data_proto_goTypes = []any{
-	(*BinaryDataRequest)(nil),  // 0: api.proto.v1.rpc.BinaryDataRequest
-	(*BinaryDataResponse)(nil), // 1: api.proto.v1.rpc.BinaryDataResponse
-	(*models.Meta)(nil),        // 2: api.proto.v1.models.Meta
+	(*FileMetadata)(nil),       // 0: api.proto.v1.rpc.FileMetadata
+	(*BinaryDataRequest)(nil),  // 1: api.proto.v1.rpc.BinaryDataRequest
+	(*BinaryDataResponse)(nil), // 2: api.proto.v1.rpc.BinaryDataResponse
 }
 var file_api_proto_v1_rpc_binary_data_proto_depIdxs = []int32{
-	2, // 0: api.proto.v1.rpc.BinaryDataRequest.meta:type_name -> api.proto.v1.models.Meta
+	0, // 0: api.proto.v1.rpc.BinaryDataRequest.metadata:type_name -> api.proto.v1.rpc.FileMetadata
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -162,14 +266,17 @@ func file_api_proto_v1_rpc_binary_data_proto_init() {
 	if File_api_proto_v1_rpc_binary_data_proto != nil {
 		return
 	}
-	file_api_proto_v1_rpc_binary_data_proto_msgTypes[0].OneofWrappers = []any{}
+	file_api_proto_v1_rpc_binary_data_proto_msgTypes[1].OneofWrappers = []any{
+		(*BinaryDataRequest_Metadata)(nil),
+		(*BinaryDataRequest_Chunk)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_rpc_binary_data_proto_rawDesc), len(file_api_proto_v1_rpc_binary_data_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -104,26 +104,43 @@ func local_request_GophKeeper_BankCard_0(ctx context.Context, marshaler runtime.
 }
 
 func request_GophKeeper_BinaryData_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq rpc.BinaryDataRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var metadata runtime.ServerMetadata
+	stream, err := client.BinaryData(ctx)
+	if err != nil {
+		grpclog.Errorf("Failed to start streaming: %v", err)
+		return nil, metadata, err
 	}
-	msg, err := client.BinaryData(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_GophKeeper_BinaryData_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq rpc.BinaryDataRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	dec := marshaler.NewDecoder(req.Body)
+	for {
+		var protoReq rpc.BinaryDataRequest
+		err = dec.Decode(&protoReq)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			grpclog.Errorf("Failed to decode request: %v", err)
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		}
+		if err = stream.Send(&protoReq); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			grpclog.Errorf("Failed to send request: %v", err)
+			return nil, metadata, err
+		}
 	}
-	msg, err := server.BinaryData(ctx, &protoReq)
+	if err := stream.CloseSend(); err != nil {
+		grpclog.Errorf("Failed to terminate client stream: %v", err)
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		grpclog.Errorf("Failed to get header from client: %v", err)
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	msg, err := stream.CloseAndRecv()
+	metadata.TrailerMD = stream.Trailer()
 	return msg, metadata, err
 }
 
@@ -193,25 +210,12 @@ func RegisterGophKeeperHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		}
 		forward_GophKeeper_BankCard_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+
 	mux.Handle(http.MethodPost, pattern_GophKeeper_BinaryData_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/BinaryData", runtime.WithHTTPPathPattern("/v1/binary-data"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_GophKeeper_BinaryData_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_GophKeeper_BinaryData_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil

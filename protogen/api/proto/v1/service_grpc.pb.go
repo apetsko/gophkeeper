@@ -33,7 +33,7 @@ type GophKeeperClient interface {
 	Ping(ctx context.Context, in *rpc.PingRequest, opts ...grpc.CallOption) (*rpc.PingResponse, error)
 	Credentials(ctx context.Context, in *rpc.CredentialsRequest, opts ...grpc.CallOption) (*rpc.CredentialsResponse, error)
 	BankCard(ctx context.Context, in *rpc.BankCardRequest, opts ...grpc.CallOption) (*rpc.BankCardResponse, error)
-	BinaryData(ctx context.Context, in *rpc.BinaryDataRequest, opts ...grpc.CallOption) (*rpc.BinaryDataResponse, error)
+	BinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[rpc.BinaryDataRequest, rpc.BinaryDataResponse], error)
 }
 
 type gophKeeperClient struct {
@@ -74,15 +74,18 @@ func (c *gophKeeperClient) BankCard(ctx context.Context, in *rpc.BankCardRequest
 	return out, nil
 }
 
-func (c *gophKeeperClient) BinaryData(ctx context.Context, in *rpc.BinaryDataRequest, opts ...grpc.CallOption) (*rpc.BinaryDataResponse, error) {
+func (c *gophKeeperClient) BinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[rpc.BinaryDataRequest, rpc.BinaryDataResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(rpc.BinaryDataResponse)
-	err := c.cc.Invoke(ctx, GophKeeper_BinaryData_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &GophKeeper_ServiceDesc.Streams[0], GophKeeper_BinaryData_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[rpc.BinaryDataRequest, rpc.BinaryDataResponse]{ClientStream: stream}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GophKeeper_BinaryDataClient = grpc.ClientStreamingClient[rpc.BinaryDataRequest, rpc.BinaryDataResponse]
 
 // GophKeeperServer is the server API for GophKeeper service.
 // All implementations must embed UnimplementedGophKeeperServer
@@ -91,7 +94,7 @@ type GophKeeperServer interface {
 	Ping(context.Context, *rpc.PingRequest) (*rpc.PingResponse, error)
 	Credentials(context.Context, *rpc.CredentialsRequest) (*rpc.CredentialsResponse, error)
 	BankCard(context.Context, *rpc.BankCardRequest) (*rpc.BankCardResponse, error)
-	BinaryData(context.Context, *rpc.BinaryDataRequest) (*rpc.BinaryDataResponse, error)
+	BinaryData(grpc.ClientStreamingServer[rpc.BinaryDataRequest, rpc.BinaryDataResponse]) error
 	mustEmbedUnimplementedGophKeeperServer()
 }
 
@@ -111,8 +114,8 @@ func (UnimplementedGophKeeperServer) Credentials(context.Context, *rpc.Credentia
 func (UnimplementedGophKeeperServer) BankCard(context.Context, *rpc.BankCardRequest) (*rpc.BankCardResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BankCard not implemented")
 }
-func (UnimplementedGophKeeperServer) BinaryData(context.Context, *rpc.BinaryDataRequest) (*rpc.BinaryDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BinaryData not implemented")
+func (UnimplementedGophKeeperServer) BinaryData(grpc.ClientStreamingServer[rpc.BinaryDataRequest, rpc.BinaryDataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method BinaryData not implemented")
 }
 func (UnimplementedGophKeeperServer) mustEmbedUnimplementedGophKeeperServer() {}
 func (UnimplementedGophKeeperServer) testEmbeddedByValue()                    {}
@@ -189,23 +192,12 @@ func _GophKeeper_BankCard_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GophKeeper_BinaryData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(rpc.BinaryDataRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GophKeeperServer).BinaryData(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GophKeeper_BinaryData_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GophKeeperServer).BinaryData(ctx, req.(*rpc.BinaryDataRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+func _GophKeeper_BinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GophKeeperServer).BinaryData(&grpc.GenericServerStream[rpc.BinaryDataRequest, rpc.BinaryDataResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GophKeeper_BinaryDataServer = grpc.ClientStreamingServer[rpc.BinaryDataRequest, rpc.BinaryDataResponse]
 
 // GophKeeper_ServiceDesc is the grpc.ServiceDesc for GophKeeper service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -226,11 +218,13 @@ var GophKeeper_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "BankCard",
 			Handler:    _GophKeeper_BankCard_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "BinaryData",
-			Handler:    _GophKeeper_BinaryData_Handler,
+			StreamName:    "BinaryData",
+			Handler:       _GophKeeper_BinaryData_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "api/proto/v1/service.proto",
 }
