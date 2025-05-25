@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -53,6 +54,15 @@ func main() {
 
 	// HTTP Gateway mux
 	mux := runtime.NewServeMux()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(mux)
+
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
 	if errRegister := pb.RegisterGophKeeperHandlerFromEndpoint(ctx, mux, grpcAddr, opts); errRegister != nil {
@@ -62,7 +72,7 @@ func main() {
 	// HTTP сервер
 	httpServer := &http.Server{
 		Addr:    httpAddr,
-		Handler: mux,
+		Handler: handler,
 	}
 
 	// HTTP запуск
