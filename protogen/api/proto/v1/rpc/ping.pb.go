@@ -59,6 +59,7 @@ func (*PingRequest) Descriptor() ([]byte, []int) {
 
 type PingResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,13 +94,21 @@ func (*PingResponse) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_rpc_ping_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *PingResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_api_proto_v1_rpc_ping_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_rpc_ping_proto_rawDesc = "" +
 	"\n" +
 	"\x1bapi/proto/v1/rpc/ping.proto\x12\x10api.proto.v1.rpc\"\r\n" +
-	"\vPingRequest\"\x0e\n" +
-	"\fPingResponseB&Z$gophkeeper/protogen/api/proto/v1/rpcb\beditionsp\xe8\a"
+	"\vPingRequest\"(\n" +
+	"\fPingResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB&Z$gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_ping_proto_rawDescOnce sync.Once

@@ -30,7 +30,7 @@ const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"GophKeeper\x12W\n" +
 	"\x04Ping\x12\x1d.api.proto.v1.rpc.PingRequest\x1a\x1e.api.proto.v1.rpc.PingResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/v1/pingB\"Z gophkeeper/protogen/api/proto/v1b\beditionsp\xe8\a"
+	"\x12\b/v1/pingB\"Z gophkeeper/protogen/api/proto/v1b\x06proto3"
 
 var file_api_proto_v1_service_proto_goTypes = []any{
 	(*rpc.PingRequest)(nil),  // 0: api.proto.v1.rpc.PingRequest

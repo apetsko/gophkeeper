@@ -21,5 +21,7 @@ import (
 // - *pbrpc.PingResponse: An empty response indicating success.
 // - error: Always nil.
 func (s *ServerAdmin) Ping(_ context.Context, _ *pbrpc.PingRequest) (*pbrpc.PingResponse, error) {
-	return &pbrpc.PingResponse{}, nil
+	return &pbrpc.PingResponse{
+		Message: "pong",
+	}, nil
 }
