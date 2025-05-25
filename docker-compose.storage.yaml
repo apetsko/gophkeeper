@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   gophkeeper_minio:
     image: minio/minio:latest
@@ -12,8 +10,8 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
     volumes:
-      - ./gophstorage/minio/data:/data
-      - ./gophstorage/minio/config:/root/.minio
+      - ../gophstorage/minio/data:/data
+      - ../gophstorage/minio/config:/root/.minio
     networks:
       - gophkeeper_net
 
@@ -28,7 +26,7 @@ services:
       POSTGRES_PASSWORD: gophkeeper_pass
       POSTGRES_DB: gophkeeper_db
     volumes:
-      - ./gophstorage/postgres/data:/var/lib/postgresql/data
+      - ../gophstorage/postgres/data:/var/lib/postgresql/data
     networks:
       - gophkeeper_net
 
