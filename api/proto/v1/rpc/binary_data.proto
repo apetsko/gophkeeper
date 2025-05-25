@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2023";
 
 package api.proto.v1.rpc;
 
@@ -8,7 +8,7 @@ import "api/proto/v1/models/meta.proto";
 
 message BinaryDataRequest {
   bytes data = 1;
-  optional api.proto.v1.models.Meta meta = 2;
+  api.proto.v1.models.Meta meta = 2;
 }
 
 message BinaryDataResponse {
