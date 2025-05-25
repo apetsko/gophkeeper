@@ -12,9 +12,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "gophkeeper/api/proto/v1"
 	"gophkeeper/internal/grpcserver"
 	"gophkeeper/internal/grpcserver/handlers"
+	pb "gophkeeper/protogen/api/proto/v1"
 )
 
 func main() {

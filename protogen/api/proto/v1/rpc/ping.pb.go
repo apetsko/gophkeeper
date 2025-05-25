@@ -99,7 +99,7 @@ const file_api_proto_v1_rpc_ping_proto_rawDesc = "" +
 	"\n" +
 	"\x1bapi/proto/v1/rpc/ping.proto\x12\x10api.proto.v1.rpc\"\r\n" +
 	"\vPingRequest\"\x0e\n" +
-	"\fPingResponseB\x1dZ\x1bgophkeeper/api/proto/v1/rpcb\beditionsp\xe8\a"
+	"\fPingResponseB&Z$gophkeeper/protogen/api/proto/v1/rpcb\beditionsp\xe8\a"
 
 var (
 	file_api_proto_v1_rpc_ping_proto_rawDescOnce sync.Once

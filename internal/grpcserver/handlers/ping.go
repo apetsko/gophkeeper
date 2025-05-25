@@ -5,7 +5,7 @@ package handlers
 import (
 	"context"
 
-	pbrpc "gophkeeper/api/proto/v1/rpc"
+	pbrpc "gophkeeper/protogen/api/proto/v1/rpc"
 )
 
 // Ping handles a health check request for the gRPC service.

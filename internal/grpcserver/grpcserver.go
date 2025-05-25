@@ -11,10 +11,10 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	pb "gophkeeper/api/proto/v1"
-	pbrpc "gophkeeper/api/proto/v1/rpc"
 	"gophkeeper/internal/constants"
 	"gophkeeper/internal/grpcserver/handlers"
+	pb "gophkeeper/protogen/api/proto/v1"
+	pbrpc "gophkeeper/protogen/api/proto/v1/rpc"
 )
 
 type GRPCServer struct {
