@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
 	"net/http"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -22,55 +24,71 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
-	// Канал для синхронизации запуска gRPC-сервера
-	grpcReady := make(chan struct{})
+	grpcAddr := ":3007"
+	httpAddr := ":8082"
 
-	// Запуск gRPC-сервера в отдельной горутине
+	// GRPC-сервер
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			grpcserver.AuthUnaryInterceptor(map[string]bool{}),
+			grpcserver.LoggingInterceptor(),
+		),
+	)
+	pb.RegisterGophKeeperServer(grpcServer, grpcserver.NewGRPCServer(handlers.NewServer()))
+	reflection.Register(grpcServer)
+
+	// GRPC Listener
+	lis, errListen := net.Listen("tcp", grpcAddr)
+	if errListen != nil {
+		log.Fatalf("failed to listen: %v", errListen)
+	}
+
+	// GRPC запуск
 	go func() {
-		listen, err := net.Listen("tcp", ":3007")
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-
-		server := grpcserver.NewGRPCServer(handlers.NewServer())
-
-		grpcServer := grpc.NewServer(
-			grpc.ChainUnaryInterceptor(
-				grpcserver.AuthUnaryInterceptor(map[string]bool{}),
-				grpcserver.LoggingInterceptor(),
-			),
-		)
-
-		pb.RegisterGophKeeperServer(grpcServer, server)
-		reflection.Register(grpcServer)
-
-		// Сигнализируем, что gRPC-сервер готов
-		close(grpcReady)
-
-		if err := grpcServer.Serve(listen); err != nil {
-			log.Fatalf("failed to serve gRPC server: %v", err)
+		log.Println("Starting gRPC server on", grpcAddr)
+		if errStarting := grpcServer.Serve(lis); errStarting != nil {
+			log.Fatalf("gRPC server failed: %v", errStarting)
 		}
 	}()
 
-	// Ожидаем, пока gRPC-сервер будет готов
-	<-grpcReady
-
-	// Инициализация gRPC-Gateway
+	// HTTP Gateway mux
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	if err := pb.RegisterGophKeeperHandlerFromEndpoint(ctx, mux, ":3007", opts); err != nil {
-		log.Fatalf("failed to register gRPC-Gateway: %v", err)
+	if errRegister := pb.RegisterGophKeeperHandlerFromEndpoint(ctx, mux, grpcAddr, opts); errRegister != nil {
+		log.Fatalf("failed to register gRPC-Gateway: %v", errRegister)
 	}
 
+	// HTTP сервер
+	httpServer := &http.Server{
+		Addr:    httpAddr,
+		Handler: mux,
+	}
+
+	// HTTP запуск
 	go func() {
-		if err := http.ListenAndServe(":8082", mux); err != nil {
-			log.Fatalf("failed to serve HTTP server: %v", err)
+		log.Println("Starting HTTP server on", httpAddr)
+		if errHTTP := httpServer.ListenAndServe(); errHTTP != nil && !errors.Is(errHTTP, http.ErrServerClosed) {
+			log.Fatalf("HTTP server failed: %v", errHTTP)
 		}
 	}()
 
 	log.Println("Servers are running...")
 
+	// Ожидаем сигнал завершения
 	<-ctx.Done()
 	log.Println("Shutdown signal received")
+
+	// Контекст с таймаутом для остановки HTTP-сервера
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Остановка gRPC и HTTP серверов
+	grpcServer.GracefulStop()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		log.Printf("HTTP shutdown error: %v", err)
+	}
+
+	log.Println("Servers stopped gracefully")
 }
