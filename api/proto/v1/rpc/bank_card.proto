@@ -10,7 +10,7 @@ message BankCardRequest {
   string card_number = 1;
   string expiry_date = 2;
   string cvv = 3;
-  string cardholder_name = 4;
+  string cardholder = 4;
   api.proto.v1.models.Meta meta = 5;
 }
 

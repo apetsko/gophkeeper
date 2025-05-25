@@ -23,14 +23,14 @@ const (
 )
 
 type BankCardRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	CardNumber     string                 `protobuf:"bytes,1,opt,name=card_number,json=cardNumber,proto3" json:"card_number,omitempty"`
-	ExpiryDate     string                 `protobuf:"bytes,2,opt,name=expiry_date,json=expiryDate,proto3" json:"expiry_date,omitempty"`
-	Cvv            string                 `protobuf:"bytes,3,opt,name=cvv,proto3" json:"cvv,omitempty"`
-	CardholderName string                 `protobuf:"bytes,4,opt,name=cardholder_name,json=cardholderName,proto3" json:"cardholder_name,omitempty"`
-	Meta           *models.Meta           `protobuf:"bytes,5,opt,name=meta,proto3,oneof" json:"meta,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CardNumber    string                 `protobuf:"bytes,1,opt,name=card_number,json=cardNumber,proto3" json:"card_number,omitempty"`
+	ExpiryDate    string                 `protobuf:"bytes,2,opt,name=expiry_date,json=expiryDate,proto3" json:"expiry_date,omitempty"`
+	Cvv           string                 `protobuf:"bytes,3,opt,name=cvv,proto3" json:"cvv,omitempty"`
+	Cardholder    string                 `protobuf:"bytes,4,opt,name=cardholder,proto3" json:"cardholder,omitempty"`
+	Meta          *models.Meta           `protobuf:"bytes,5,opt,name=meta,proto3,oneof" json:"meta,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BankCardRequest) Reset() {
@@ -84,9 +84,9 @@ func (x *BankCardRequest) GetCvv() string {
 	return ""
 }
 
-func (x *BankCardRequest) GetCardholderName() string {
+func (x *BankCardRequest) GetCardholder() string {
 	if x != nil {
-		return x.CardholderName
+		return x.Cardholder
 	}
 	return ""
 }
@@ -146,14 +146,16 @@ var File_api_proto_v1_rpc_bank_card_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_rpc_bank_card_proto_rawDesc = "" +
 	"\n" +
-	" api/proto/v1/rpc/bank_card.proto\x12\x10api.proto.v1.rpc\x1a\x1eapi/proto/v1/models/meta.proto\"\xcb\x01\n" +
+	" api/proto/v1/rpc/bank_card.proto\x12\x10api.proto.v1.rpc\x1a\x1eapi/proto/v1/models/meta.proto\"\xc2\x01\n" +
 	"\x0fBankCardRequest\x12\x1f\n" +
 	"\vcard_number\x18\x01 \x01(\tR\n" +
 	"cardNumber\x12\x1f\n" +
 	"\vexpiry_date\x18\x02 \x01(\tR\n" +
 	"expiryDate\x12\x10\n" +
-	"\x03cvv\x18\x03 \x01(\tR\x03cvv\x12'\n" +
-	"\x0fcardholder_name\x18\x04 \x01(\tR\x0ecardholderName\x122\n" +
+	"\x03cvv\x18\x03 \x01(\tR\x03cvv\x12\x1e\n" +
+	"\n" +
+	"cardholder\x18\x04 \x01(\tR\n" +
+	"cardholder\x122\n" +
 	"\x04meta\x18\x05 \x01(\v2\x19.api.proto.v1.models.MetaH\x00R\x04meta\x88\x01\x01B\a\n" +
 	"\x05_meta\",\n" +
 	"\x10BankCardResponse\x12\x18\n" +
