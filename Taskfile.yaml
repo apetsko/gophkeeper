@@ -1,10 +1,28 @@
 version: "3"
 
 tasks:
-  protoc:
-    desc: Generate grpc files from proto/shortugo.proto
+  run-server:
     cmds:
-      - protoc --go_out=. --go-grpc_out=. proto/shortugo.proto
+      - go run cmd/server/main.go
+
+  protoc:
+    desc: Generate grpc files from proto/gophkeeper.proto
+    cmds:
+      - |
+        FILES=$(find api/proto/v1 -name '*.proto')
+        protoc \
+          -I. \
+          -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis \
+          --go_out=. \
+          --go_opt=paths=source_relative \
+          --go-grpc_out=. \
+          --go-grpc_opt=paths=source_relative \
+          $FILES
+
+  clean-gen-proto:
+    desc: Delete generate files
+    cmds:
+      - find api/proto -type f ! -name "*proto" -delete
 
   gen-certs:
     desc: Generate self-signed certs
@@ -48,7 +66,7 @@ tasks:
   lint:
     desc: Run linters using golangci-lint
     cmds:
-      - golangci-lint run --config .golangci2.yml
+      - golangci-lint run --config ./pkg/version/.golangci.yml
     silent: true
 
   cover:

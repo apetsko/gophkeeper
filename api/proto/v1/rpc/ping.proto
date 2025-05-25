@@ -1,0 +1,11 @@
+edition = "2023";
+
+package api.proto.v1.rpc;
+
+option go_package = "gophkeeper/api/proto/v1/rpc";
+
+message PingRequest {
+}
+
+message PingResponse {
+}

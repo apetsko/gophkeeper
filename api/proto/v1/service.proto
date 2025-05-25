@@ -1,0 +1,17 @@
+edition = "2023";
+
+package api.proto.v1;
+
+option go_package = "gophkeeper/api/proto/v1";
+
+import "api/proto/v1/rpc/ping.proto";
+
+import "google/api/annotations.proto";
+
+service GophKeeper {
+  rpc Ping(api.proto.v1.rpc.PingRequest) returns (api.proto.v1.rpc.PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/ping"
+    };
+  };
+}
