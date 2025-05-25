@@ -1,9 +1,13 @@
 version: "3"
 
 tasks:
+
   run-server:
+    desc: run server
     cmds:
-      - go run cmd/server/main.go
+      # go install github.com/bokwoon95/wgo@latest раннер wgo
+      - wgo run cmd/server/main.go -d="postgres://postgres:postgres@localhost:25432/gophkeeper?sslmode=disable"
+    silent: true
 
   protoc:
     desc: Generate grpc files from proto/gophkeeper.proto
@@ -47,30 +51,6 @@ tasks:
       - certs/cert.key
     silent: false
 
-  build-multichecker:
-    desc: Build the custom static linter
-    cmds:
-      - go build -o staticlint ./cmd/staticlint
-    sources:
-      - ./cmd/staticlint/**/*.go
-    generates:
-      - staticlint
-
-  multichecker:
-    desc: Run static analysis using the custom linter (excluding mocks, main, noexit, multichecker, proto)
-    deps:
-      - build-multichecker
-    cmds:
-      - >
-        for pkg in $(go list ./...); do
-          if [[ "$pkg" =~ mocks|main|noexit|multichecker|proto ]]; then
-            echo "Skipping $pkg"
-            continue
-          fi
-          go vet -vettool=$(pwd)/staticlint "$pkg"
-        done
-
-
   lint:
     desc: Run linters using golangci-lint
     cmds:
@@ -81,16 +61,11 @@ tasks:
     desc: Check test coverage
     cmds:
       - go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
-      - grep -vE "/(mocks|main|noexit|multichecker|shortugo.pb.go|shortugo_grpc.pb.go)" cover.tmp.out > cover.out
+      - grep -vE "/(mocks|main|noexit|multichecker|shortugo.pb.go|shortugo_grpc.pb.go)" cover.tmp.out > cover.out #exception by name in filepath
       - go-test-coverage --config=./.testcoverage.yml
       - go tool cover -html=cover.out -o coverage.html
     silent: true
 
-  statictest:
-    desc: yp statictest
-    cmds:
-      - go vet -vettool=./statictest ./...
-    silent: true
 
   buildserver:
     desc: build server
@@ -118,17 +93,21 @@ tasks:
       - echo "Doner"
     silent: true
 
-  run:
-    desc: run project
-    cmds:
-      - wgo run cmd/shortugo/main.go -f="db.json" -d="postgres://postgres:postgres@localhost:5432/praktikum?sslmode=disable"
-    silent: true
-
   test:
-    desc: build and run tests
-    deps:
-      - build
+    desc: run tests
     cmds:
-      - ./shortenertest -test.v -test.run=^TestIteration1$ -binary-path=cmd/shortugo/shortugo
+      - go test ./...
+
+
+  storage-up:
+    desc: run docker minio & postgresql
+    cmds:
+      - docker compose -f docker-compose.storage.yaml up -d
+
+  storage-down:
+    desc: stop docker minio & postgresql
+    cmds:
+      - docker compose -f docker-compose.storage.yaml down
+
 
 
