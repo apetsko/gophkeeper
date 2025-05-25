@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package api.proto.v1.models;
+
+option go_package = "gophkeeper/protogen/api/proto/v1/models";
+
+message Meta {
+  string content = 1;
+}

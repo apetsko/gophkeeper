@@ -32,6 +32,18 @@ func (s *GRPCServer) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.Pi
 	return s.ServerAdmin.Ping(ctx, in)
 }
 
+func (s *GRPCServer) Credentials(ctx context.Context, in *pbrpc.CredentialsRequest) (*pbrpc.CredentialsResponse, error) {
+	return s.ServerAdmin.Credentials(ctx, in)
+}
+
+func (s *GRPCServer) BankCard(ctx context.Context, in *pbrpc.BankCardRequest) (*pbrpc.BankCardResponse, error) {
+	return s.ServerAdmin.BankCard(ctx, in)
+}
+
+func (s *GRPCServer) BinaryData(ctx context.Context, in *pbrpc.BinaryDataRequest) (*pbrpc.BinaryDataResponse, error) {
+	return s.ServerAdmin.BinaryData(ctx, in)
+}
+
 func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor {
 	slog.Info("Auth interceptor enabled")
 

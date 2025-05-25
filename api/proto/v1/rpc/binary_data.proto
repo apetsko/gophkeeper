@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api.proto.v1.rpc;
+
+option go_package = "gophkeeper/protogen/api/proto/v1/rpc";
+
+import "api/proto/v1/models/meta.proto";
+
+message BinaryDataRequest {
+  bytes data = 1;
+  optional api.proto.v1.models.Meta meta = 2;
+}
+
+message BinaryDataResponse {
+  string message = 1;
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package api.proto.v1.rpc;
+
+option go_package = "gophkeeper/protogen/api/proto/v1/rpc";
+
+import "api/proto/v1/models/meta.proto";
+
+message BankCardRequest {
+  string card_number = 1;
+  string expiry_date = 2;
+  string cvv = 3;
+  string cardholder_name = 4;
+  optional api.proto.v1.models.Meta meta = 5;
+}
+
+message BankCardResponse {
+  string message = 1;
+}

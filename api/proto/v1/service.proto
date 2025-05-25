@@ -5,6 +5,9 @@ package api.proto.v1;
 option go_package = "gophkeeper/protogen/api/proto/v1";
 
 import "api/proto/v1/rpc/ping.proto";
+import "api/proto/v1/rpc/credentials.proto";
+import "api/proto/v1/rpc/bank_card.proto";
+import "api/proto/v1/rpc/binary_data.proto";
 
 import "google/api/annotations.proto";
 
@@ -12,6 +15,27 @@ service GophKeeper {
   rpc Ping(api.proto.v1.rpc.PingRequest) returns (api.proto.v1.rpc.PingResponse) {
     option (google.api.http) = {
       get: "/v1/ping"
+    };
+  };
+
+  rpc Credentials(api.proto.v1.rpc.CredentialsRequest) returns (api.proto.v1.rpc.CredentialsResponse) {
+    option (google.api.http) = {
+      post: "/v1/credentials"
+      body: "*"
+    };
+  };
+
+  rpc BankCard(api.proto.v1.rpc.BankCardRequest) returns (api.proto.v1.rpc.BankCardResponse) {
+    option (google.api.http) = {
+      post: "/v1/bank-card"
+      body: "*"
+    };
+  };
+
+  rpc BinaryData(api.proto.v1.rpc.BinaryDataRequest) returns (api.proto.v1.rpc.BinaryDataResponse) {
+    option (google.api.http) = {
+      post: "/v1/binary-data"
+      body: "*"
     };
   };
 }
