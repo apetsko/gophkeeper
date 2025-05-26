@@ -1,8 +1,8 @@
-edition = "2023";
+syntax = "proto3";
 
 package api.proto.v1;
 
-option go_package = "gophkeeper/protogen/api/proto/v1";
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1";
 
 import "api/proto/v1/rpc/ping.proto";
 import "api/proto/v1/rpc/credentials.proto";

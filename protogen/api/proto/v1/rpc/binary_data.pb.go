@@ -7,9 +7,9 @@
 package rpc
 
 import (
+	models "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	models "gophkeeper/protogen/api/proto/v1/models"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,8 +24,8 @@ const (
 
 type BinaryDataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data" json:"data,omitempty"`
-	Meta          *models.Meta           `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
+	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Meta          *models.Meta           `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -76,7 +76,7 @@ func (x *BinaryDataRequest) GetMeta() *models.Meta {
 
 type BinaryDataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       *string                `protobuf:"bytes,1,opt,name=message" json:"message,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -112,8 +112,8 @@ func (*BinaryDataResponse) Descriptor() ([]byte, []int) {
 }
 
 func (x *BinaryDataResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -127,7 +127,7 @@ const file_api_proto_v1_rpc_binary_data_proto_rawDesc = "" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12-\n" +
 	"\x04meta\x18\x02 \x01(\v2\x19.api.proto.v1.models.MetaR\x04meta\".\n" +
 	"\x12BinaryDataResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB&Z$gophkeeper/protogen/api/proto/v1/rpcb\beditionsp\xe8\a"
+	"\amessage\x18\x01 \x01(\tR\amessageB9Z7github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_binary_data_proto_rawDescOnce sync.Once

@@ -7,10 +7,10 @@
 package v1
 
 import (
+	rpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	rpc "gophkeeper/protogen/api/proto/v1/rpc"
 	reflect "reflect"
 	unsafe "unsafe"
 )
@@ -34,7 +34,7 @@ const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\vCredentials\x12$.api.proto.v1.rpc.CredentialsRequest\x1a%.api.proto.v1.rpc.CredentialsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/credentials\x12k\n" +
 	"\bBankCard\x12!.api.proto.v1.rpc.BankCardRequest\x1a\".api.proto.v1.rpc.BankCardResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/bank-card\x12s\n" +
 	"\n" +
-	"BinaryData\x12#.api.proto.v1.rpc.BinaryDataRequest\x1a$.api.proto.v1.rpc.BinaryDataResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/binary-dataB\"Z gophkeeper/protogen/api/proto/v1b\beditionsp\xe8\a"
+	"BinaryData\x12#.api.proto.v1.rpc.BinaryDataRequest\x1a$.api.proto.v1.rpc.BinaryDataResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/binary-dataB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
 
 var file_api_proto_v1_service_proto_goTypes = []any{
 	(*rpc.PingRequest)(nil),         // 0: api.proto.v1.rpc.PingRequest

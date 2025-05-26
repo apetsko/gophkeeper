@@ -7,9 +7,9 @@
 package rpc
 
 import (
+	models "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	models "gophkeeper/protogen/api/proto/v1/models"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,9 +24,9 @@ const (
 
 type CredentialsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Login         *string                `protobuf:"bytes,1,opt,name=login" json:"login,omitempty"`
-	Password      *string                `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
-	Meta          *models.Meta           `protobuf:"bytes,3,opt,name=meta" json:"meta,omitempty"`
+	Login         string                 `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Meta          *models.Meta           `protobuf:"bytes,3,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -62,15 +62,15 @@ func (*CredentialsRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *CredentialsRequest) GetLogin() string {
-	if x != nil && x.Login != nil {
-		return *x.Login
+	if x != nil {
+		return x.Login
 	}
 	return ""
 }
 
 func (x *CredentialsRequest) GetPassword() string {
-	if x != nil && x.Password != nil {
-		return *x.Password
+	if x != nil {
+		return x.Password
 	}
 	return ""
 }
@@ -84,7 +84,7 @@ func (x *CredentialsRequest) GetMeta() *models.Meta {
 
 type CredentialsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       *string                `protobuf:"bytes,1,opt,name=message" json:"message,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,8 +120,8 @@ func (*CredentialsResponse) Descriptor() ([]byte, []int) {
 }
 
 func (x *CredentialsResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -136,7 +136,7 @@ const file_api_proto_v1_rpc_credentials_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12-\n" +
 	"\x04meta\x18\x03 \x01(\v2\x19.api.proto.v1.models.MetaR\x04meta\"/\n" +
 	"\x13CredentialsResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB&Z$gophkeeper/protogen/api/proto/v1/rpcb\beditionsp\xe8\a"
+	"\amessage\x18\x01 \x01(\tR\amessageB9Z7github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_credentials_proto_rawDescOnce sync.Once

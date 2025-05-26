@@ -23,7 +23,7 @@ const (
 
 type Meta struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Content       *string                `protobuf:"bytes,1,opt,name=content" json:"content,omitempty"`
+	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,8 +59,8 @@ func (*Meta) Descriptor() ([]byte, []int) {
 }
 
 func (x *Meta) GetContent() string {
-	if x != nil && x.Content != nil {
-		return *x.Content
+	if x != nil {
+		return x.Content
 	}
 	return ""
 }
@@ -71,7 +71,7 @@ const file_api_proto_v1_models_meta_proto_rawDesc = "" +
 	"\n" +
 	"\x1eapi/proto/v1/models/meta.proto\x12\x13api.proto.v1.models\" \n" +
 	"\x04Meta\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontentB)Z'gophkeeper/protogen/api/proto/v1/modelsb\beditionsp\xe8\a"
+	"\acontent\x18\x01 \x01(\tR\acontentB<Z:github.com/apetsko/gophkeeper/protogen/api/proto/v1/modelsb\x06proto3"
 
 var (
 	file_api_proto_v1_models_meta_proto_rawDescOnce sync.Once

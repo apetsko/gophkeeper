@@ -7,9 +7,9 @@
 package rpc
 
 import (
+	models "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	models "gophkeeper/protogen/api/proto/v1/models"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,11 +24,11 @@ const (
 
 type BankCardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CardNumber    *string                `protobuf:"bytes,1,opt,name=card_number,json=cardNumber" json:"card_number,omitempty"`
-	ExpiryDate    *string                `protobuf:"bytes,2,opt,name=expiry_date,json=expiryDate" json:"expiry_date,omitempty"`
-	Cvv           *string                `protobuf:"bytes,3,opt,name=cvv" json:"cvv,omitempty"`
-	Cardholder    *string                `protobuf:"bytes,4,opt,name=cardholder" json:"cardholder,omitempty"`
-	Meta          *models.Meta           `protobuf:"bytes,5,opt,name=meta" json:"meta,omitempty"`
+	CardNumber    string                 `protobuf:"bytes,1,opt,name=card_number,json=cardNumber,proto3" json:"card_number,omitempty"`
+	ExpiryDate    string                 `protobuf:"bytes,2,opt,name=expiry_date,json=expiryDate,proto3" json:"expiry_date,omitempty"`
+	Cvv           string                 `protobuf:"bytes,3,opt,name=cvv,proto3" json:"cvv,omitempty"`
+	Cardholder    string                 `protobuf:"bytes,4,opt,name=cardholder,proto3" json:"cardholder,omitempty"`
+	Meta          *models.Meta           `protobuf:"bytes,5,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,29 +64,29 @@ func (*BankCardRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *BankCardRequest) GetCardNumber() string {
-	if x != nil && x.CardNumber != nil {
-		return *x.CardNumber
+	if x != nil {
+		return x.CardNumber
 	}
 	return ""
 }
 
 func (x *BankCardRequest) GetExpiryDate() string {
-	if x != nil && x.ExpiryDate != nil {
-		return *x.ExpiryDate
+	if x != nil {
+		return x.ExpiryDate
 	}
 	return ""
 }
 
 func (x *BankCardRequest) GetCvv() string {
-	if x != nil && x.Cvv != nil {
-		return *x.Cvv
+	if x != nil {
+		return x.Cvv
 	}
 	return ""
 }
 
 func (x *BankCardRequest) GetCardholder() string {
-	if x != nil && x.Cardholder != nil {
-		return *x.Cardholder
+	if x != nil {
+		return x.Cardholder
 	}
 	return ""
 }
@@ -100,7 +100,7 @@ func (x *BankCardRequest) GetMeta() *models.Meta {
 
 type BankCardResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       *string                `protobuf:"bytes,1,opt,name=message" json:"message,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -136,8 +136,8 @@ func (*BankCardResponse) Descriptor() ([]byte, []int) {
 }
 
 func (x *BankCardResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -158,7 +158,7 @@ const file_api_proto_v1_rpc_bank_card_proto_rawDesc = "" +
 	"cardholder\x12-\n" +
 	"\x04meta\x18\x05 \x01(\v2\x19.api.proto.v1.models.MetaR\x04meta\",\n" +
 	"\x10BankCardResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB&Z$gophkeeper/protogen/api/proto/v1/rpcb\beditionsp\xe8\a"
+	"\amessage\x18\x01 \x01(\tR\amessageB9Z7github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_bank_card_proto_rawDescOnce sync.Once

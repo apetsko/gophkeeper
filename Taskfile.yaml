@@ -22,6 +22,14 @@ tasks:
           --go-grpc_out=./protogen/ \
           --go-grpc_opt=paths=source_relative \
           $FILES
+      - |
+        FILES=$(find api/proto/v1 -name '*.proto')
+        protoc \
+          -I. \
+          -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis \
+          --grpc-gateway_out ./protogen/ \
+          --grpc-gateway_opt paths=source_relative \
+          $FILES
 
   clean-gen-proto:
     desc: Delete generate files
