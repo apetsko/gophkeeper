@@ -11,6 +11,8 @@ tasks:
 
   protoc:
     desc: Generate grpc files from proto/gophkeeper.proto
+    deps:
+      - clean-gen-proto
     cmds:
       - |
         FILES=$(find api/proto/v1 -name '*.proto')
@@ -21,12 +23,6 @@ tasks:
           --go_opt=paths=source_relative \
           --go-grpc_out=./protogen/ \
           --go-grpc_opt=paths=source_relative \
-          $FILES
-      - |
-        FILES=$(find api/proto/v1 -name '*.proto')
-        protoc \
-          -I. \
-          -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis \
           --grpc-gateway_out ./protogen/ \
           --grpc-gateway_opt paths=source_relative \
           $FILES
