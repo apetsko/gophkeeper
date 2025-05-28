@@ -24,7 +24,7 @@ const (
 
 type BinaryDataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	File          *models.File           `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
 	Meta          *models.Meta           `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -60,9 +60,9 @@ func (*BinaryDataRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_rpc_binary_data_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *BinaryDataRequest) GetData() []byte {
+func (x *BinaryDataRequest) GetFile() *models.File {
 	if x != nil {
-		return x.Data
+		return x.File
 	}
 	return nil
 }
@@ -122,9 +122,9 @@ var File_api_proto_v1_rpc_binary_data_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_rpc_binary_data_proto_rawDesc = "" +
 	"\n" +
-	"\"api/proto/v1/rpc/binary_data.proto\x12\x10api.proto.v1.rpc\x1a\x1eapi/proto/v1/models/meta.proto\"V\n" +
-	"\x11BinaryDataRequest\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\x12-\n" +
+	"\"api/proto/v1/rpc/binary_data.proto\x12\x10api.proto.v1.rpc\x1a\x1eapi/proto/v1/models/meta.proto\x1a\x1eapi/proto/v1/models/file.proto\"q\n" +
+	"\x11BinaryDataRequest\x12-\n" +
+	"\x04file\x18\x01 \x01(\v2\x19.api.proto.v1.models.FileR\x04file\x12-\n" +
 	"\x04meta\x18\x02 \x01(\v2\x19.api.proto.v1.models.MetaR\x04meta\".\n" +
 	"\x12BinaryDataResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB9Z7github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpcb\x06proto3"
@@ -145,15 +145,17 @@ var file_api_proto_v1_rpc_binary_data_proto_msgTypes = make([]protoimpl.MessageI
 var file_api_proto_v1_rpc_binary_data_proto_goTypes = []any{
 	(*BinaryDataRequest)(nil),  // 0: api.proto.v1.rpc.BinaryDataRequest
 	(*BinaryDataResponse)(nil), // 1: api.proto.v1.rpc.BinaryDataResponse
-	(*models.Meta)(nil),        // 2: api.proto.v1.models.Meta
+	(*models.File)(nil),        // 2: api.proto.v1.models.File
+	(*models.Meta)(nil),        // 3: api.proto.v1.models.Meta
 }
 var file_api_proto_v1_rpc_binary_data_proto_depIdxs = []int32{
-	2, // 0: api.proto.v1.rpc.BinaryDataRequest.meta:type_name -> api.proto.v1.models.Meta
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 0: api.proto.v1.rpc.BinaryDataRequest.file:type_name -> api.proto.v1.models.File
+	3, // 1: api.proto.v1.rpc.BinaryDataRequest.meta:type_name -> api.proto.v1.models.Meta
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_rpc_binary_data_proto_init() }

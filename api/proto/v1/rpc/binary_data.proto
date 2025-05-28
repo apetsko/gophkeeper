@@ -5,9 +5,10 @@ package api.proto.v1.rpc;
 option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc";
 
 import "api/proto/v1/models/meta.proto";
+import "api/proto/v1/models/file.proto";
 
 message BinaryDataRequest {
-  bytes data = 1;
+  api.proto.v1.models.File file = 1;
   api.proto.v1.models.Meta meta = 2;
 }
 

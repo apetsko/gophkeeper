@@ -1,1 +1,1 @@
-package postgres_test
+package stogage

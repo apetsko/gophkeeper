@@ -2,9 +2,7 @@ package grpcserver
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -70,37 +68,5 @@ func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor
 		ctx = context.WithValue(ctx, constants.JWT, jwt[0])
 
 		return handler(ctx, req)
-	}
-}
-
-func LoggingInterceptor() grpc.UnaryServerInterceptor {
-	slog.Info("gRPC logger interceptor enabled")
-
-	return func(
-		ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler,
-	) (interface{}, error) {
-		start := time.Now()
-
-		resp, err := handler(ctx, req)
-
-		duration := time.Since(start)
-		st := status.Convert(err)
-
-		message := fmt.Sprintf("method: %s, duration: %s, status: %s",
-			info.FullMethod,
-			duration,
-			st.Code().String(),
-		)
-
-		if err != nil {
-			message += fmt.Sprintf(", error: %s", st.Message())
-		}
-
-		slog.Info(message)
-
-		return resp, err
 	}
 }

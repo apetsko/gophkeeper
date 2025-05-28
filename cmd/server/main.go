@@ -10,11 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/internal/grpcserver"
 	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
+	"github.com/apetsko/gophkeeper/internal/stogage"
 	"github.com/apetsko/gophkeeper/pkg/logging"
 	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
-	grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
@@ -29,23 +31,32 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
-	grpcAddr := ":3007"
-	httpAddr := ":8082"
+	cfg, err := config.NewConfig()
+	if err != nil {
+		log.Fatalf("config read err %v", err)
+	}
+
+	minioClient, err := stogage.NewMinioClient(ctx, cfg.Minio)
+	if err != nil {
+		log.Fatalf("minio client init err %v", err)
+	}
 
 	// GRPC-сервер
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			grpcserver.AuthUnaryInterceptor(map[string]bool{}),                  // твой авторизационный interceptor
-			grpc_logging.UnaryServerInterceptor(logging.InterceptorLogger(log)), // логгер
+			grpcserver.AuthUnaryInterceptor(map[string]bool{}),                 // твой авторизационный interceptor
+			grpcLogging.UnaryServerInterceptor(logging.InterceptorLogger(log)), // логгер
 		),
 	)
 
-	pb.RegisterGophKeeperServer(grpcServer, grpcserver.NewGRPCServer(handlers.NewServer()))
+	pb.RegisterGophKeeperServer(grpcServer, grpcserver.NewGRPCServer(
+		handlers.NewServer(cfg.Minio.Bucket, minioClient),
+	))
 	reflection.Register(grpcServer)
 
 	// Запускаем сервера
-	go runGRPC(ctx, grpcServer, grpcAddr, log)
-	go runHTTP(ctx, httpAddr, grpcAddr, log)
+	go runGRPC(ctx, grpcServer, cfg.GRPCAddress, log)
+	go runHTTP(ctx, cfg.GRPCGatewayAddress, cfg.GRPCAddress, log)
 
 	log.Info("Servers are running...")
 
@@ -59,8 +70,8 @@ func main() {
 
 	// Останавливаем gRPC и HTTP серверы
 	grpcServer.GracefulStop()
-	if err := shutdownHTTP(shutdownCtx, httpAddr, log); err != nil {
-		log.Error("HTTP shutdown error", "err", err)
+	if errShutdownHTTP := shutdownHTTP(shutdownCtx, cfg.GRPCGatewayAddress, log); errShutdownHTTP != nil {
+		log.Error("HTTP shutdown error", "err", errShutdownHTTP)
 	}
 
 	log.Info("Servers stopped gracefully")
