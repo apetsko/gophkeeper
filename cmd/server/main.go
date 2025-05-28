@@ -13,7 +13,7 @@ import (
 	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/internal/grpcserver"
 	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
-	"github.com/apetsko/gophkeeper/internal/stogage"
+	"github.com/apetsko/gophkeeper/internal/storage"
 	"github.com/apetsko/gophkeeper/pkg/logging"
 	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
@@ -36,10 +36,21 @@ func main() {
 		log.Fatalf("config read err %v", err)
 	}
 
-	minioClient, err := stogage.NewMinioClient(ctx, cfg.Minio)
+	minioClient, err := storage.NewMinioClient(ctx, cfg.Minio)
 	if err != nil {
 		log.Fatalf("minio client init err %v", err)
 	}
+
+	pg, err := storage.NewPostgres(cfg.DatabaseDSN, log)
+	if err != nil {
+		log.Fatalf("postgres init err %v", err)
+	}
+
+	defer func() {
+		if err = pg.Close(); err != nil {
+			log.Fatal("failed to close postgres: " + err.Error())
+		}
+	}()
 
 	// GRPC-сервер
 	grpcServer := grpc.NewServer(

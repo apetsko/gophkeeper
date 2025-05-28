@@ -1,4 +1,4 @@
-package stogage
+package storage
 
 import (
 	"context"
@@ -49,7 +49,7 @@ func migrate(conn string, logger *logging.Logger) error {
 	return nil
 }
 
-func New(conn string, logger *logging.Logger) (*Storage, error) {
+func NewPostgres(conn string, logger *logging.Logger) (*Storage, error) {
 	if err := migrate(conn, logger); err != nil {
 		return nil, err
 	}
