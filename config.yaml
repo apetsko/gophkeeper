@@ -1,0 +1,11 @@
+
+GRPC_ADDRESS: ":3007"
+GRPC_GATEWAY_ADDRESS: ":8082"
+
+DATABASE_DSN: "postgres://postgres:postgres@localhost:25432/gophkeeper?sslmode=disable"
+
+MINIO:
+  MINIO_ID: "minioadmin"
+  MINIO_SECRET: "minioadmin"
+  MINIO_BUCKET: "gophkeeper"
+  MINIO_ADDRESS: "localhost:9000"

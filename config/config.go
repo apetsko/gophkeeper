@@ -2,67 +2,62 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
+
+	"github.com/apetsko/gophkeeper/utils"
+	"github.com/caarlos0/env/v11"
+	"gopkg.in/yaml.v3"
 )
 
-type MinioConfig struct {
-	ID      string `env:"MINIO_ID"`
-	Secret  string `env:"MINIO_SECRET"`
-	Bucket  string `env:"MINIO_BUCKET"`
-	Address string `env:"MINIO_ADDRESS"`
-}
-
 type Config struct {
-	DatabaseDSN        string `env:"DATABASE_DSN"`
-	GRPCAddress        string `env:"GRPC_ADDRESS"`
-	GRPCGatewayAddress string `env:"GRPC_GATEWAY_ADDRESS"`
-	Minio              MinioConfig
+	ConfigFile         string      `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+	DatabaseDSN        string      `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
+	GRPCAddress        string      `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
+	GRPCGatewayAddress string      `env:"GRPC_GATEWAY_ADDRESS" yaml:"GRPC_GATEWAY_ADDRESS" validate:"required"`
+	Minio              MinioConfig `yaml:"MINIO"`
+}
+type MinioConfig struct {
+	ID      string `env:"MINIO_ID" yaml:"MINIO_ID" validate:"required"`
+	Secret  string `env:"MINIO_SECRET" yaml:"MINIO_SECRET" validate:"required"`
+	Bucket  string `env:"MINIO_BUCKET" yaml:"MINIO_BUCKET" validate:"required"`
+	Address string `env:"MINIO_ADDRESS" yaml:"MINIO_ADDRESS" validate:"required"`
 }
 
-func NewConfig() (*Config, error) {
+func New() (*Config, error) {
 	var cfg Config
-
-	flag.StringVar(&cfg.DatabaseDSN, "d", "postgres://postgres:postgres@localhost:25432/gophkeeper?sslmode=disable", "database DSN")
-	flag.StringVar(&cfg.GRPCAddress, "g", ":3007", "GRPC server startup address")
-	flag.StringVar(&cfg.GRPCGatewayAddress, "h", ":8082", "GRPCGateway startup address")
-
+	flag.StringVar(&cfg.ConfigFile, "f", "", "config.yaml or config.yml")
 	flag.Parse()
 
-	if databaseDSN := os.Getenv("DATABASE_DSN"); databaseDSN != "" {
-		cfg.DatabaseDSN = databaseDSN
-	}
-
-	if gRPCAddress := os.Getenv("GRPC_ADDRESS"); gRPCAddress != "" {
-		cfg.GRPCAddress = gRPCAddress
-	}
-
-	if gRPCGatewayAddress := os.Getenv("GRPC_GATEWAY_ADDRESS"); gRPCGatewayAddress != "" {
-		cfg.GRPCGatewayAddress = gRPCGatewayAddress
-	}
-
-	if minioId := os.Getenv("MINIO_ID"); minioId != "" {
-		cfg.Minio.ID = minioId
+	//file or env
+	if cfg.ConfigFile != "" {
+		fmt.Println("Using config file:", cfg.ConfigFile)
+		if err := cfg.readConfigFile(); err != nil {
+			return nil, fmt.Errorf("failed to load config from file: %w", err)
+		}
 	} else {
-		cfg.Minio.ID = "minioadmin"
+		if err := env.Parse(&cfg); err != nil {
+			return nil, fmt.Errorf("failed to load environment: %w", err)
+		}
+
 	}
 
-	if minioSecret := os.Getenv("MINIO_SECRET"); minioSecret != "" {
-		cfg.Minio.Secret = minioSecret
-	} else {
-		cfg.Minio.Secret = "minioadmin"
+	// Validate the loaded configuration
+	if err := utils.ValidateStruct(cfg); err != nil {
+		return nil, err
 	}
-
-	if minioBucket := os.Getenv("MINIO_BUCKET"); minioBucket != "" {
-		cfg.Minio.Bucket = minioBucket
-	} else {
-		cfg.Minio.Bucket = "gophkeeper"
-	}
-
-	if minioAddress := os.Getenv("MINIO_ADDRESS"); minioAddress != "" {
-		cfg.Minio.Address = minioAddress
-	} else {
-		cfg.Minio.Address = "localhost:9000"
-	}
-
 	return &cfg, nil
+
+}
+
+func (cfg *Config) readConfigFile() error {
+	b, err := os.ReadFile(cfg.ConfigFile)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(b, &cfg); err != nil {
+		return err
+	}
+	fmt.Println(cfg)
+	return nil
 }
