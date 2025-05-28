@@ -39,15 +39,14 @@ func New() (*Config, error) {
 		if err := env.Parse(&cfg); err != nil {
 			return nil, fmt.Errorf("failed to load environment: %w", err)
 		}
-
 	}
 
 	// Validate the loaded configuration
 	if err := utils.ValidateStruct(cfg); err != nil {
 		return nil, err
 	}
-	return &cfg, nil
 
+	return &cfg, nil
 }
 
 func (cfg *Config) readConfigFile() error {
@@ -58,6 +57,5 @@ func (cfg *Config) readConfigFile() error {
 	if err := yaml.Unmarshal(b, &cfg); err != nil {
 		return err
 	}
-	fmt.Println(cfg)
 	return nil
 }
