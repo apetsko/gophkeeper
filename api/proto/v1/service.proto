@@ -16,13 +16,15 @@ import "google/api/annotations.proto";
 service GophKeeper {
   rpc Login(api.proto.v1.rpc.user.LoginRequest) returns (api.proto.v1.rpc.user.LoginResponse) {
     option (google.api.http) = {
-      get: "/v1/login"
+      post: "/v1/login"
+      body: "*"
     };
   };
 
   rpc Signup(api.proto.v1.rpc.user.SignupRequest) returns (api.proto.v1.rpc.user.SignupResponse) {
     option (google.api.http) = {
-      get: "/v1/signup"
+      post: "/v1/signup"
+      body: "*"
     };
   };
 
