@@ -15,7 +15,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/apetsko/gophkeeper/models"
-	"github.com/apetsko/gophkeeper/pkg/logging"
 )
 
 type PgxPoolIface interface {
@@ -33,8 +32,7 @@ type Storage struct {
 	DB PgxPoolIface
 }
 
-func migrate(conn string, logger *logging.Logger) error {
-	goose.SetLogger(logger)
+func migrate(conn string) error {
 	goose.SetBaseFS(migrations)
 	db, err := sql.Open("pgx", conn)
 	if err != nil {
@@ -50,8 +48,8 @@ func migrate(conn string, logger *logging.Logger) error {
 	return nil
 }
 
-func NewPostrgesClient(conn string, logger *logging.Logger) (*Storage, error) {
-	if err := migrate(conn, logger); err != nil {
+func NewPostrgesClient(conn string) (*Storage, error) {
+	if err := migrate(conn); err != nil {
 		return nil, err
 	}
 

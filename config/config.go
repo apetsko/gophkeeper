@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/apetsko/gophkeeper/utils"
@@ -35,7 +36,7 @@ func New() (*Config, error) {
 
 	//file or env
 	if cfg.ConfigFile != "" {
-		fmt.Println("Using config file:", cfg.ConfigFile)
+		slog.Info("Using config file: " + cfg.ConfigFile)
 		if err := cfg.readConfigFile(); err != nil {
 			return nil, fmt.Errorf("failed to load config from file: %w", err)
 		}

@@ -26,8 +26,8 @@ import (
 )
 
 func main() {
-	log := logging.New(slog.LevelDebug)
-	defer log.Close()
+	slog.SetDefault(logging.LogHandler(slog.LevelDebug))
+	log := logging.NewLogger(slog.LevelDebug)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("config read err %v", err)
 	}
 
-	dbClient, err := storage.NewPostrgesClient(cfg.DatabaseDSN, log)
+	dbClient, err := storage.NewPostrgesClient(cfg.DatabaseDSN)
 	if err != nil {
 		log.Fatalf("database client init err %v", err)
 	}

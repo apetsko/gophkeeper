@@ -7,93 +7,75 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 )
 
-// LogEntry defines the interface for log entries.
-type LogEntry interface {
-	// Write logs the status, bytes, header, elapsed time, and extra information.
-	Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{})
-	// Panic logs a panic message with the stack trace.
-	Panic(v interface{}, stack []byte)
-}
-
-// Logger wraps slog.Logger to provide structured logging.
-type Logger struct {
-	slog *slog.Logger
-}
-
-// New создает новый Logger с JSON-форматом, временем в RFC3339 с миллисекундами,
-// и без поля source (caller).
-func New(level slog.Level) *Logger {
-	//_, file, line, ok := runtime.Caller(2) // Skip 2 frames to get the caller of logWithLine
-	//if !ok {
-	//	file = "unknown"
-	//	line = 0
-	//}
-	//var allArgs []any
-	//allArgs = append(allArgs, "file", file, "line", line)
-	//allArgs = append(allArgs, args...)
-
+func LogHandler(level slog.Level) *slog.Logger {
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     level,
-		AddSource: false, // Отключаем вывод source (caller)
+		AddSource: true,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {
 				if t, ok := a.Value.Any().(time.Time); ok {
-					// Формат с миллисекундами RFC3339Nano (потому что RFC3339 неявно не выводит миллисекунды, RFC3339Nano - с наносекундами)
-					// Но можно ограничить наносекунды до миллисекунд через Format с 000:
-					return slog.Attr{
+					a = slog.Attr{
 						Key:   a.Key,
 						Value: slog.StringValue(t.Format("2006-01-02T15:04:05.000Z07:00")),
+					}
+				}
+			}
+
+			if a.Key == slog.SourceKey {
+				src, ok := a.Value.Any().(*slog.Source)
+				if ok {
+					link := fmt.Sprintf("file://%s:%d", src.File, src.Line)
+					a = slog.Attr{
+						Key:   filepath.Base(src.Function),
+						Value: slog.StringValue(link),
 					}
 				}
 			}
 			return a
 		},
 	})
-
-	return &Logger{slog: slog.New(handler)}
+	return slog.New(handler)
 }
 
-// Close is a no-op for slog (included for compatibility).
-func (l *Logger) Close() error {
-	// slog doesn't need explicit sync like zap.
-	return nil
+type Logger struct {
+	*slog.Logger
 }
 
-// Debug logs a debug message with additional context.
-func (l *Logger) Debug(message string, keysAndValues ...interface{}) {
-	l.slog.Debug(message, keysAndValues...)
+func NewLogger(level slog.Level) *Logger {
+	base := LogHandler(level)
+	return &Logger{Logger: base}
 }
 
-// Info logs an informational message with additional context.
-func (l *Logger) Info(message string, keysAndValues ...interface{}) {
-	l.slog.Info(message, keysAndValues...)
+func (l *Logger) Debugf(format string, args ...any) {
+	l.Debug(fmt.Sprintf(format, args...))
 }
 
-// Error logs an error message with additional context.
-func (l *Logger) Error(message string, keysAndValues ...interface{}) {
-	l.slog.Error(message, keysAndValues...)
+func (l *Logger) Infof(format string, args ...any) {
+	l.Info(fmt.Sprintf(format, args...))
 }
 
-// Fatal logs a fatal message and exits the application.
-func (l *Logger) Fatal(message string, keysAndValues ...interface{}) {
-	l.slog.Error(message, keysAndValues...)
+func (l *Logger) Warnf(format string, args ...any) {
+	l.Warn(fmt.Sprintf(format, args...))
+}
+
+func (l *Logger) Errorf(format string, args ...any) {
+	l.Error(fmt.Sprintf(format, args...))
+}
+
+func (l *Logger) Fatal(msg string) {
+	l.Log(context.Background(), slog.LevelError, msg)
 	os.Exit(1)
 }
 
-// Printf logs a formatted informational message.
-func (l *Logger) Printf(format string, v ...interface{}) {
-	l.slog.Info(fmt.Sprintf(format, v...))
-}
-
-func (l *Logger) Fatalf(format string, args ...interface{}) {
-	l.slog.Error(fmt.Sprintf(format, args...))
+func (l *Logger) Fatalf(format string, args ...any) {
+	l.Log(context.Background(), slog.LevelError, fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
 
@@ -114,7 +96,7 @@ func InterceptorLogger(l *Logger) grpc_logging.Logger {
 		case grpc_logging.LevelInfo:
 			l.Info(msg, args...)
 		case grpc_logging.LevelWarn:
-			l.slog.Warn(msg, args...)
+			slog.Warn(msg, args...)
 		case grpc_logging.LevelError:
 			l.Error(msg, args...)
 		default:
