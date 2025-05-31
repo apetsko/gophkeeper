@@ -8,10 +8,24 @@ import "api/proto/v1/rpc/ping.proto";
 import "api/proto/v1/rpc/data_save.proto";
 import "api/proto/v1/rpc/data_list.proto";
 import "api/proto/v1/rpc/data_delete.proto";
+import "api/proto/v1/rpc/user/login.proto";
+import "api/proto/v1/rpc/user/signup.proto";
 
 import "google/api/annotations.proto";
 
 service GophKeeper {
+  rpc Login(api.proto.v1.rpc.user.LoginRequest) returns (api.proto.v1.rpc.user.LoginResponse) {
+    option (google.api.http) = {
+      get: "/v1/login"
+    };
+  };
+
+  rpc Signup(api.proto.v1.rpc.user.SignupRequest) returns (api.proto.v1.rpc.user.SignupResponse) {
+    option (google.api.http) = {
+      get: "/v1/signup"
+    };
+  };
+
   rpc Ping(api.proto.v1.rpc.PingRequest) returns (api.proto.v1.rpc.PingResponse) {
     option (google.api.http) = {
       get: "/v1/ping"

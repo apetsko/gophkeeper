@@ -13,6 +13,7 @@ import (
 	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
 	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+	pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
 type GRPCServer struct {
@@ -28,6 +29,14 @@ func NewGRPCServer(admin *handlers.ServerAdmin) pb.GophKeeperServer {
 
 func (s *GRPCServer) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.PingResponse, error) {
 	return s.ServerAdmin.Ping(ctx, in)
+}
+
+func (s *GRPCServer) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) {
+	return s.ServerAdmin.Login(ctx, in)
+}
+
+func (s *GRPCServer) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) {
+	return s.ServerAdmin.Signup(ctx, in)
 }
 
 func (s *GRPCServer) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) {
