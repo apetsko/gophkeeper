@@ -30,20 +30,16 @@ func (s *GRPCServer) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.Pi
 	return s.ServerAdmin.Ping(ctx, in)
 }
 
-func (s *GRPCServer) Credentials(ctx context.Context, in *pbrpc.CredentialsRequest) (*pbrpc.CredentialsResponse, error) {
-	return s.ServerAdmin.Credentials(ctx, in)
+func (s *GRPCServer) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) {
+	return s.ServerAdmin.DataList(ctx, in)
 }
 
-func (s *GRPCServer) BankCard(ctx context.Context, in *pbrpc.BankCardRequest) (*pbrpc.BankCardResponse, error) {
-	return s.ServerAdmin.BankCard(ctx, in)
+func (s *GRPCServer) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
+	return s.ServerAdmin.DataSave(ctx, in)
 }
 
-func (s *GRPCServer) BinaryData(ctx context.Context, in *pbrpc.BinaryDataRequest) (*pbrpc.BinaryDataResponse, error) {
-	return s.ServerAdmin.BinaryData(ctx, in)
-}
-
-func (s *GRPCServer) Records(ctx context.Context, in *pbrpc.RecordsRequest) (*pbrpc.RecordsResponse, error) {
-	return s.ServerAdmin.Records(ctx, in)
+func (s *GRPCServer) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) {
+	return s.ServerAdmin.DataDelete(ctx, in)
 }
 
 func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor {

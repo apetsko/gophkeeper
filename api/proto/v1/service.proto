@@ -5,10 +5,9 @@ package api.proto.v1;
 option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1";
 
 import "api/proto/v1/rpc/ping.proto";
-import "api/proto/v1/rpc/credentials.proto";
-import "api/proto/v1/rpc/bank_card.proto";
-import "api/proto/v1/rpc/binary_data.proto";
-import "api/proto/v1/rpc/records.proto";
+import "api/proto/v1/rpc/data_save.proto";
+import "api/proto/v1/rpc/data_list.proto";
+import "api/proto/v1/rpc/data_delete.proto";
 
 import "google/api/annotations.proto";
 
@@ -19,30 +18,23 @@ service GophKeeper {
     };
   };
 
-  rpc Credentials(api.proto.v1.rpc.CredentialsRequest) returns (api.proto.v1.rpc.CredentialsResponse) {
+  rpc DataSave(api.proto.v1.rpc.DataSaveRequest) returns (api.proto.v1.rpc.DataSaveResponse) {
     option (google.api.http) = {
-      post: "/v1/credentials"
+      post: "/v1/data/save"
       body: "*"
     };
   };
 
-  rpc BankCard(api.proto.v1.rpc.BankCardRequest) returns (api.proto.v1.rpc.BankCardResponse) {
+  rpc DataDelete(api.proto.v1.rpc.DataDeleteRequest) returns (api.proto.v1.rpc.DataDeleteResponse) {
     option (google.api.http) = {
-      post: "/v1/bank-card"
+      post: "/v1/data/delete"
       body: "*"
     };
   };
 
-  rpc BinaryData(api.proto.v1.rpc.BinaryDataRequest) returns (api.proto.v1.rpc.BinaryDataResponse) {
+  rpc DataList(api.proto.v1.rpc.DataListRequest) returns (api.proto.v1.rpc.DataListResponse) {
     option (google.api.http) = {
-      post: "/v1/binary-data"
-      body: "*"
-    };
-  };
-
-  rpc Records(api.proto.v1.rpc.RecordsRequest) returns (api.proto.v1.rpc.RecordsResponse) {
-    option (google.api.http) = {
-      get: "/v1/records"
+      get: "/v1/data/list"
     };
   };
 }

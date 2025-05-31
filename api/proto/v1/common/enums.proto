@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package api.proto.v1.common;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common";
+
+enum DataType {
+  DATA_TYPE_UNSPECIFIED = 0;
+  DATA_TYPE_BANK_CARD = 1;
+  DATA_TYPE_CREDENTIALS = 2;
+  DATA_TYPE_BINARY_DATA = 3;
+}

@@ -55,108 +55,84 @@ func local_request_GophKeeper_Ping_0(ctx context.Context, marshaler runtime.Mars
 	return msg, metadata, err
 }
 
-func request_GophKeeper_Credentials_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_GophKeeper_DataSave_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.CredentialsRequest
+		protoReq rpc.DataSaveRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.Credentials(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.DataSave(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_GophKeeper_Credentials_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_GophKeeper_DataSave_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.CredentialsRequest
+		protoReq rpc.DataSaveRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.Credentials(ctx, &protoReq)
+	msg, err := server.DataSave(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-func request_GophKeeper_BankCard_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_GophKeeper_DataDelete_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.BankCardRequest
+		protoReq rpc.DataDeleteRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.BankCard(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.DataDelete(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_GophKeeper_BankCard_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_GophKeeper_DataDelete_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.BankCardRequest
+		protoReq rpc.DataDeleteRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.BankCard(ctx, &protoReq)
+	msg, err := server.DataDelete(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-func request_GophKeeper_BinaryData_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq rpc.BinaryDataRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.BinaryData(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
+var filter_GophKeeper_DataList_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
-func local_request_GophKeeper_BinaryData_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_GophKeeper_DataList_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.BinaryDataRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.BinaryData(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_GophKeeper_Records_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
-func request_GophKeeper_Records_0(ctx context.Context, marshaler runtime.Marshaler, client GophKeeperClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq rpc.RecordsRequest
+		protoReq rpc.DataListRequest
 		metadata runtime.ServerMetadata
 	)
 	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_GophKeeper_Records_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_GophKeeper_DataList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.Records(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.DataList(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_GophKeeper_Records_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_GophKeeper_DataList_0(ctx context.Context, marshaler runtime.Marshaler, server GophKeeperServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq rpc.RecordsRequest
+		protoReq rpc.DataListRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_GophKeeper_Records_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_GophKeeper_DataList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.Records(ctx, &protoReq)
+	msg, err := server.DataList(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -186,85 +162,65 @@ func RegisterGophKeeperHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		}
 		forward_GophKeeper_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_Credentials_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_GophKeeper_DataSave_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/Credentials", runtime.WithHTTPPathPattern("/v1/credentials"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataSave", runtime.WithHTTPPathPattern("/v1/data/save"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_GophKeeper_Credentials_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_GophKeeper_DataSave_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_Credentials_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataSave_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_BankCard_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_GophKeeper_DataDelete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/BankCard", runtime.WithHTTPPathPattern("/v1/bank-card"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataDelete", runtime.WithHTTPPathPattern("/v1/data/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_GophKeeper_BankCard_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_GophKeeper_DataDelete_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_BankCard_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataDelete_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_BinaryData_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_GophKeeper_DataList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/BinaryData", runtime.WithHTTPPathPattern("/v1/binary-data"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataList", runtime.WithHTTPPathPattern("/v1/data/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_GophKeeper_BinaryData_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_GophKeeper_DataList_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_BinaryData_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_GophKeeper_Records_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.proto.v1.GophKeeper/Records", runtime.WithHTTPPathPattern("/v1/records"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_GophKeeper_Records_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_GophKeeper_Records_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataList_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -323,89 +279,70 @@ func RegisterGophKeeperHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		}
 		forward_GophKeeper_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_Credentials_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_GophKeeper_DataSave_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/Credentials", runtime.WithHTTPPathPattern("/v1/credentials"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataSave", runtime.WithHTTPPathPattern("/v1/data/save"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_GophKeeper_Credentials_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_GophKeeper_DataSave_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_Credentials_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataSave_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_BankCard_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_GophKeeper_DataDelete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/BankCard", runtime.WithHTTPPathPattern("/v1/bank-card"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataDelete", runtime.WithHTTPPathPattern("/v1/data/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_GophKeeper_BankCard_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_GophKeeper_DataDelete_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_BankCard_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataDelete_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_GophKeeper_BinaryData_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_GophKeeper_DataList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/BinaryData", runtime.WithHTTPPathPattern("/v1/binary-data"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/DataList", runtime.WithHTTPPathPattern("/v1/data/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_GophKeeper_BinaryData_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_GophKeeper_DataList_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_GophKeeper_BinaryData_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_GophKeeper_Records_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.proto.v1.GophKeeper/Records", runtime.WithHTTPPathPattern("/v1/records"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_GophKeeper_Records_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_GophKeeper_Records_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_GophKeeper_DataList_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	return nil
 }
 
 var (
-	pattern_GophKeeper_Ping_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "ping"}, ""))
-	pattern_GophKeeper_Credentials_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "credentials"}, ""))
-	pattern_GophKeeper_BankCard_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "bank-card"}, ""))
-	pattern_GophKeeper_BinaryData_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "binary-data"}, ""))
-	pattern_GophKeeper_Records_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "records"}, ""))
+	pattern_GophKeeper_Ping_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "ping"}, ""))
+	pattern_GophKeeper_DataSave_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "data", "save"}, ""))
+	pattern_GophKeeper_DataDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "data", "delete"}, ""))
+	pattern_GophKeeper_DataList_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "data", "list"}, ""))
 )
 
 var (
-	forward_GophKeeper_Ping_0        = runtime.ForwardResponseMessage
-	forward_GophKeeper_Credentials_0 = runtime.ForwardResponseMessage
-	forward_GophKeeper_BankCard_0    = runtime.ForwardResponseMessage
-	forward_GophKeeper_BinaryData_0  = runtime.ForwardResponseMessage
-	forward_GophKeeper_Records_0     = runtime.ForwardResponseMessage
+	forward_GophKeeper_Ping_0       = runtime.ForwardResponseMessage
+	forward_GophKeeper_DataSave_0   = runtime.ForwardResponseMessage
+	forward_GophKeeper_DataDelete_0 = runtime.ForwardResponseMessage
+	forward_GophKeeper_DataList_0   = runtime.ForwardResponseMessage
 )

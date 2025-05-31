@@ -6,12 +6,12 @@ option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc";
 
 import "api/proto/v1/models/record.proto";
 
-message RecordsRequest {
+message DataListRequest {
   int32 page = 1;
   int32 limit = 2;
 }
 
-message RecordsResponse {
+message DataListResponse {
   repeated api.proto.v1.models.Record records = 1;
   int32 count = 2;
 }

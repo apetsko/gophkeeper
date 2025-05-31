@@ -26,42 +26,37 @@ var File_api_proto_v1_service_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a\"api/proto/v1/rpc/credentials.proto\x1a api/proto/v1/rpc/bank_card.proto\x1a\"api/proto/v1/rpc/binary_data.proto\x1a\x1eapi/proto/v1/rpc/records.proto\x1a\x1cgoogle/api/annotations.proto2\xa4\x04\n" +
+	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a\x1cgoogle/api/annotations.proto2\xb1\x03\n" +
 	"\n" +
 	"GophKeeper\x12W\n" +
 	"\x04Ping\x12\x1d.api.proto.v1.rpc.PingRequest\x1a\x1e.api.proto.v1.rpc.PingResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/v1/ping\x12v\n" +
-	"\vCredentials\x12$.api.proto.v1.rpc.CredentialsRequest\x1a%.api.proto.v1.rpc.CredentialsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/credentials\x12k\n" +
-	"\bBankCard\x12!.api.proto.v1.rpc.BankCardRequest\x1a\".api.proto.v1.rpc.BankCardResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/bank-card\x12s\n" +
+	"\x12\b/v1/ping\x12k\n" +
+	"\bDataSave\x12!.api.proto.v1.rpc.DataSaveRequest\x1a\".api.proto.v1.rpc.DataSaveResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/data/save\x12s\n" +
 	"\n" +
-	"BinaryData\x12#.api.proto.v1.rpc.BinaryDataRequest\x1a$.api.proto.v1.rpc.BinaryDataResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/binary-data\x12c\n" +
-	"\aRecords\x12 .api.proto.v1.rpc.RecordsRequest\x1a!.api.proto.v1.rpc.RecordsResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/recordsB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
+	"DataDelete\x12#.api.proto.v1.rpc.DataDeleteRequest\x1a$.api.proto.v1.rpc.DataDeleteResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/data/delete\x12h\n" +
+	"\bDataList\x12!.api.proto.v1.rpc.DataListRequest\x1a\".api.proto.v1.rpc.DataListResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/listB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
 
 var file_api_proto_v1_service_proto_goTypes = []any{
-	(*rpc.PingRequest)(nil),         // 0: api.proto.v1.rpc.PingRequest
-	(*rpc.CredentialsRequest)(nil),  // 1: api.proto.v1.rpc.CredentialsRequest
-	(*rpc.BankCardRequest)(nil),     // 2: api.proto.v1.rpc.BankCardRequest
-	(*rpc.BinaryDataRequest)(nil),   // 3: api.proto.v1.rpc.BinaryDataRequest
-	(*rpc.RecordsRequest)(nil),      // 4: api.proto.v1.rpc.RecordsRequest
-	(*rpc.PingResponse)(nil),        // 5: api.proto.v1.rpc.PingResponse
-	(*rpc.CredentialsResponse)(nil), // 6: api.proto.v1.rpc.CredentialsResponse
-	(*rpc.BankCardResponse)(nil),    // 7: api.proto.v1.rpc.BankCardResponse
-	(*rpc.BinaryDataResponse)(nil),  // 8: api.proto.v1.rpc.BinaryDataResponse
-	(*rpc.RecordsResponse)(nil),     // 9: api.proto.v1.rpc.RecordsResponse
+	(*rpc.PingRequest)(nil),        // 0: api.proto.v1.rpc.PingRequest
+	(*rpc.DataSaveRequest)(nil),    // 1: api.proto.v1.rpc.DataSaveRequest
+	(*rpc.DataDeleteRequest)(nil),  // 2: api.proto.v1.rpc.DataDeleteRequest
+	(*rpc.DataListRequest)(nil),    // 3: api.proto.v1.rpc.DataListRequest
+	(*rpc.PingResponse)(nil),       // 4: api.proto.v1.rpc.PingResponse
+	(*rpc.DataSaveResponse)(nil),   // 5: api.proto.v1.rpc.DataSaveResponse
+	(*rpc.DataDeleteResponse)(nil), // 6: api.proto.v1.rpc.DataDeleteResponse
+	(*rpc.DataListResponse)(nil),   // 7: api.proto.v1.rpc.DataListResponse
 }
 var file_api_proto_v1_service_proto_depIdxs = []int32{
 	0, // 0: api.proto.v1.GophKeeper.Ping:input_type -> api.proto.v1.rpc.PingRequest
-	1, // 1: api.proto.v1.GophKeeper.Credentials:input_type -> api.proto.v1.rpc.CredentialsRequest
-	2, // 2: api.proto.v1.GophKeeper.BankCard:input_type -> api.proto.v1.rpc.BankCardRequest
-	3, // 3: api.proto.v1.GophKeeper.BinaryData:input_type -> api.proto.v1.rpc.BinaryDataRequest
-	4, // 4: api.proto.v1.GophKeeper.Records:input_type -> api.proto.v1.rpc.RecordsRequest
-	5, // 5: api.proto.v1.GophKeeper.Ping:output_type -> api.proto.v1.rpc.PingResponse
-	6, // 6: api.proto.v1.GophKeeper.Credentials:output_type -> api.proto.v1.rpc.CredentialsResponse
-	7, // 7: api.proto.v1.GophKeeper.BankCard:output_type -> api.proto.v1.rpc.BankCardResponse
-	8, // 8: api.proto.v1.GophKeeper.BinaryData:output_type -> api.proto.v1.rpc.BinaryDataResponse
-	9, // 9: api.proto.v1.GophKeeper.Records:output_type -> api.proto.v1.rpc.RecordsResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
+	1, // 1: api.proto.v1.GophKeeper.DataSave:input_type -> api.proto.v1.rpc.DataSaveRequest
+	2, // 2: api.proto.v1.GophKeeper.DataDelete:input_type -> api.proto.v1.rpc.DataDeleteRequest
+	3, // 3: api.proto.v1.GophKeeper.DataList:input_type -> api.proto.v1.rpc.DataListRequest
+	4, // 4: api.proto.v1.GophKeeper.Ping:output_type -> api.proto.v1.rpc.PingResponse
+	5, // 5: api.proto.v1.GophKeeper.DataSave:output_type -> api.proto.v1.rpc.DataSaveResponse
+	6, // 6: api.proto.v1.GophKeeper.DataDelete:output_type -> api.proto.v1.rpc.DataDeleteResponse
+	7, // 7: api.proto.v1.GophKeeper.DataList:output_type -> api.proto.v1.rpc.DataListResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
