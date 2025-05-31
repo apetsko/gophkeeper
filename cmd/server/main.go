@@ -10,18 +10,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/apetsko/gophkeeper/config"
-	"github.com/apetsko/gophkeeper/internal/grpcserver"
-	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
-	"github.com/apetsko/gophkeeper/internal/storage"
-	"github.com/apetsko/gophkeeper/pkg/logging"
-	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/apetsko/gophkeeper/config"
+	"github.com/apetsko/gophkeeper/internal/grpcserver"
+	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
+	"github.com/apetsko/gophkeeper/internal/storage"
+	"github.com/apetsko/gophkeeper/pkg/logging"
+	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 )
 
 func main() {
@@ -57,6 +58,7 @@ func main() {
 	pb.RegisterGophKeeperServer(grpcServer, grpcserver.NewGRPCServer(
 		handlers.NewServer(
 			dbClient,
+			cfg.JWT,
 			cfg.Minio.Bucket,
 			minioClient,
 		),

@@ -1,12 +1,14 @@
 -- +goose Up
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE
+EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TABLE users (
-                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                       login VARCHAR(255) UNIQUE NOT NULL,
-                       password_hash TEXT NOT NULL,
-                       created_at TIMESTAMPTZ DEFAULT now(),
-                       updated_at TIMESTAMPTZ DEFAULT now()
+CREATE TABLE users
+(
+    id            SERIAL PRIMARY KEY,
+    username      VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT                NOT NULL,
+    created_at    TIMESTAMPTZ DEFAULT now(),
+    updated_at    TIMESTAMPTZ DEFAULT now()
 );
 
 -- CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -21,10 +23,6 @@ CREATE TABLE users (
 --     BEFORE UPDATE ON users
 --     FOR EACH ROW
 -- EXECUTE PROCEDURE update_updated_at_column();
-
-
-
-
 
 
 -- +goose Down

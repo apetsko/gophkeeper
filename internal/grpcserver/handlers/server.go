@@ -3,22 +3,26 @@ package handlers
 import (
 	"github.com/minio/minio-go/v7"
 
+	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/internal/storage"
 )
 
 type ServerAdmin struct {
-	dbClient    *storage.Storage
+	storage     *storage.Storage
+	jwtConfig   config.JWTConfig
 	minioBucket string
 	minioClient *minio.Client
 }
 
 func NewServer(
-	dbClient *storage.Storage,
+	storage *storage.Storage,
+	jwtConfig config.JWTConfig,
 	minioBucket string,
 	minioClient *minio.Client,
 ) *ServerAdmin {
 	return &ServerAdmin{
-		dbClient:    dbClient,
+		storage:     storage,
+		jwtConfig:   jwtConfig,
 		minioBucket: minioBucket,
 		minioClient: minioClient,
 	}
