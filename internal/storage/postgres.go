@@ -50,7 +50,7 @@ func migrate(conn string, logger *logging.Logger) error {
 	return nil
 }
 
-func NewPostgres(conn string, logger *logging.Logger) (*Storage, error) {
+func NewPostrgesClient(conn string, logger *logging.Logger) (*Storage, error) {
 	if err := migrate(conn, logger); err != nil {
 		return nil, err
 	}

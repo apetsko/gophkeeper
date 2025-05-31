@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("config read err %v", err)
 	}
 
-	dbClient, err := storage.New(cfg.DatabaseDSN, log)
+	dbClient, err := storage.NewPostrgesClient(cfg.DatabaseDSN, log)
 	if err != nil {
 		log.Fatalf("database client init err %v", err)
 	}

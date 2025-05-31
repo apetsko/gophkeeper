@@ -13,12 +13,5 @@ CREATE TABLE user_data
 
 CREATE INDEX idx_user_data_user_id ON user_data (user_id);
 CREATE INDEX idx_user_data_data_type ON user_data (data_type);
-
--- CREATE TRIGGER trg_user_data_updated_at
---     BEFORE UPDATE ON user_data
---     FOR EACH ROW
--- EXECUTE PROCEDURE update_updated_at_column();
-
 -- +goose Down
--- DROP TRIGGER IF EXISTS trg_user_data_updated_at ON user_data;
-DROP TABLE IF EXISTS user_data;
+DROP TABLE IF` EXISTS user_data;
