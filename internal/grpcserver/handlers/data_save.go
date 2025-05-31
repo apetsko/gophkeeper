@@ -57,8 +57,9 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 				ContentType: file.Type,
 				UserMetadata: map[string]string{
 					"original-name": file.Name,
-					"meta-content":  in.Meta.Content,
-					"upload-time":   time.Now().Format(time.RFC3339),
+					//"meta-content":  in.Meta.Content, panics
+					"meta-content": "in.Meta.Content",
+					"upload-time":  time.Now().Format(time.RFC3339),
 				},
 			},
 		)
