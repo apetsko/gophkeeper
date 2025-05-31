@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package api.proto.v1.models;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models";
+
+import "api/proto/v1/models/meta.proto";
+
+message Record {
+  int32 id = 1;
+  string type = 2;
+  Meta meta = 3;
+}

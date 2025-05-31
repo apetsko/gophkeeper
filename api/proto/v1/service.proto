@@ -8,6 +8,7 @@ import "api/proto/v1/rpc/ping.proto";
 import "api/proto/v1/rpc/credentials.proto";
 import "api/proto/v1/rpc/bank_card.proto";
 import "api/proto/v1/rpc/binary_data.proto";
+import "api/proto/v1/rpc/records.proto";
 
 import "google/api/annotations.proto";
 
@@ -36,6 +37,12 @@ service GophKeeper {
     option (google.api.http) = {
       post: "/v1/binary-data"
       body: "*"
+    };
+  };
+
+  rpc Records(api.proto.v1.rpc.RecordsRequest) returns (api.proto.v1.rpc.RecordsResponse) {
+    option (google.api.http) = {
+      get: "/v1/records"
     };
   };
 }

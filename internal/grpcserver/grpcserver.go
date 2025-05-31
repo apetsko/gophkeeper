@@ -42,6 +42,10 @@ func (s *GRPCServer) BinaryData(ctx context.Context, in *pbrpc.BinaryDataRequest
 	return s.ServerAdmin.BinaryData(ctx, in)
 }
 
+func (s *GRPCServer) Records(ctx context.Context, in *pbrpc.RecordsRequest) (*pbrpc.RecordsResponse, error) {
+	return s.ServerAdmin.Records(ctx, in)
+}
+
 func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor {
 	slog.Info("Auth interceptor enabled")
 
