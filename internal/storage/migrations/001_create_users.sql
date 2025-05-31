@@ -9,18 +9,18 @@ CREATE TABLE users (
                        updated_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-    RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER trg_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-EXECUTE PROCEDURE update_updated_at_column();
+-- CREATE OR REPLACE FUNCTION update_updated_at_column()
+--     RETURNS TRIGGER AS $$
+-- BEGIN
+--     NEW.updated_at = now();
+--     RETURN NEW;
+-- END;
+-- $$ language 'plpgsql';
+--
+-- CREATE TRIGGER trg_users_updated_at
+--     BEFORE UPDATE ON users
+--     FOR EACH ROW
+-- EXECUTE PROCEDURE update_updated_at_column();
 
 
 
@@ -28,6 +28,6 @@ EXECUTE PROCEDURE update_updated_at_column();
 
 
 -- +goose Down
-DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
-DROP FUNCTION IF EXISTS update_updated_at_column();
+-- DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
+-- DROP FUNCTION IF EXISTS update_updated_at_column();
 DROP TABLE IF EXISTS users;

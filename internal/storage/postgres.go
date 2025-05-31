@@ -1,4 +1,4 @@
-package stogage
+package storage
 
 import (
 	"context"
