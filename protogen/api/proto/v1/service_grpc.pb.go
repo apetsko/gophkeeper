@@ -9,6 +9,7 @@ package v1
 import (
 	context "context"
 	rpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+	user "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,20 +21,24 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GophKeeper_Ping_FullMethodName        = "/api.proto.v1.GophKeeper/Ping"
-	GophKeeper_Credentials_FullMethodName = "/api.proto.v1.GophKeeper/Credentials"
-	GophKeeper_BankCard_FullMethodName    = "/api.proto.v1.GophKeeper/BankCard"
-	GophKeeper_BinaryData_FullMethodName  = "/api.proto.v1.GophKeeper/BinaryData"
+	GophKeeper_Login_FullMethodName      = "/api.proto.v1.GophKeeper/Login"
+	GophKeeper_Signup_FullMethodName     = "/api.proto.v1.GophKeeper/Signup"
+	GophKeeper_Ping_FullMethodName       = "/api.proto.v1.GophKeeper/Ping"
+	GophKeeper_DataSave_FullMethodName   = "/api.proto.v1.GophKeeper/DataSave"
+	GophKeeper_DataDelete_FullMethodName = "/api.proto.v1.GophKeeper/DataDelete"
+	GophKeeper_DataList_FullMethodName   = "/api.proto.v1.GophKeeper/DataList"
 )
 
 // GophKeeperClient is the client API for GophKeeper service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GophKeeperClient interface {
+	Login(ctx context.Context, in *user.LoginRequest, opts ...grpc.CallOption) (*user.LoginResponse, error)
+	Signup(ctx context.Context, in *user.SignupRequest, opts ...grpc.CallOption) (*user.SignupResponse, error)
 	Ping(ctx context.Context, in *rpc.PingRequest, opts ...grpc.CallOption) (*rpc.PingResponse, error)
-	Credentials(ctx context.Context, in *rpc.CredentialsRequest, opts ...grpc.CallOption) (*rpc.CredentialsResponse, error)
-	BankCard(ctx context.Context, in *rpc.BankCardRequest, opts ...grpc.CallOption) (*rpc.BankCardResponse, error)
-	BinaryData(ctx context.Context, in *rpc.BinaryDataRequest, opts ...grpc.CallOption) (*rpc.BinaryDataResponse, error)
+	DataSave(ctx context.Context, in *rpc.DataSaveRequest, opts ...grpc.CallOption) (*rpc.DataSaveResponse, error)
+	DataDelete(ctx context.Context, in *rpc.DataDeleteRequest, opts ...grpc.CallOption) (*rpc.DataDeleteResponse, error)
+	DataList(ctx context.Context, in *rpc.DataListRequest, opts ...grpc.CallOption) (*rpc.DataListResponse, error)
 }
 
 type gophKeeperClient struct {
@@ -42,6 +47,26 @@ type gophKeeperClient struct {
 
 func NewGophKeeperClient(cc grpc.ClientConnInterface) GophKeeperClient {
 	return &gophKeeperClient{cc}
+}
+
+func (c *gophKeeperClient) Login(ctx context.Context, in *user.LoginRequest, opts ...grpc.CallOption) (*user.LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(user.LoginResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gophKeeperClient) Signup(ctx context.Context, in *user.SignupRequest, opts ...grpc.CallOption) (*user.SignupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(user.SignupResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_Signup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *gophKeeperClient) Ping(ctx context.Context, in *rpc.PingRequest, opts ...grpc.CallOption) (*rpc.PingResponse, error) {
@@ -54,30 +79,30 @@ func (c *gophKeeperClient) Ping(ctx context.Context, in *rpc.PingRequest, opts .
 	return out, nil
 }
 
-func (c *gophKeeperClient) Credentials(ctx context.Context, in *rpc.CredentialsRequest, opts ...grpc.CallOption) (*rpc.CredentialsResponse, error) {
+func (c *gophKeeperClient) DataSave(ctx context.Context, in *rpc.DataSaveRequest, opts ...grpc.CallOption) (*rpc.DataSaveResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(rpc.CredentialsResponse)
-	err := c.cc.Invoke(ctx, GophKeeper_Credentials_FullMethodName, in, out, cOpts...)
+	out := new(rpc.DataSaveResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_DataSave_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *gophKeeperClient) BankCard(ctx context.Context, in *rpc.BankCardRequest, opts ...grpc.CallOption) (*rpc.BankCardResponse, error) {
+func (c *gophKeeperClient) DataDelete(ctx context.Context, in *rpc.DataDeleteRequest, opts ...grpc.CallOption) (*rpc.DataDeleteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(rpc.BankCardResponse)
-	err := c.cc.Invoke(ctx, GophKeeper_BankCard_FullMethodName, in, out, cOpts...)
+	out := new(rpc.DataDeleteResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_DataDelete_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *gophKeeperClient) BinaryData(ctx context.Context, in *rpc.BinaryDataRequest, opts ...grpc.CallOption) (*rpc.BinaryDataResponse, error) {
+func (c *gophKeeperClient) DataList(ctx context.Context, in *rpc.DataListRequest, opts ...grpc.CallOption) (*rpc.DataListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(rpc.BinaryDataResponse)
-	err := c.cc.Invoke(ctx, GophKeeper_BinaryData_FullMethodName, in, out, cOpts...)
+	out := new(rpc.DataListResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_DataList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,10 +113,12 @@ func (c *gophKeeperClient) BinaryData(ctx context.Context, in *rpc.BinaryDataReq
 // All implementations must embed UnimplementedGophKeeperServer
 // for forward compatibility.
 type GophKeeperServer interface {
+	Login(context.Context, *user.LoginRequest) (*user.LoginResponse, error)
+	Signup(context.Context, *user.SignupRequest) (*user.SignupResponse, error)
 	Ping(context.Context, *rpc.PingRequest) (*rpc.PingResponse, error)
-	Credentials(context.Context, *rpc.CredentialsRequest) (*rpc.CredentialsResponse, error)
-	BankCard(context.Context, *rpc.BankCardRequest) (*rpc.BankCardResponse, error)
-	BinaryData(context.Context, *rpc.BinaryDataRequest) (*rpc.BinaryDataResponse, error)
+	DataSave(context.Context, *rpc.DataSaveRequest) (*rpc.DataSaveResponse, error)
+	DataDelete(context.Context, *rpc.DataDeleteRequest) (*rpc.DataDeleteResponse, error)
+	DataList(context.Context, *rpc.DataListRequest) (*rpc.DataListResponse, error)
 	mustEmbedUnimplementedGophKeeperServer()
 }
 
@@ -102,17 +129,23 @@ type GophKeeperServer interface {
 // pointer dereference when methods are called.
 type UnimplementedGophKeeperServer struct{}
 
+func (UnimplementedGophKeeperServer) Login(context.Context, *user.LoginRequest) (*user.LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedGophKeeperServer) Signup(context.Context, *user.SignupRequest) (*user.SignupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Signup not implemented")
+}
 func (UnimplementedGophKeeperServer) Ping(context.Context, *rpc.PingRequest) (*rpc.PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedGophKeeperServer) Credentials(context.Context, *rpc.CredentialsRequest) (*rpc.CredentialsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Credentials not implemented")
+func (UnimplementedGophKeeperServer) DataSave(context.Context, *rpc.DataSaveRequest) (*rpc.DataSaveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DataSave not implemented")
 }
-func (UnimplementedGophKeeperServer) BankCard(context.Context, *rpc.BankCardRequest) (*rpc.BankCardResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BankCard not implemented")
+func (UnimplementedGophKeeperServer) DataDelete(context.Context, *rpc.DataDeleteRequest) (*rpc.DataDeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DataDelete not implemented")
 }
-func (UnimplementedGophKeeperServer) BinaryData(context.Context, *rpc.BinaryDataRequest) (*rpc.BinaryDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BinaryData not implemented")
+func (UnimplementedGophKeeperServer) DataList(context.Context, *rpc.DataListRequest) (*rpc.DataListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DataList not implemented")
 }
 func (UnimplementedGophKeeperServer) mustEmbedUnimplementedGophKeeperServer() {}
 func (UnimplementedGophKeeperServer) testEmbeddedByValue()                    {}
@@ -135,6 +168,42 @@ func RegisterGophKeeperServer(s grpc.ServiceRegistrar, srv GophKeeperServer) {
 	s.RegisterService(&GophKeeper_ServiceDesc, srv)
 }
 
+func _GophKeeper_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GophKeeperServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GophKeeper_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GophKeeperServer).Login(ctx, req.(*user.LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GophKeeper_Signup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.SignupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GophKeeperServer).Signup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GophKeeper_Signup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GophKeeperServer).Signup(ctx, req.(*user.SignupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GophKeeper_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(rpc.PingRequest)
 	if err := dec(in); err != nil {
@@ -153,56 +222,56 @@ func _GophKeeper_Ping_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GophKeeper_Credentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(rpc.CredentialsRequest)
+func _GophKeeper_DataSave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rpc.DataSaveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GophKeeperServer).Credentials(ctx, in)
+		return srv.(GophKeeperServer).DataSave(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GophKeeper_Credentials_FullMethodName,
+		FullMethod: GophKeeper_DataSave_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GophKeeperServer).Credentials(ctx, req.(*rpc.CredentialsRequest))
+		return srv.(GophKeeperServer).DataSave(ctx, req.(*rpc.DataSaveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GophKeeper_BankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(rpc.BankCardRequest)
+func _GophKeeper_DataDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rpc.DataDeleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GophKeeperServer).BankCard(ctx, in)
+		return srv.(GophKeeperServer).DataDelete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GophKeeper_BankCard_FullMethodName,
+		FullMethod: GophKeeper_DataDelete_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GophKeeperServer).BankCard(ctx, req.(*rpc.BankCardRequest))
+		return srv.(GophKeeperServer).DataDelete(ctx, req.(*rpc.DataDeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GophKeeper_BinaryData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(rpc.BinaryDataRequest)
+func _GophKeeper_DataList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rpc.DataListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GophKeeperServer).BinaryData(ctx, in)
+		return srv.(GophKeeperServer).DataList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GophKeeper_BinaryData_FullMethodName,
+		FullMethod: GophKeeper_DataList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GophKeeperServer).BinaryData(ctx, req.(*rpc.BinaryDataRequest))
+		return srv.(GophKeeperServer).DataList(ctx, req.(*rpc.DataListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -215,20 +284,28 @@ var GophKeeper_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*GophKeeperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Login",
+			Handler:    _GophKeeper_Login_Handler,
+		},
+		{
+			MethodName: "Signup",
+			Handler:    _GophKeeper_Signup_Handler,
+		},
+		{
 			MethodName: "Ping",
 			Handler:    _GophKeeper_Ping_Handler,
 		},
 		{
-			MethodName: "Credentials",
-			Handler:    _GophKeeper_Credentials_Handler,
+			MethodName: "DataSave",
+			Handler:    _GophKeeper_DataSave_Handler,
 		},
 		{
-			MethodName: "BankCard",
-			Handler:    _GophKeeper_BankCard_Handler,
+			MethodName: "DataDelete",
+			Handler:    _GophKeeper_DataDelete_Handler,
 		},
 		{
-			MethodName: "BinaryData",
-			Handler:    _GophKeeper_BinaryData_Handler,
+			MethodName: "DataList",
+			Handler:    _GophKeeper_DataList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

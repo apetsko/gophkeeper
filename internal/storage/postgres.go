@@ -7,14 +7,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/apetsko/gophkeeper/models"
-	"github.com/apetsko/gophkeeper/pkg/logging"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pressly/goose/v3"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
+
+	"github.com/apetsko/gophkeeper/models"
+	"github.com/apetsko/gophkeeper/pkg/logging"
 )
 
 type PgxPoolIface interface {
@@ -69,32 +70,35 @@ func (p *Storage) Close() error {
 }
 
 func (p *Storage) AddUser(ctx context.Context, u *models.UserEntry) (int, error) {
-	const insert = `
-		INSERT INTO users (username, password_hash, created_at, updated_at)
-		VALUES ($1, $2, NOW(), NOW())
-		ON CONFLICT (username) DO NOTHING
-		RETURNING id;
-	`
+	const insertUser = `
+        INSERT INTO users (username, password_hash, created_at, updated_at)
+        VALUES ($1, $2, NOW(), NOW())
+        ON CONFLICT (username) DO NOTHING
+        RETURNING id;
+    `
 
 	var id int
+	err := p.DB.QueryRow(ctx, insertUser, u.Username, u.PasswordHash).Scan(&id)
 
-	err := p.DB.QueryRow(ctx, insert, u.Username, u.PasswordHash).Scan(&id)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return 0, models.ErrUserExists // ✅ Возвращаем осмысленную ошибку
+	switch {
+	case err == nil:
+		return id, nil // Успешное создание
+	case errors.Is(err, pgx.ErrNoRows):
+		return 0, models.ErrUserExists // Конфликт по username
+	default:
+		return 0, fmt.Errorf("failed to insertUser user: %w", err)
 	}
-
-	return id, err
 }
 
-func (p *Storage) GetUser(ctx context.Context, login string) (*models.UserEntry, error) {
-	const getUserHash = `
+func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEntry, error) {
+	const getUser = `
 		SELECT id, username, password_hash FROM users
 		WHERE username = $1;
 	`
 
 	var u models.UserEntry
 
-	err := p.DB.QueryRow(ctx, getUserHash, login).Scan(&u.ID, &u.Username, &u.PasswordHash)
+	err := p.DB.QueryRow(ctx, getUser, username).Scan(&u.ID, &u.Username, &u.PasswordHash)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, models.ErrUserNotFound

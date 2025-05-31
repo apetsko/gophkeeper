@@ -15,7 +15,11 @@ type Config struct {
 	DatabaseDSN        string      `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
 	GRPCAddress        string      `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
 	GRPCGatewayAddress string      `env:"GRPC_GATEWAY_ADDRESS" yaml:"GRPC_GATEWAY_ADDRESS" validate:"required"`
+	JWT                JWTConfig   `yaml:"JWT"`
 	Minio              MinioConfig `yaml:"MINIO"`
+}
+type JWTConfig struct {
+	Secret string `env:"JWT_SECRET" yaml:"JWT_SECRET" validate:"required"`
 }
 type MinioConfig struct {
 	ID      string `env:"MINIO_ID" yaml:"MINIO_ID" validate:"required"`

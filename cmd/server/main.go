@@ -10,18 +10,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/apetsko/gophkeeper/config"
-	"github.com/apetsko/gophkeeper/internal/grpcserver"
-	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
-	"github.com/apetsko/gophkeeper/internal/storage"
-	"github.com/apetsko/gophkeeper/pkg/logging"
-	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/apetsko/gophkeeper/config"
+	"github.com/apetsko/gophkeeper/internal/grpcserver"
+	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
+	"github.com/apetsko/gophkeeper/internal/storage"
+	"github.com/apetsko/gophkeeper/pkg/logging"
+	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 )
 
 func main() {
@@ -36,21 +37,15 @@ func main() {
 		log.Fatalf("config read err %v", err)
 	}
 
+	dbClient, err := storage.New(cfg.DatabaseDSN, log)
+	if err != nil {
+		log.Fatalf("database client init err %v", err)
+	}
+
 	minioClient, err := storage.NewMinioClient(ctx, cfg.Minio)
 	if err != nil {
 		log.Fatalf("minio client init err %v", err)
 	}
-
-	pg, err := storage.NewPostgres(cfg.DatabaseDSN, log)
-	if err != nil {
-		log.Fatalf("postgres init err %v", err)
-	}
-
-	defer func() {
-		if err = pg.Close(); err != nil {
-			log.Fatal("failed to close postgres: " + err.Error())
-		}
-	}()
 
 	// GRPC-сервер
 	grpcServer := grpc.NewServer(
@@ -61,7 +56,12 @@ func main() {
 	)
 
 	pb.RegisterGophKeeperServer(grpcServer, grpcserver.NewGRPCServer(
-		handlers.NewServer(cfg.Minio.Bucket, minioClient),
+		handlers.NewServer(
+			dbClient,
+			cfg.JWT,
+			cfg.Minio.Bucket,
+			minioClient,
+		),
 	))
 	reflection.Register(grpcServer)
 

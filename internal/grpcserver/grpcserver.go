@@ -13,6 +13,7 @@ import (
 	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
 	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+	pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
 type GRPCServer struct {
@@ -30,16 +31,24 @@ func (s *GRPCServer) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.Pi
 	return s.ServerAdmin.Ping(ctx, in)
 }
 
-func (s *GRPCServer) Credentials(ctx context.Context, in *pbrpc.CredentialsRequest) (*pbrpc.CredentialsResponse, error) {
-	return s.ServerAdmin.Credentials(ctx, in)
+func (s *GRPCServer) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) {
+	return s.ServerAdmin.Login(ctx, in)
 }
 
-func (s *GRPCServer) BankCard(ctx context.Context, in *pbrpc.BankCardRequest) (*pbrpc.BankCardResponse, error) {
-	return s.ServerAdmin.BankCard(ctx, in)
+func (s *GRPCServer) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) {
+	return s.ServerAdmin.Signup(ctx, in)
 }
 
-func (s *GRPCServer) BinaryData(ctx context.Context, in *pbrpc.BinaryDataRequest) (*pbrpc.BinaryDataResponse, error) {
-	return s.ServerAdmin.BinaryData(ctx, in)
+func (s *GRPCServer) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) {
+	return s.ServerAdmin.DataList(ctx, in)
+}
+
+func (s *GRPCServer) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
+	return s.ServerAdmin.DataSave(ctx, in)
+}
+
+func (s *GRPCServer) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) {
+	return s.ServerAdmin.DataDelete(ctx, in)
 }
 
 func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor {
