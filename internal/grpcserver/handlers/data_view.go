@@ -38,6 +38,8 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		return nil, fmt.Errorf("error get encryptedMK: %v", err)
 	}
 
+	// TODO: нет обработчика для файла
+
 	decryptData, err := s.envelop.DecryptUserData(ctx, *userData, encryptedMK)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
