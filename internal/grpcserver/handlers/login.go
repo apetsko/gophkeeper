@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/apetsko/gophkeeper/models"
 	"github.com/apetsko/gophkeeper/pkg/jwt"
@@ -32,6 +33,22 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
+
+	encryptedMK, err := s.keyManager.GetMasterKey(
+		ctx,
+		user.ID,
+		in.Password,
+		nil,
+	)
+
+	if err != nil {
+		slog.Error("failed to generate encrypted master key: %w", err)
+
+		return nil, errors.New("failed to generate encrypted master key")
+	}
+
+	// TODO: нужно записать в потокобезопасную мапу в памяти
+	fmt.Println("encryptedMK: [", encryptedMK, "]")
 
 	return &pbrpcu.LoginResponse{
 		Id:       int32(user.ID),

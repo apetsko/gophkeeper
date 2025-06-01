@@ -3,6 +3,7 @@ package models
 import "errors"
 
 var (
-	ErrUserExists   = errors.New("user already exists")
-	ErrUserNotFound = errors.New("user not found")
+	ErrUserExists     = errors.New("user already exists")
+	ErrUserNotFound   = errors.New("user not found")
+	MasterKeyNotFound = errors.New("master key not found")
 )

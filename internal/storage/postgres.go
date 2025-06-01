@@ -106,27 +106,46 @@ func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEnt
 	return &u, nil
 }
 
-//func (p *Storage) AddOrder(ctx context.Context, userID int64, order string) error {
-//	const check = `SELECT user_id FROM orders WHERE order_number = $1`
-//	var existingUserID int64
-//	err := p.DB.QueryRow(ctx, check, order).Scan(&existingUserID)
-//
-//	if err == nil {
-//		if existingUserID == userID {
-//			return models.ErrOrderAlreadyExists
-//		}
-//		return models.ErrOrderExistsForAnotherUser
-//	} else if !errors.Is(err, pgx.ErrNoRows) {
-//		return err
-//	}
-//
-//	const insert = `
-//		INSERT INTO orders (user_id, order_number, status, uploaded_at, start_process_at)
-//		VALUES ($1, $2, 'NEW', NOW(), NOW() - INTERVAL '5 MINUTE')
-//	`
-//	_, err = p.DB.Exec(ctx, insert, userID, order)
-//	return err
-//}
+func (p *Storage) SaveMasterKey(
+	ctx context.Context,
+	userID int,
+	encryptedMK []byte,
+	nonce []byte,
+) (int, error) {
+	const insertSQL = `
+        INSERT INTO user_keys (user_id, encrypted_master_key, nonce) 
+        VALUES ($1, $2, $3)
+        RETURNING id;
+    `
+
+	var id int
+
+	err := p.DB.QueryRow(ctx, insertSQL, userID, encryptedMK, nonce).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to save master key: %w", err)
+	}
+
+	return id, err
+}
+
+func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error) {
+	const selectSQL = `
+        SELECT encrypted_master_key, nonce FROM user_keys 
+        WHERE user_id = $1;
+    `
+
+	var encryptedMK models.EncryptedMK
+	err := p.DB.QueryRow(ctx, selectSQL, userID).Scan(&encryptedMK.EncryptedMK, &encryptedMK.Nonce)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, models.MasterKeyNotFound
+		}
+		return nil, err
+	}
+
+	return &encryptedMK, err
+}
+
 //
 //func (p *Storage) ListOrders(ctx context.Context, userID int64) (ee []models.UserOrderEntry, err error) {
 //	if err := ctx.Err(); err != nil {
