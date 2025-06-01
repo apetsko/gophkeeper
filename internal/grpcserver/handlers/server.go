@@ -11,6 +11,7 @@ import (
 type ServerAdmin struct {
 	storage     *storage.Storage
 	jwtConfig   config.JWTConfig
+	envelop     *crypto.Envelop
 	keyManager  *crypto.KeyManager
 	minioBucket string
 	minioClient *minio.Client
@@ -19,6 +20,7 @@ type ServerAdmin struct {
 func NewServer(
 	storage *storage.Storage,
 	jwtConfig config.JWTConfig,
+	envelop *crypto.Envelop,
 	keyManager *crypto.KeyManager,
 	minioBucket string,
 	minioClient *minio.Client,
@@ -26,6 +28,7 @@ func NewServer(
 	return &ServerAdmin{
 		storage:     storage,
 		jwtConfig:   jwtConfig,
+		envelop:     envelop,
 		keyManager:  keyManager,
 		minioBucket: minioBucket,
 		minioClient: minioClient,

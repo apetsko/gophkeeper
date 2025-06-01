@@ -33,7 +33,26 @@ func NewKeyManager(
 	}
 }
 
-func (m *KeyManager) GetMasterKey(
+func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, error) {
+	// 1. Получаем зашифрованный MK из БД
+	encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Расшифровываем серверным ключом
+	block, _ := aes.NewCipher(m.serverEncryptionKey)
+	gcm, _ := cipher.NewGCM(block)
+
+	mk, err := gcm.Open(nil, encryptedMK.Nonce, encryptedMK.EncryptedMK, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return mk, nil
+}
+
+func (m *KeyManager) GetOrCreateMasterKey(
 	ctx context.Context,
 	userID int,
 	userPassword string,
@@ -63,7 +82,7 @@ func (m *KeyManager) GetMasterKey(
 		return nil, err
 	}
 
-	// Верифицируем пароль
+	// Верифицируем
 	computedMK := argon2.IDKey([]byte(userPassword), userSalt, 3, 64*1024, 4, 32)
 	if subtle.ConstantTimeCompare(mk, computedMK) != 1 {
 		return nil, errors.New("invalid password")

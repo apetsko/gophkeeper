@@ -34,21 +34,19 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
 
-	encryptedMK, err := s.keyManager.GetMasterKey(
+	// TODO: нужно записать в потокобезопасную мапу в памяти
+	_, errMasterKey := s.keyManager.GetOrCreateMasterKey(
 		ctx,
 		user.ID,
 		in.Password,
 		nil,
 	)
 
-	if err != nil {
-		slog.Error("failed to generate encrypted master key: %w", err)
+	if errMasterKey != nil {
+		slog.Error("failed to generate encrypted master key: %w", errMasterKey)
 
 		return nil, errors.New("failed to generate encrypted master key")
 	}
-
-	// TODO: нужно записать в потокобезопасную мапу в памяти
-	fmt.Println("encryptedMK: [", encryptedMK, "]")
 
 	return &pbrpcu.LoginResponse{
 		Id:       int32(user.ID),

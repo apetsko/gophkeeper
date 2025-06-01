@@ -5,17 +5,28 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/minio/minio-go/v7"
 
-	pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
-	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/apetsko/gophkeeper/internal/constants"
+	"github.com/apetsko/gophkeeper/models"
+	pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
+	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
 func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
+	userID, ok := ctx.Value(constants.UserID).(int)
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
+	}
+
 	// Валидация типа данных
 	if in.Type == pbc.DataType_DATA_TYPE_UNSPECIFIED {
 		return nil, status.Errorf(codes.InvalidArgument, "тип данных не указан")
@@ -28,7 +39,35 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		if bankCard == nil {
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные банковской карты")
 		}
-		fmt.Printf("Сохранение карты: %s (%s)\n", bankCard.GetCardNumber(), bankCard.GetCardholder())
+
+		// TODO: переделать на потокобезопасную in memory мапу
+		encryptedMK, err := s.keyManager.GetMasterKey(ctx, userID)
+		if err != nil {
+			return nil, fmt.Errorf("error get encryptedMK: %v", err)
+		}
+
+		data, err := proto.Marshal(in.GetBankCard())
+		if err != nil {
+			return nil, fmt.Errorf("error serialize: %v", err)
+		}
+
+		userData := &models.UserData{
+			UserID:        userID,
+			Type:          "bank_card", // TODO: типы унести в константы
+			MinioObjectID: "",
+			Meta:          protojson.Format(in.Meta),
+		}
+
+		_, errEncrypt := s.envelop.EncryptUserData(
+			ctx,
+			*userData,
+			encryptedMK,
+			data,
+		)
+		if errEncrypt != nil {
+			slog.Error("failed to save bank card: %w", errEncrypt)
+			return nil, fmt.Errorf("failed to save bank card: %v", errEncrypt)
+		}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
 		creds := in.GetCredentials()

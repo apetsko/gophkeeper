@@ -49,6 +49,7 @@ func main() {
 		log.Fatalf("minio client init err %v", err)
 	}
 
+	envelop := crypto.NewEnvelop(dbClient)
 	keyManager := crypto.NewKeyManager(dbClient, cfg.ServerEK)
 
 	// GRPC-сервер
@@ -70,6 +71,7 @@ func main() {
 		handlers.NewServer(
 			dbClient,
 			cfg.JWT,
+			envelop,
 			keyManager,
 			cfg.Minio.Bucket,
 			minioClient,
