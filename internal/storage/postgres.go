@@ -205,3 +205,44 @@ func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DbUs
 
 	return &userData, err
 }
+
+func (p *Storage) GetUserDataList(ctx context.Context, userID int) ([]models.UserDataListItem, error) {
+	const selectSQL = `
+        SELECT id,
+               user_id, 
+               type,
+               meta,
+               created_at
+        FROM user_data 
+        WHERE user_id = $1
+        ORDER BY id DESC;
+    `
+
+	rows, err := p.DB.Query(ctx, selectSQL, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query user data list: %w", err)
+	}
+	defer rows.Close()
+
+	var result []models.UserDataListItem
+	for rows.Next() {
+		var data models.UserDataListItem
+		err := rows.Scan(
+			&data.ID,
+			&data.UserID,
+			&data.Type,
+			&data.Meta,
+			&data.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		result = append(result, data)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return result, nil
+}

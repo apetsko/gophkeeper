@@ -26,6 +26,7 @@ type Record struct {
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	Meta          *Meta                  `protobuf:"bytes,3,opt,name=meta,proto3" json:"meta,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -81,15 +82,24 @@ func (x *Record) GetMeta() *Meta {
 	return nil
 }
 
+func (x *Record) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
 var File_api_proto_v1_models_record_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_models_record_proto_rawDesc = "" +
 	"\n" +
-	" api/proto/v1/models/record.proto\x12\x13api.proto.v1.models\x1a\x1eapi/proto/v1/models/meta.proto\"[\n" +
+	" api/proto/v1/models/record.proto\x12\x13api.proto.v1.models\x1a\x1eapi/proto/v1/models/meta.proto\"z\n" +
 	"\x06Record\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12-\n" +
-	"\x04meta\x18\x03 \x01(\v2\x19.api.proto.v1.models.MetaR\x04metaB<Z:github.com/apetsko/gophkeeper/protogen/api/proto/v1/modelsb\x06proto3"
+	"\x04meta\x18\x03 \x01(\v2\x19.api.proto.v1.models.MetaR\x04meta\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAtB<Z:github.com/apetsko/gophkeeper/protogen/api/proto/v1/modelsb\x06proto3"
 
 var (
 	file_api_proto_v1_models_record_proto_rawDescOnce sync.Once

@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type BankCard struct {
 	CardNumber string `json:"card_number"`
 	ExpiryDate string `json:"expiry_date"`
@@ -23,4 +25,12 @@ type DbUserData struct {
 	EncryptedDek  []byte `json:"encrypted_dek"`
 	DekNonce      []byte `json:"dek_nonce"`
 	Meta          string `json:"meta"`
+}
+
+type UserDataListItem struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	Type      string    `json:"type"`
+	Meta      string    `json:"meta"`
+	CreatedAt time.Time `json:"created_at"`
 }

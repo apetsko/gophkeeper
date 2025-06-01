@@ -10,4 +10,5 @@ message Record {
   int32 id = 1;
   string type = 2;
   Meta meta = 3;
+  string created_at = 4;
 }
