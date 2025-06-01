@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/apetsko/gophkeeper/config"
+	"github.com/apetsko/gophkeeper/internal/crypto"
 	"github.com/apetsko/gophkeeper/internal/grpcserver"
 	"github.com/apetsko/gophkeeper/internal/grpcserver/handlers"
 	"github.com/apetsko/gophkeeper/internal/storage"
@@ -48,6 +49,8 @@ func main() {
 		log.Fatalf("minio client init err %v", err)
 	}
 
+	keyManager := crypto.NewKeyManager(dbClient, cfg.ServerEK)
+
 	// GRPC-сервер
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -67,6 +70,7 @@ func main() {
 		handlers.NewServer(
 			dbClient,
 			cfg.JWT,
+			keyManager,
 			cfg.Minio.Bucket,
 			minioClient,
 		),

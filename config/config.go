@@ -1,6 +1,8 @@
 package config
 
 import (
+	"encoding/hex"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -12,10 +14,12 @@ import (
 )
 
 type Config struct {
-	ConfigFile         string      `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
-	DatabaseDSN        string      `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
-	GRPCAddress        string      `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
-	GRPCGatewayAddress string      `env:"GRPC_GATEWAY_ADDRESS" yaml:"GRPC_GATEWAY_ADDRESS" validate:"required"`
+	ConfigFile         string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+	DatabaseDSN        string `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
+	GRPCAddress        string `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
+	GRPCGatewayAddress string `env:"GRPC_GATEWAY_ADDRESS" yaml:"GRPC_GATEWAY_ADDRESS" validate:"required"`
+	StrServerEK        string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
+	ServerEK           []byte
 	JWT                JWTConfig   `yaml:"JWT"`
 	Minio              MinioConfig `yaml:"MINIO"`
 }
@@ -50,6 +54,17 @@ func New() (*Config, error) {
 	if err := utils.ValidateStruct(cfg); err != nil {
 		return nil, err
 	}
+
+	serverKey, errDecode := hex.DecodeString(cfg.StrServerEK)
+	if errDecode != nil {
+		return nil, errDecode
+	}
+
+	if len(serverKey) != 32 {
+		return nil, errors.New("server encryption key must be 32 bytes")
+	}
+
+	cfg.ServerEK = serverKey
 
 	return &cfg, nil
 }
