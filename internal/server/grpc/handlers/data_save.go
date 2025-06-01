@@ -41,7 +41,7 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		}
 
 		// TODO: переделать на потокобезопасную in memory мапу
-		encryptedMK, err := s.keyManager.GetMasterKey(ctx, userID)
+		encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
 		if err != nil {
 			return nil, fmt.Errorf("error get encryptedMK: %v", err)
 		}
@@ -58,7 +58,7 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			Meta:          protojson.Format(in.Meta),
 		}
 
-		_, errEncrypt := s.envelop.EncryptUserData(
+		_, errEncrypt := s.Envelop.EncryptUserData(
 			ctx,
 			*userData,
 			encryptedMK,
@@ -86,9 +86,9 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 
 		fmt.Printf("Сохранение файла: %s (%d bytes)\n", file.Name, file.Size)
 
-		info, errPutObject := s.minioClient.PutObject(
+		info, errPutObject := s.MinioClient.PutObject(
 			ctx,
-			s.minioBucket,
+			s.MinioBucket,
 			objectName,
 			bytes.NewReader(file.Data),
 			int64(len(file.Data)),
@@ -103,11 +103,13 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			},
 		)
 
+		//todo добавить сохранение инфы в базу, чтобы потом лист из базы делать, и потом при выборе файла прислать его.
+
 		if errPutObject != nil {
 			return nil, fmt.Errorf("failed to upload file to MinIO: %v", errPutObject)
 		}
 
-		log.Printf("Успешно загружен %s в бакет %s. ETAG: %s", objectName, s.minioBucket, info.ETag)
+		log.Printf("Успешно загружен %s в бакет %s. ETAG: %s", objectName, s.MinioBucket, info.ETag)
 
 	default:
 		return nil, status.Errorf(codes.Unimplemented, "неподдерживаемый тип данных: %v", in.Type)
