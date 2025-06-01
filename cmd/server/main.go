@@ -15,6 +15,7 @@ import (
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/apetsko/gophkeeper/config"
@@ -50,8 +51,15 @@ func main() {
 	// GRPC-сервер
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			grpcserver.AuthUnaryInterceptor(map[string]bool{}),                 // твой авторизационный interceptor
-			grpcLogging.UnaryServerInterceptor(logging.InterceptorLogger(log)), // логгер
+			grpcserver.AuthUnaryInterceptor(
+				map[string]bool{
+					"/api.proto.v1.GophKeeper/DataList":   true,
+					"/api.proto.v1.GophKeeper/DataSave":   true,
+					"/api.proto.v1.GophKeeper/DataDelete": true,
+				},
+				[]byte(cfg.JWT.Secret),
+			),
+			grpcLogging.UnaryServerInterceptor(logging.InterceptorLogger(log)),
 		),
 	)
 
@@ -103,7 +111,15 @@ func runGRPC(ctx context.Context, grpcServer *grpc.Server, grpcAddr string, log 
 
 // runHTTP запускает HTTP сервер с gRPC-Gateway и CORS
 func runHTTP(ctx context.Context, httpAddr, grpcAddr string, log *logging.Logger) {
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {
+			md := metadata.New(nil)
+			if auth := req.Header.Get("jwt"); auth != "" {
+				md.Set("jwt", auth)
+			}
+			return md
+		}),
+	)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
