@@ -75,7 +75,9 @@ func (x *SignupRequest) GetPassword() string {
 
 type SignupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -110,6 +112,20 @@ func (*SignupResponse) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_rpc_user_signup_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *SignupResponse) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *SignupResponse) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
 func (x *SignupResponse) GetToken() string {
 	if x != nil {
 		return x.Token
@@ -124,9 +140,11 @@ const file_api_proto_v1_rpc_user_signup_proto_rawDesc = "" +
 	"\"api/proto/v1/rpc/user/signup.proto\x12\x15api.proto.v1.rpc.user\"G\n" +
 	"\rSignupRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"&\n" +
-	"\x0eSignupResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05tokenB>Z<github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/userb\x06proto3"
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"R\n" +
+	"\x0eSignupResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05tokenB>Z<github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/userb\x06proto3"
 
 var (
 	file_api_proto_v1_rpc_user_signup_proto_rawDescOnce sync.Once

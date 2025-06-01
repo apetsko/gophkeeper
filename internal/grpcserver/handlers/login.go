@@ -34,6 +34,8 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 	}
 
 	return &pbrpcu.LoginResponse{
-		Token: token,
+		Id:       int32(user.ID),
+		Username: user.Username,
+		Token:    token,
 	}, nil
 }
