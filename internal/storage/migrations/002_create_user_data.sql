@@ -14,4 +14,4 @@ CREATE TABLE user_data
 CREATE INDEX idx_user_data_user_id ON user_data (user_id);
 CREATE INDEX idx_user_data_data_type ON user_data (data_type);
 -- +goose Down
-DROP TABLE IF` EXISTS user_data;
+DROP TABLE IF EXISTS user_data;

@@ -24,7 +24,7 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
-	if !password.CheckPasswordHash(user.PasswordHash, in.Password) {
+	if !password.CheckPasswordHash(in.Password, user.PasswordHash) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
