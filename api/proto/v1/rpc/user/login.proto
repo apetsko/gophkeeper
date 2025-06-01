@@ -10,5 +10,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string token = 1;
+  int32 id = 1;
+  string username = 2;
+  string token = 3;
 }

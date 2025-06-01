@@ -10,5 +10,7 @@ message SignupRequest {
 }
 
 message SignupResponse {
-  string token = 1;
+  int32 id = 1;
+  string username = 2;
+  string token = 3;
 }

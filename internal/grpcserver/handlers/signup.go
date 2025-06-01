@@ -36,6 +36,8 @@ func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
 	}
 
 	return &pbrpcu.SignupResponse{
-		Token: token,
+		Id:       int32(user.ID),
+		Username: user.Username,
+		Token:    token,
 	}, nil
 }

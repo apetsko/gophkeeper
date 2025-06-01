@@ -27,11 +27,11 @@ var File_api_proto_v1_service_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\x83\x05\n" +
+	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\x89\x05\n" +
 	"\n" +
-	"GophKeeper\x12e\n" +
-	"\x05Login\x12#.api.proto.v1.rpc.user.LoginRequest\x1a$.api.proto.v1.rpc.user.LoginResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/login\x12i\n" +
-	"\x06Signup\x12$.api.proto.v1.rpc.user.SignupRequest\x1a%.api.proto.v1.rpc.user.SignupResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
+	"GophKeeper\x12h\n" +
+	"\x05Login\x12#.api.proto.v1.rpc.user.LoginRequest\x1a$.api.proto.v1.rpc.user.LoginResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/login\x12l\n" +
+	"\x06Signup\x12$.api.proto.v1.rpc.user.SignupRequest\x1a%.api.proto.v1.rpc.user.SignupResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
 	"/v1/signup\x12W\n" +
 	"\x04Ping\x12\x1d.api.proto.v1.rpc.PingRequest\x1a\x1e.api.proto.v1.rpc.PingResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/ping\x12k\n" +

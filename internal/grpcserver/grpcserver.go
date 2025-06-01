@@ -2,8 +2,10 @@ package grpcserver
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
+	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -51,7 +53,7 @@ func (s *GRPCServer) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest
 	return s.ServerAdmin.DataDelete(ctx, in)
 }
 
-func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor {
+func AuthUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
 	slog.Info("Auth interceptor enabled")
 
 	return func(
@@ -69,13 +71,29 @@ func AuthUnaryInterceptor(protected map[string]bool) grpc.UnaryServerInterceptor
 			return nil, status.Error(codes.Unauthenticated, "missing metadata")
 		}
 
-		jwt := md.Get(string(constants.JWT))
-		if len(jwt) == 0 || jwt[0] == "" {
+		jwtHeader := md.Get(string(constants.JWT))
+		if len(jwtHeader) == 0 || jwtHeader[0] == "" {
 			return nil, status.Error(codes.Unauthenticated, "missing jwt")
 		}
 
-		ctx = context.WithValue(ctx, constants.JWT, jwt[0])
+		tokenStr := jwtHeader[0]
 
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			return nil, status.Error(codes.Unauthenticated, "invalid jwt")
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			ctx = context.WithValue(ctx, "user_id", claims["sub"])
+		}
+
+		ctx = context.WithValue(ctx, constants.JWT, tokenStr)
 		return handler(ctx, req)
 	}
 }
