@@ -58,6 +58,7 @@ func main() {
 			grpcserver.AuthUnaryInterceptor(
 				map[string]bool{
 					"/api.proto.v1.GophKeeper/DataList":   true,
+					"/api.proto.v1.GophKeeper/DataView":   true,
 					"/api.proto.v1.GophKeeper/DataSave":   true,
 					"/api.proto.v1.GophKeeper/DataDelete": true,
 				},

@@ -146,7 +146,7 @@ func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.Encrypt
 	return &encryptedMK, err
 }
 
-func (p *Storage) SaveUserData(ctx context.Context, userData *models.SaveUserData) (int, error) {
+func (p *Storage) SaveUserData(ctx context.Context, userData *models.DbUserData) (int, error) {
 	const insertSQL = `
         INSERT INTO user_data (user_id, type, minio_object_id, encrypted_data, data_nonce, encrypted_dek, dek_nonce, meta) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -172,4 +172,36 @@ func (p *Storage) SaveUserData(ctx context.Context, userData *models.SaveUserDat
 	}
 
 	return id, err
+}
+
+func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DbUserData, error) {
+	const selectSQL = `
+        SELECT user_id, 
+               type,
+               minio_object_id,
+               encrypted_data,
+               data_nonce,
+               encrypted_dek,
+               dek_nonce,
+               meta FROM user_data 
+        WHERE id = $1;
+    `
+
+	var userData models.DbUserData
+
+	err := p.DB.QueryRow(ctx, selectSQL, userDataID).Scan(
+		&userData.UserID,
+		&userData.Type,
+		&userData.MinioObjectID,
+		&userData.EncryptedData,
+		&userData.DataNonce,
+		&userData.EncryptedDek,
+		&userData.DekNonce,
+		&userData.Meta,
+	)
+	if err != nil {
+		return &userData, fmt.Errorf("failed to get user data: %w", err)
+	}
+
+	return &userData, err
 }

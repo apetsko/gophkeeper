@@ -27,7 +27,7 @@ var File_api_proto_v1_service_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\x89\x05\n" +
+	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a api/proto/v1/rpc/data_view.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\xf3\x05\n" +
 	"\n" +
 	"GophKeeper\x12h\n" +
 	"\x05Login\x12#.api.proto.v1.rpc.user.LoginRequest\x1a$.api.proto.v1.rpc.user.LoginResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/login\x12l\n" +
@@ -38,7 +38,8 @@ const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\bDataSave\x12!.api.proto.v1.rpc.DataSaveRequest\x1a\".api.proto.v1.rpc.DataSaveResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/data/save\x12s\n" +
 	"\n" +
 	"DataDelete\x12#.api.proto.v1.rpc.DataDeleteRequest\x1a$.api.proto.v1.rpc.DataDeleteResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/data/delete\x12h\n" +
-	"\bDataList\x12!.api.proto.v1.rpc.DataListRequest\x1a\".api.proto.v1.rpc.DataListResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/listB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
+	"\bDataList\x12!.api.proto.v1.rpc.DataListRequest\x1a\".api.proto.v1.rpc.DataListResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/list\x12h\n" +
+	"\bDataView\x12!.api.proto.v1.rpc.DataViewRequest\x1a\".api.proto.v1.rpc.DataViewResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/viewB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
 
 var file_api_proto_v1_service_proto_goTypes = []any{
 	(*user.LoginRequest)(nil),      // 0: api.proto.v1.rpc.user.LoginRequest
@@ -47,12 +48,14 @@ var file_api_proto_v1_service_proto_goTypes = []any{
 	(*rpc.DataSaveRequest)(nil),    // 3: api.proto.v1.rpc.DataSaveRequest
 	(*rpc.DataDeleteRequest)(nil),  // 4: api.proto.v1.rpc.DataDeleteRequest
 	(*rpc.DataListRequest)(nil),    // 5: api.proto.v1.rpc.DataListRequest
-	(*user.LoginResponse)(nil),     // 6: api.proto.v1.rpc.user.LoginResponse
-	(*user.SignupResponse)(nil),    // 7: api.proto.v1.rpc.user.SignupResponse
-	(*rpc.PingResponse)(nil),       // 8: api.proto.v1.rpc.PingResponse
-	(*rpc.DataSaveResponse)(nil),   // 9: api.proto.v1.rpc.DataSaveResponse
-	(*rpc.DataDeleteResponse)(nil), // 10: api.proto.v1.rpc.DataDeleteResponse
-	(*rpc.DataListResponse)(nil),   // 11: api.proto.v1.rpc.DataListResponse
+	(*rpc.DataViewRequest)(nil),    // 6: api.proto.v1.rpc.DataViewRequest
+	(*user.LoginResponse)(nil),     // 7: api.proto.v1.rpc.user.LoginResponse
+	(*user.SignupResponse)(nil),    // 8: api.proto.v1.rpc.user.SignupResponse
+	(*rpc.PingResponse)(nil),       // 9: api.proto.v1.rpc.PingResponse
+	(*rpc.DataSaveResponse)(nil),   // 10: api.proto.v1.rpc.DataSaveResponse
+	(*rpc.DataDeleteResponse)(nil), // 11: api.proto.v1.rpc.DataDeleteResponse
+	(*rpc.DataListResponse)(nil),   // 12: api.proto.v1.rpc.DataListResponse
+	(*rpc.DataViewResponse)(nil),   // 13: api.proto.v1.rpc.DataViewResponse
 }
 var file_api_proto_v1_service_proto_depIdxs = []int32{
 	0,  // 0: api.proto.v1.GophKeeper.Login:input_type -> api.proto.v1.rpc.user.LoginRequest
@@ -61,14 +64,16 @@ var file_api_proto_v1_service_proto_depIdxs = []int32{
 	3,  // 3: api.proto.v1.GophKeeper.DataSave:input_type -> api.proto.v1.rpc.DataSaveRequest
 	4,  // 4: api.proto.v1.GophKeeper.DataDelete:input_type -> api.proto.v1.rpc.DataDeleteRequest
 	5,  // 5: api.proto.v1.GophKeeper.DataList:input_type -> api.proto.v1.rpc.DataListRequest
-	6,  // 6: api.proto.v1.GophKeeper.Login:output_type -> api.proto.v1.rpc.user.LoginResponse
-	7,  // 7: api.proto.v1.GophKeeper.Signup:output_type -> api.proto.v1.rpc.user.SignupResponse
-	8,  // 8: api.proto.v1.GophKeeper.Ping:output_type -> api.proto.v1.rpc.PingResponse
-	9,  // 9: api.proto.v1.GophKeeper.DataSave:output_type -> api.proto.v1.rpc.DataSaveResponse
-	10, // 10: api.proto.v1.GophKeeper.DataDelete:output_type -> api.proto.v1.rpc.DataDeleteResponse
-	11, // 11: api.proto.v1.GophKeeper.DataList:output_type -> api.proto.v1.rpc.DataListResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
+	6,  // 6: api.proto.v1.GophKeeper.DataView:input_type -> api.proto.v1.rpc.DataViewRequest
+	7,  // 7: api.proto.v1.GophKeeper.Login:output_type -> api.proto.v1.rpc.user.LoginResponse
+	8,  // 8: api.proto.v1.GophKeeper.Signup:output_type -> api.proto.v1.rpc.user.SignupResponse
+	9,  // 9: api.proto.v1.GophKeeper.Ping:output_type -> api.proto.v1.rpc.PingResponse
+	10, // 10: api.proto.v1.GophKeeper.DataSave:output_type -> api.proto.v1.rpc.DataSaveResponse
+	11, // 11: api.proto.v1.GophKeeper.DataDelete:output_type -> api.proto.v1.rpc.DataDeleteResponse
+	12, // 12: api.proto.v1.GophKeeper.DataList:output_type -> api.proto.v1.rpc.DataListResponse
+	13, // 13: api.proto.v1.GophKeeper.DataView:output_type -> api.proto.v1.rpc.DataViewResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

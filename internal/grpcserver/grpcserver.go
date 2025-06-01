@@ -53,6 +53,10 @@ func (s *GRPCServer) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest
 	return s.ServerAdmin.DataDelete(ctx, in)
 }
 
+func (s *GRPCServer) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) {
+	return s.ServerAdmin.DataView(ctx, in)
+}
+
 func AuthUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
 	slog.Info("Auth interceptor enabled")
 

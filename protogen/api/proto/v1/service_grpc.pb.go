@@ -27,6 +27,7 @@ const (
 	GophKeeper_DataSave_FullMethodName   = "/api.proto.v1.GophKeeper/DataSave"
 	GophKeeper_DataDelete_FullMethodName = "/api.proto.v1.GophKeeper/DataDelete"
 	GophKeeper_DataList_FullMethodName   = "/api.proto.v1.GophKeeper/DataList"
+	GophKeeper_DataView_FullMethodName   = "/api.proto.v1.GophKeeper/DataView"
 )
 
 // GophKeeperClient is the client API for GophKeeper service.
@@ -39,6 +40,7 @@ type GophKeeperClient interface {
 	DataSave(ctx context.Context, in *rpc.DataSaveRequest, opts ...grpc.CallOption) (*rpc.DataSaveResponse, error)
 	DataDelete(ctx context.Context, in *rpc.DataDeleteRequest, opts ...grpc.CallOption) (*rpc.DataDeleteResponse, error)
 	DataList(ctx context.Context, in *rpc.DataListRequest, opts ...grpc.CallOption) (*rpc.DataListResponse, error)
+	DataView(ctx context.Context, in *rpc.DataViewRequest, opts ...grpc.CallOption) (*rpc.DataViewResponse, error)
 }
 
 type gophKeeperClient struct {
@@ -109,6 +111,16 @@ func (c *gophKeeperClient) DataList(ctx context.Context, in *rpc.DataListRequest
 	return out, nil
 }
 
+func (c *gophKeeperClient) DataView(ctx context.Context, in *rpc.DataViewRequest, opts ...grpc.CallOption) (*rpc.DataViewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(rpc.DataViewResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_DataView_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GophKeeperServer is the server API for GophKeeper service.
 // All implementations must embed UnimplementedGophKeeperServer
 // for forward compatibility.
@@ -119,6 +131,7 @@ type GophKeeperServer interface {
 	DataSave(context.Context, *rpc.DataSaveRequest) (*rpc.DataSaveResponse, error)
 	DataDelete(context.Context, *rpc.DataDeleteRequest) (*rpc.DataDeleteResponse, error)
 	DataList(context.Context, *rpc.DataListRequest) (*rpc.DataListResponse, error)
+	DataView(context.Context, *rpc.DataViewRequest) (*rpc.DataViewResponse, error)
 	mustEmbedUnimplementedGophKeeperServer()
 }
 
@@ -146,6 +159,9 @@ func (UnimplementedGophKeeperServer) DataDelete(context.Context, *rpc.DataDelete
 }
 func (UnimplementedGophKeeperServer) DataList(context.Context, *rpc.DataListRequest) (*rpc.DataListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DataList not implemented")
+}
+func (UnimplementedGophKeeperServer) DataView(context.Context, *rpc.DataViewRequest) (*rpc.DataViewResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DataView not implemented")
 }
 func (UnimplementedGophKeeperServer) mustEmbedUnimplementedGophKeeperServer() {}
 func (UnimplementedGophKeeperServer) testEmbeddedByValue()                    {}
@@ -276,6 +292,24 @@ func _GophKeeper_DataList_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GophKeeper_DataView_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rpc.DataViewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GophKeeperServer).DataView(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GophKeeper_DataView_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GophKeeperServer).DataView(ctx, req.(*rpc.DataViewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GophKeeper_ServiceDesc is the grpc.ServiceDesc for GophKeeper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -306,6 +340,10 @@ var GophKeeper_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DataList",
 			Handler:    _GophKeeper_DataList_Handler,
+		},
+		{
+			MethodName: "DataView",
+			Handler:    _GophKeeper_DataView_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

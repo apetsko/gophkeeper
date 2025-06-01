@@ -6,12 +6,13 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
+	"fmt"
 
 	"github.com/apetsko/gophkeeper/models"
 )
 
 type EnvelopStorage interface {
-	SaveUserData(ctx context.Context, userData *models.SaveUserData) (int, error)
+	SaveUserData(ctx context.Context, userData *models.DbUserData) (int, error)
 }
 
 type Envelop struct {
@@ -58,7 +59,7 @@ func (e *Envelop) EncryptUserData(
 
 	encryptedDEK := mkGCM.Seal(nil, dekNonce, dek, nil)
 
-	saveUserData := &models.SaveUserData{
+	saveUserData := &models.DbUserData{
 		UserID:        userData.UserID,
 		Type:          userData.Type,
 		MinioObjectID: userData.MinioObjectID,
@@ -75,4 +76,44 @@ func (e *Envelop) EncryptUserData(
 	}
 
 	return encryptedData, nil
+}
+
+func (e *Envelop) DecryptUserData(
+	ctx context.Context,
+	userData models.DbUserData,
+	masterKey []byte,
+) ([]byte, error) {
+	// 1. Расшифровываем DEK с помощью Master Key
+	mkBlock, err := aes.NewCipher(masterKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create AES cipher for master key: %w", err)
+	}
+
+	mkGCM, err := cipher.NewGCM(mkBlock)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GCM for master key: %w", err)
+	}
+
+	dek, err := mkGCM.Open(nil, userData.DekNonce, userData.EncryptedDek, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt DEK: %w", err)
+	}
+
+	// 2. Расшифровываем данные с помощью DEK
+	block, err := aes.NewCipher(dek)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create AES cipher for DEK: %w", err)
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GCM for DEK: %w", err)
+	}
+
+	decryptData, err := gcm.Open(nil, userData.DataNonce, userData.EncryptedData, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt data: %w", err)
+	}
+
+	return decryptData, nil
 }

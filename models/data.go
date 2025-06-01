@@ -14,7 +14,7 @@ type UserData struct {
 	Meta          string `json:"meta"`
 }
 
-type SaveUserData struct {
+type DbUserData struct {
 	UserID        int    `json:"user_id"`
 	Type          string `json:"type"`
 	MinioObjectID string `json:"minio_object_id"`
