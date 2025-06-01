@@ -13,18 +13,18 @@ import (
 	"github.com/apetsko/gophkeeper/models"
 )
 
-type Storage interface {
+type KeyStorage interface {
 	GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error)
 	SaveMasterKey(ctx context.Context, userID int, encryptedMK, nonce []byte) (int, error)
 }
 
 type KeyManager struct {
-	storage             Storage
+	storage             KeyStorage
 	serverEncryptionKey []byte
 }
 
 func NewKeyManager(
-	storage Storage,
+	storage KeyStorage,
 	serverEncryptionKey []byte,
 ) *KeyManager {
 	return &KeyManager{

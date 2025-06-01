@@ -90,7 +90,12 @@ func AuthUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.Unar
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			ctx = context.WithValue(ctx, "user_id", claims["sub"])
+			if uidFloat, ok := claims["user_id"].(float64); ok {
+				userID := int(uidFloat)
+				ctx = context.WithValue(ctx, constants.UserID, userID)
+			} else {
+				return nil, status.Error(codes.InvalidArgument, "user_id not found or not a number")
+			}
 		}
 
 		ctx = context.WithValue(ctx, constants.JWT, tokenStr)

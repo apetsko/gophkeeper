@@ -8,9 +8,9 @@ import (
 
 func GenerateJWT(userID int, username, jwtSecret string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  userID,
-		"name": username,
-		"iat":  time.Now().Unix(),
+		"user_id": userID,
+		"name":    username,
+		"iat":     time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
