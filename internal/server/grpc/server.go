@@ -102,6 +102,8 @@ func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.Unar
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			fmt.Println(claims)
+
 			if uidFloat, ok := claims["user_id"].(float64); ok {
 				userID := int(uidFloat)
 				ctx = context.WithValue(ctx, constants.UserID, userID)
@@ -137,6 +139,7 @@ func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) 
 		authUnaryInterceptor(
 			map[string]bool{
 				"/api.proto.v1.GophKeeper/DataList":   true,
+				"/api.proto.v1.GophKeeper/DataView":   true,
 				"/api.proto.v1.GophKeeper/DataSave":   true,
 				"/api.proto.v1.GophKeeper/DataDelete": true,
 			},
