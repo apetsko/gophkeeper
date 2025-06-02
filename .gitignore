@@ -2,3 +2,4 @@
 /gophstorage/
 .env
 uploads/*
+certs/*
