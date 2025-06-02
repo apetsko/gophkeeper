@@ -7,8 +7,6 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/apetsko/gophkeeper/config"
-	"github.com/apetsko/gophkeeper/pkg/logging"
 	"github.com/golang-jwt/jwt/v5"
 	grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"golang.org/x/sync/errgroup"
@@ -19,8 +17,10 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
+	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/internal/constants"
 	"github.com/apetsko/gophkeeper/internal/server/grpc/handlers"
+	"github.com/apetsko/gophkeeper/pkg/logging"
 	pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 	pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
@@ -59,6 +59,10 @@ func (s *GRPCHandler) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 
 func (s *GRPCHandler) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) {
 	return s.ServerAdmin.DataDelete(ctx, in)
+}
+
+func (s *GRPCHandler) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) {
+	return s.ServerAdmin.DataView(ctx, in)
 }
 
 func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
@@ -168,5 +172,4 @@ func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) 
 	}()
 
 	return srv, nil
-
 }

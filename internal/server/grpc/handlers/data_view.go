@@ -27,20 +27,20 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
 	}
 
-	userData, err := s.storage.GetUserData(ctx, int(in.GetId()))
+	userData, err := s.Storage.GetUserData(ctx, int(in.GetId()))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "ошибка получения данных")
 	}
 
 	// TODO: переделать на потокобезопасную in memory мапу
-	encryptedMK, err := s.keyManager.GetMasterKey(ctx, userID)
+	encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error get encryptedMK: %v", err)
 	}
 
 	// TODO: нет обработчика для файла
 
-	decryptData, err := s.envelop.DecryptUserData(ctx, *userData, encryptedMK)
+	decryptData, err := s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
 	}

@@ -19,7 +19,7 @@ func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (
 		return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
 	}
 
-	userDataList, err := s.storage.GetUserDataList(ctx, userID)
+	userDataList, err := s.Storage.GetUserDataList(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "ошибка получения данных: %v", err)
 	}
