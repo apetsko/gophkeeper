@@ -44,8 +44,7 @@ service GophKeeper {
 
   rpc DataDelete(api.proto.v1.rpc.DataDeleteRequest) returns (api.proto.v1.rpc.DataDeleteResponse) {
     option (google.api.http) = {
-      post: "/v1/data/delete"
-      body: "*"
+      delete: "/v1/data/delete"
     };
   };
 

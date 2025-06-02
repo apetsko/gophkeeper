@@ -27,7 +27,7 @@ var File_api_proto_v1_service_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a api/proto/v1/rpc/data_view.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\xf3\x05\n" +
+	"\x1aapi/proto/v1/service.proto\x12\fapi.proto.v1\x1a\x1bapi/proto/v1/rpc/ping.proto\x1a api/proto/v1/rpc/data_save.proto\x1a api/proto/v1/rpc/data_list.proto\x1a\"api/proto/v1/rpc/data_delete.proto\x1a api/proto/v1/rpc/data_view.proto\x1a!api/proto/v1/rpc/user/login.proto\x1a\"api/proto/v1/rpc/user/signup.proto\x1a\x1cgoogle/api/annotations.proto2\xf0\x05\n" +
 	"\n" +
 	"GophKeeper\x12h\n" +
 	"\x05Login\x12#.api.proto.v1.rpc.user.LoginRequest\x1a$.api.proto.v1.rpc.user.LoginResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/login\x12l\n" +
@@ -35,9 +35,9 @@ const file_api_proto_v1_service_proto_rawDesc = "" +
 	"/v1/signup\x12W\n" +
 	"\x04Ping\x12\x1d.api.proto.v1.rpc.PingRequest\x1a\x1e.api.proto.v1.rpc.PingResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/ping\x12k\n" +
-	"\bDataSave\x12!.api.proto.v1.rpc.DataSaveRequest\x1a\".api.proto.v1.rpc.DataSaveResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/data/save\x12s\n" +
+	"\bDataSave\x12!.api.proto.v1.rpc.DataSaveRequest\x1a\".api.proto.v1.rpc.DataSaveResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/data/save\x12p\n" +
 	"\n" +
-	"DataDelete\x12#.api.proto.v1.rpc.DataDeleteRequest\x1a$.api.proto.v1.rpc.DataDeleteResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/data/delete\x12h\n" +
+	"DataDelete\x12#.api.proto.v1.rpc.DataDeleteRequest\x1a$.api.proto.v1.rpc.DataDeleteResponse\"\x17\x82\xd3\xe4\x93\x02\x11*\x0f/v1/data/delete\x12h\n" +
 	"\bDataList\x12!.api.proto.v1.rpc.DataListRequest\x1a\".api.proto.v1.rpc.DataListResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/list\x12h\n" +
 	"\bDataView\x12!.api.proto.v1.rpc.DataViewRequest\x1a\".api.proto.v1.rpc.DataViewResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/data/viewB5Z3github.com/apetsko/gophkeeper/protogen/api/proto/v1b\x06proto3"
 

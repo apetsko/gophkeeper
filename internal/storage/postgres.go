@@ -246,3 +246,22 @@ func (p *Storage) GetUserDataList(ctx context.Context, userID int) ([]models.Use
 
 	return result, nil
 }
+
+func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error {
+	const deleteSQL = `
+        DELETE FROM user_data 
+        WHERE id = $1
+        RETURNING id;
+    `
+
+	var deletedID int
+	err := p.DB.QueryRow(ctx, deleteSQL, userDataID).Scan(&deletedID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("user data with ID %d not found", userDataID)
+		}
+		return fmt.Errorf("failed to delete user data: %w", err)
+	}
+
+	return nil
+}
