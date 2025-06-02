@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("database client init err %v", err)
 	}
 
-	minioClient, err := storage.NewMinioClient(ctx, cfg.Minio)
+	storageS3, err := storage.NewS3Client(ctx, cfg.Minio)
 	if err != nil {
 		log.Fatalf("minio client init err %v", err)
 	}
@@ -45,7 +45,7 @@ func main() {
 		Envelop:     envelop,
 		KeyManager:  keyManager,
 		MinioBucket: cfg.Minio.Bucket,
-		MinioClient: minioClient,
+		StorageS3:   storageS3,
 	}
 
 	// Start gRPC server

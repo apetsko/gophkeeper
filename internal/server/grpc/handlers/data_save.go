@@ -1,14 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"time"
-
-	"github.com/minio/minio-go/v7"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -46,26 +42,33 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные банковской карты")
 		}
 
-		data, err := proto.Marshal(in.GetBankCard())
-		if err != nil {
-			return nil, fmt.Errorf("error serialize: %v", err)
+		data, errMarshal := proto.Marshal(in.GetBankCard())
+		if errMarshal != nil {
+			return nil, fmt.Errorf("error serialize: %v", errMarshal)
 		}
 
-		userData := &models.UserData{
-			UserID: userID,
-			Type:   constants.BankCard,
-			Meta:   protojson.Format(in.Meta),
-		}
-
-		_, errEncrypt := s.Envelop.EncryptUserData(
+		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
 			ctx,
-			*userData,
 			encryptedMK,
 			data,
 		)
 		if errEncrypt != nil {
-			slog.Error("failed to save bank card: %w", errEncrypt)
-			return nil, fmt.Errorf("failed to save bank card: %v", errEncrypt)
+			slog.Error("failed to crypt data: %w", errEncrypt)
+			return nil, fmt.Errorf("failed to crypt data: %v", errEncrypt)
+		}
+
+		saveUserData := &models.DbUserData{
+			UserID:        userID,
+			Type:          constants.BankCard,
+			EncryptedData: encryptedData.EncryptedData,
+			DataNonce:     encryptedData.DataNonce,
+			EncryptedDek:  encryptedData.EncryptedDek,
+			DekNonce:      encryptedData.DekNonce,
+			Meta:          protojson.Format(in.Meta),
+		}
+		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
+		if errSave != nil {
+			return nil, errSave
 		}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
@@ -74,26 +77,33 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют учетные данные")
 		}
 
-		data, err := proto.Marshal(in.GetCredentials())
-		if err != nil {
-			return nil, fmt.Errorf("error serialize: %v", err)
+		data, errMarshal := proto.Marshal(in.GetCredentials())
+		if errMarshal != nil {
+			return nil, fmt.Errorf("error serialize: %v", errMarshal)
 		}
 
-		userData := &models.UserData{
-			UserID: userID,
-			Type:   constants.Credentials,
-			Meta:   protojson.Format(in.Meta),
-		}
-
-		_, errEncrypt := s.Envelop.EncryptUserData(
+		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
 			ctx,
-			*userData,
 			encryptedMK,
 			data,
 		)
 		if errEncrypt != nil {
-			slog.Error("failed to save credentials: %w", errEncrypt)
-			return nil, fmt.Errorf("failed to save credentials: %v", errEncrypt)
+			slog.Error("failed to crypt data: %w", errEncrypt)
+			return nil, fmt.Errorf("failed to crypt data: %v", errEncrypt)
+		}
+
+		saveUserData := &models.DbUserData{
+			UserID:        userID,
+			Type:          constants.Credentials,
+			EncryptedData: encryptedData.EncryptedData,
+			DataNonce:     encryptedData.DataNonce,
+			EncryptedDek:  encryptedData.EncryptedDek,
+			DekNonce:      encryptedData.DekNonce,
+			Meta:          protojson.Format(in.Meta),
+		}
+		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
+		if errSave != nil {
+			return nil, errSave
 		}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
@@ -102,41 +112,48 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные файла")
 		}
 
-		objectName := fmt.Sprintf("%d-%s", time.Now().UnixNano(), file.Name)
-
-		fmt.Printf("Сохранение файла: %s (%d bytes)\n", file.Name, file.Size)
-
-		info, errPutObject := s.MinioClient.PutObject(
+		// Шифруем данные файла
+		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
 			ctx,
-			s.MinioBucket,
-			objectName,
-			bytes.NewReader(file.Data),
-			int64(len(file.Data)),
-			minio.PutObjectOptions{
-				ContentType: file.Type,
-				UserMetadata: map[string]string{
-					"original-name": file.Name,
-					//"meta-content":  in.Meta.Content, panics
-					"meta-content": "in.Meta.Content",
-					"upload-time":  time.Now().Format(time.RFC3339),
-				},
-			},
+			encryptedMK,
+			file.Data,
 		)
-
-		//todo добавить сохранение инфы в базу, чтобы потом лист из базы делать, и потом при выборе файла прислать его.
-
-		if errPutObject != nil {
-			return nil, fmt.Errorf("failed to upload file to MinIO: %v", errPutObject)
+		if errEncrypt != nil {
+			slog.Error("failed to encrypt binary data", "error", errEncrypt)
+			return nil, fmt.Errorf("failed to encrypt binary data: %v", errEncrypt)
 		}
 
-		log.Printf("Успешно загружен %s в бакет %s. ETAG: %s", objectName, s.MinioBucket, info.ETag)
+		// Генерируем уникальное имя файла
+		objectName := fmt.Sprintf("%d-%s", time.Now().UnixNano(), file.Name)
+
+		s3UploadData := &models.S3UploadData{
+			ObjectName:  objectName,
+			MetaContent: in.Meta.Content,
+			FileName:    file.Name,
+			FileType:    file.Type,
+		}
+
+		uploadInfo, errUpload := s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
+		if errUpload != nil {
+			return nil, fmt.Errorf("failed to upload file to MinIO: %v", errUpload)
+		}
+
+		saveUserData := &models.DbUserData{
+			UserID:        userID,
+			Type:          constants.BinaryData,
+			MinioObjectID: uploadInfo.ETag,
+			DataNonce:     encryptedData.DataNonce,
+			EncryptedDek:  encryptedData.EncryptedDek,
+			DekNonce:      encryptedData.DekNonce,
+			Meta:          protojson.Format(in.Meta),
+		}
+		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
+		if errSave != nil {
+			return nil, errSave
+		}
 
 	default:
 		return nil, status.Errorf(codes.Unimplemented, "неподдерживаемый тип данных: %v", in.Type)
-	}
-
-	if in.Meta != nil {
-		fmt.Printf("Метаданные: %+v\n", in.Meta)
 	}
 
 	return &pbrpc.DataSaveResponse{

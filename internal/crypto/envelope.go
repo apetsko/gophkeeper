@@ -29,10 +29,9 @@ func NewEnvelop(
 
 func (e *Envelop) EncryptUserData(
 	ctx context.Context,
-	userData models.UserData,
 	masterKey []byte,
 	data []byte,
-) ([]byte, error) {
+) (*models.EncryptedData, error) {
 	// 1. Генерируем случайный DEK
 	dek := make([]byte, 32)
 	if _, err := rand.Read(dek); err != nil {
@@ -59,23 +58,12 @@ func (e *Envelop) EncryptUserData(
 
 	encryptedDEK := mkGCM.Seal(nil, dekNonce, dek, nil)
 
-	saveUserData := &models.DbUserData{
-		UserID:        userData.UserID,
-		Type:          userData.Type,
-		MinioObjectID: userData.MinioObjectID,
+	return &models.EncryptedData{
 		EncryptedData: encryptedData,
 		DataNonce:     dataNonce,
 		EncryptedDek:  encryptedDEK,
 		DekNonce:      dekNonce,
-		Meta:          userData.Meta,
-	}
-
-	_, err := e.storage.SaveUserData(ctx, saveUserData)
-	if err != nil {
-		return nil, err
-	}
-
-	return encryptedData, nil
+	}, nil
 }
 
 func (e *Envelop) DecryptUserData(
