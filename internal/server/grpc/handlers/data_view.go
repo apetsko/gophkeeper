@@ -32,7 +32,11 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		return nil, status.Errorf(codes.Internal, "ошибка получения данных")
 	}
 
-	// TODO: переделать на потокобезопасную in memory мапу
+	// Проверка прав доступа
+	if userData.UserID != userID {
+		return nil, status.Errorf(codes.PermissionDenied, "нет доступа к запрошенным данным")
+	}
+
 	encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error get encryptedMK: %v", err)
@@ -71,11 +75,11 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		response.Data = &pbrpc.DataViewResponse_BankCard{BankCard: &card}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
-		var creds models.Credentials
-		if errUnmarshal := proto.Unmarshal(decryptData, &creds); errUnmarshal != nil {
+		var credentials models.Credentials
+		if errUnmarshal := proto.Unmarshal(decryptData, &credentials); errUnmarshal != nil {
 			return nil, status.Errorf(codes.Internal, "ошибка парсинга учетных данных")
 		}
-		response.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &creds}
+		response.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &credentials}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
 		var file models.File
