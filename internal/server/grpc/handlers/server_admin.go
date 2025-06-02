@@ -7,10 +7,9 @@ import (
 )
 
 type ServerAdmin struct {
-	Storage     *storage.Storage
-	JWTConfig   config.JWTConfig
-	Envelop     *crypto.Envelop
-	KeyManager  *crypto.KeyManager
-	MinioBucket string
-	StorageS3   *storage.S3
+	Storage    *storage.Storage
+	StorageS3  *storage.S3
+	JWTConfig  config.JWTConfig
+	Envelop    *crypto.Envelop
+	KeyManager *crypto.KeyManager
 }

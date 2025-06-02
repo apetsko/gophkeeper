@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("database client init err %v", err)
 	}
 
-	storageS3, err := storage.NewS3Client(ctx, cfg.Minio)
+	s3Client, err := storage.NewS3Client(ctx, cfg.S3Config)
 	if err != nil {
 		log.Fatalf("minio client init err %v", err)
 	}
@@ -40,12 +40,11 @@ func main() {
 	keyManager := crypto.NewKeyManager(dbClient, cfg.ServerEK)
 
 	sa := handlers.ServerAdmin{
-		Storage:     dbClient,
-		JWTConfig:   cfg.JWT,
-		Envelop:     envelop,
-		KeyManager:  keyManager,
-		MinioBucket: cfg.Minio.Bucket,
-		StorageS3:   storageS3,
+		Storage:    dbClient,
+		StorageS3:  s3Client,
+		JWTConfig:  cfg.JWT,
+		Envelop:    envelop,
+		KeyManager: keyManager,
 	}
 
 	// Start gRPC server

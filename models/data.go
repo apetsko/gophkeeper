@@ -20,11 +20,12 @@ type DbUserData struct {
 	UserID        int    `json:"user_id"`
 	Type          string `json:"type"`
 	MinioObjectID string `json:"minio_object_id"`
+	Meta          string `json:"meta"`
+	
 	EncryptedData []byte `json:"encrypted_data"`
 	DataNonce     []byte `json:"data_nonce"`
 	EncryptedDek  []byte `json:"encrypted_dek"`
 	DekNonce      []byte `json:"dek_nonce"`
-	Meta          string `json:"meta"`
 }
 
 type UserDataListItem struct {

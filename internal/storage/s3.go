@@ -18,11 +18,11 @@ type S3 struct {
 	MinioBucket string
 }
 
-func NewS3Client(ctx context.Context, cfg config.MinioConfig) (*S3, error) {
+func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) {
 	var err error
 
-	minioClient, err := minio.New(cfg.Address, &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.ID, cfg.Secret, ""),
+	minioClient, err := minio.New(cfg.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: false,
 	})
 

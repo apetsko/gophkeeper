@@ -20,18 +20,19 @@ type Config struct {
 	HTTPAddress string `env:"HTTP_ADDRESS" yaml:"HTTP_ADDRESS" validate:"required"`
 	StrServerEK string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
 	ServerEK    []byte
-	JWT         JWTConfig   `yaml:"JWT"`
-	Minio       MinioConfig `yaml:"MINIO"`
-	TLSConfig   TLSConfig   `yaml:"TLS"`
+	JWT         JWTConfig `yaml:"JWT"`
+	S3Config    S3Config  `yaml:"S3"`
+	TLSConfig   TLSConfig `yaml:"TLS"`
 }
 type JWTConfig struct {
 	Secret string `env:"JWT_SECRET" yaml:"JWT_SECRET" validate:"required"`
 }
-type MinioConfig struct {
-	ID      string `env:"MINIO_ID" yaml:"MINIO_ID" validate:"required"`
-	Secret  string `env:"MINIO_SECRET" yaml:"MINIO_SECRET" validate:"required"`
-	Bucket  string `env:"MINIO_BUCKET" yaml:"MINIO_BUCKET" validate:"required"`
-	Address string `env:"MINIO_ADDRESS" yaml:"MINIO_ADDRESS" validate:"required"`
+
+type S3Config struct {
+	AccessKey string `env:"S3_ACCESS_KEY" yaml:"S3_ACCESS_KEY" validate:"required"`
+	SecretKey string `env:"S3_SECRET_KEY" yaml:"S3_SECRET_KEY" validate:"required"`
+	Bucket    string `env:"S3_BUCKET" yaml:"S3_BUCKET" validate:"required"`
+	Endpoint  string `env:"S3_ENDPOINT" yaml:"S3_ENDPOINT" validate:"required"`
 }
 
 type TLSConfig struct {
