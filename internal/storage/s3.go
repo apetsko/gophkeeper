@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -74,4 +75,33 @@ func (s *S3) Upload(
 	}
 
 	return &info, nil
+}
+
+func (s *S3) GetObject(
+	ctx context.Context,
+	objectName string,
+) ([]byte, *minio.ObjectInfo, error) {
+	object, err := s.MinioClient.GetObject(
+		ctx,
+		s.MinioBucket,
+		objectName,
+		minio.GetObjectOptions{},
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get object from MinIO: %v", err)
+	}
+	defer object.Close()
+
+	objectInfo, err := object.Stat()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get object info: %v", err)
+	}
+
+	data := make([]byte, objectInfo.Size)
+	_, err = io.ReadFull(object, data)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to read object data: %v", err)
+	}
+
+	return data, &objectInfo, nil
 }

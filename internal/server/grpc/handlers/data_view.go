@@ -32,22 +32,62 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		return nil, status.Errorf(codes.Internal, "ошибка получения данных")
 	}
 
-	// TODO: переделать на потокобезопасную in memory мапу
+	// Проверка прав доступа
+	if userData.UserID != userID {
+		return nil, status.Errorf(codes.PermissionDenied, "нет доступа к запрошенным данным")
+	}
+
 	encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error get encryptedMK: %v", err)
 	}
 
-	// TODO: нет обработчика для файла
+	var decryptData []byte
+	var dataType pbc.DataType
+	var file models.File
 
-	decryptData, err := s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
-	}
+	switch userData.Type {
+	case constants.BinaryData:
+		// Обработка бинарных данных (скачивание из MinIO)
+		fileData, fileInfo, errGetObject := s.StorageS3.GetObject(
+			ctx,
+			userData.MinioObjectID,
+		)
+		if errGetObject != nil {
+			return nil, status.Errorf(codes.Internal, "ошибка получения файла из хранилища: %v", errGetObject)
+		}
 
-	dataType, ok := stringToDataType[userData.Type]
-	if !ok {
-		return nil, status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных: %s", userData.Type)
+		userData.EncryptedData = fileData
+
+		decryptData, err = s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "ошибка расшифровки файла: %v", err)
+		}
+
+		originalName := fileInfo.UserMetadata["original-name"]
+		if originalName == "" {
+			originalName = userData.MinioObjectID
+		}
+
+		file = models.File{
+			Name: originalName,
+			Data: decryptData,
+			Size: int32(len(decryptData)),
+			Type: fileInfo.ContentType,
+		}
+
+		dataType = pbc.DataType_DATA_TYPE_BINARY_DATA
+	default:
+		decryptData, err = s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
+		}
+
+		var ok bool
+		dataType, ok = stringToDataType[userData.Type]
+		if !ok {
+			return nil, status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных: %s", userData.Type)
+		}
 	}
 
 	var meta models.Meta
@@ -71,17 +111,13 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 		response.Data = &pbrpc.DataViewResponse_BankCard{BankCard: &card}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
-		var creds models.Credentials
-		if errUnmarshal := proto.Unmarshal(decryptData, &creds); errUnmarshal != nil {
+		var credentials models.Credentials
+		if errUnmarshal := proto.Unmarshal(decryptData, &credentials); errUnmarshal != nil {
 			return nil, status.Errorf(codes.Internal, "ошибка парсинга учетных данных")
 		}
-		response.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &creds}
+		response.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &credentials}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
-		var file models.File
-		if errUnmarshal := proto.Unmarshal(decryptData, &file); errUnmarshal != nil {
-			return nil, status.Errorf(codes.Internal, "ошибка парсинга файла")
-		}
 		response.Data = &pbrpc.DataViewResponse_BinaryData{BinaryData: &file}
 
 	default:

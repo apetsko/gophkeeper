@@ -133,7 +133,7 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			FileType:    file.Type,
 		}
 
-		uploadInfo, errUpload := s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
+		_, errUpload := s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
 		if errUpload != nil {
 			return nil, fmt.Errorf("failed to upload file to MinIO: %v", errUpload)
 		}
@@ -141,7 +141,7 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		saveUserData := &models.DbUserData{
 			UserID:        userID,
 			Type:          constants.BinaryData,
-			MinioObjectID: uploadInfo.ETag,
+			MinioObjectID: objectName,
 			DataNonce:     encryptedData.DataNonce,
 			EncryptedDek:  encryptedData.EncryptedDek,
 			DekNonce:      encryptedData.DekNonce,
