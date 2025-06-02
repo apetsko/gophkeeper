@@ -32,6 +32,12 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		return nil, status.Errorf(codes.InvalidArgument, "тип данных не указан")
 	}
 
+	// TODO: переделать на потокобезопасную in memory мапу
+	encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("error get encryptedMK: %v", err)
+	}
+
 	// Обработка данных в зависимости от типа
 	switch in.Type {
 	case pbc.DataType_DATA_TYPE_BANK_CARD:
@@ -40,22 +46,15 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные банковской карты")
 		}
 
-		// TODO: переделать на потокобезопасную in memory мапу
-		encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
-		if err != nil {
-			return nil, fmt.Errorf("error get encryptedMK: %v", err)
-		}
-
 		data, err := proto.Marshal(in.GetBankCard())
 		if err != nil {
 			return nil, fmt.Errorf("error serialize: %v", err)
 		}
 
 		userData := &models.UserData{
-			UserID:        userID,
-			Type:          "bank_card", // TODO: типы унести в константы
-			MinioObjectID: "",
-			Meta:          protojson.Format(in.Meta),
+			UserID: userID,
+			Type:   constants.BankCard,
+			Meta:   protojson.Format(in.Meta),
 		}
 
 		_, errEncrypt := s.Envelop.EncryptUserData(
@@ -74,7 +73,28 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		if creds == nil {
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют учетные данные")
 		}
-		fmt.Printf("Сохранение учётных данных: %s\n", creds.GetLogin())
+
+		data, err := proto.Marshal(in.GetCredentials())
+		if err != nil {
+			return nil, fmt.Errorf("error serialize: %v", err)
+		}
+
+		userData := &models.UserData{
+			UserID: userID,
+			Type:   constants.Credentials,
+			Meta:   protojson.Format(in.Meta),
+		}
+
+		_, errEncrypt := s.Envelop.EncryptUserData(
+			ctx,
+			*userData,
+			encryptedMK,
+			data,
+		)
+		if errEncrypt != nil {
+			slog.Error("failed to save credentials: %w", errEncrypt)
+			return nil, fmt.Errorf("failed to save credentials: %v", errEncrypt)
+		}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
 		file := in.GetBinaryData()

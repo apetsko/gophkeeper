@@ -7,7 +7,7 @@ const JWT mdKey = "jwt"
 const UserID contextKey = "userID"
 
 const (
-	bankCard    string = "bank_card"
-	credentials string = "credentials"
-	binaryData  string = "binary_data"
+	BankCard    string = "bank_card"
+	Credentials string = "credentials"
+	BinaryData  string = "binary_data"
 )
