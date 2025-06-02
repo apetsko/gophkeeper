@@ -25,12 +25,12 @@ func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
 		PasswordHash: hash,
 	}
 
-	userID, err := s.storage.AddUser(ctx, &user)
+	userID, err := s.Storage.AddUser(ctx, &user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	token, err := jwt.GenerateJWT(userID, in.Username, s.jwtConfig.Secret)
+	token, err := jwt.GenerateJWT(userID, in.Username, s.JWTConfig.Secret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}

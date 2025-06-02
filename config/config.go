@@ -14,14 +14,15 @@ import (
 )
 
 type Config struct {
-	ConfigFile         string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
-	DatabaseDSN        string `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
-	GRPCAddress        string `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
-	GRPCGatewayAddress string `env:"GRPC_GATEWAY_ADDRESS" yaml:"GRPC_GATEWAY_ADDRESS" validate:"required"`
-	StrServerEK        string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
-	ServerEK           []byte
-	JWT                JWTConfig   `yaml:"JWT"`
-	Minio              MinioConfig `yaml:"MINIO"`
+	ConfigFile  string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+	DatabaseDSN string `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
+	GRPCAddress string `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
+	HTTPAddress string `env:"HTTP_ADDRESS" yaml:"HTTP_ADDRESS" validate:"required"`
+	StrServerEK string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
+	ServerEK    []byte
+	JWT         JWTConfig   `yaml:"JWT"`
+	Minio       MinioConfig `yaml:"MINIO"`
+	TLSConfig   TLSConfig   `yaml:"TLS"`
 }
 type JWTConfig struct {
 	Secret string `env:"JWT_SECRET" yaml:"JWT_SECRET" validate:"required"`
@@ -31,6 +32,12 @@ type MinioConfig struct {
 	Secret  string `env:"MINIO_SECRET" yaml:"MINIO_SECRET" validate:"required"`
 	Bucket  string `env:"MINIO_BUCKET" yaml:"MINIO_BUCKET" validate:"required"`
 	Address string `env:"MINIO_ADDRESS" yaml:"MINIO_ADDRESS" validate:"required"`
+}
+
+type TLSConfig struct {
+	EnableHTTPS bool   `env:"TLS_ENABLE_HTTPS" yaml:"TLS_ENABLE_HTTPS"`
+	CertPath    string `env:"TLS_CERT_PATH" yaml:"TLS_CERT_PATH"`
+	KeyPath     string `env:"TLS_KEY_PATH" yaml:"TLS_KEY_PATH"`
 }
 
 func New() (*Config, error) {

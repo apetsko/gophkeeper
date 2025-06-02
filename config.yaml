@@ -1,5 +1,5 @@
 GRPC_ADDRESS: ":3007"
-GRPC_GATEWAY_ADDRESS: ":8082"
+HTTP_ADDRESS: ":8082"
 
 SERVER_ENCRYPTION_KEY: "f7c13a8b6e42d9a0fd3e1b2c8d75e4f1a93cb1d5e4f6a89bcde123456789abcd"
 
@@ -13,3 +13,8 @@ MINIO:
   MINIO_SECRET: "minioadmin"
   MINIO_BUCKET: "gophkeeper"
   MINIO_ADDRESS: "localhost:9000"
+
+TLS:
+  TLS_ENABLE_HTTPS: true
+  TLS_CERT_PATH: "certs/server.crt"
+  TLS_KEY_PATH: "certs/server.key"

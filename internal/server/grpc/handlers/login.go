@@ -17,7 +17,7 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 		return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")
 	}
 
-	user, err := s.storage.GetUser(ctx, in.Username)
+	user, err := s.Storage.GetUser(ctx, in.Username)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) {
 			return nil, fmt.Errorf("invalid credentials")
@@ -29,13 +29,13 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	token, err := jwt.GenerateJWT(user.ID, user.Username, s.jwtConfig.Secret)
+	token, err := jwt.GenerateJWT(user.ID, user.Username, s.JWTConfig.Secret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
 
 	// TODO: нужно записать в потокобезопасную мапу в памяти
-	_, errMasterKey := s.keyManager.GetOrCreateMasterKey(
+	_, errMasterKey := s.KeyManager.GetOrCreateMasterKey(
 		ctx,
 		user.ID,
 		in.Password,

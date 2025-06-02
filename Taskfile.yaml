@@ -33,19 +33,11 @@ tasks:
       - find protogen -type f ! -name "*proto" -delete
 
   gen-certs:
-    desc: Generate self-signed certs
+    desc: Generate TLS certificates with mkcert
     cmds:
       - mkdir -p certs
-      - |
-        openssl req -x509 -newkey rsa:4096 -nodes \
-        -keyout certs/cert.key \
-        -out certs/cert.crt \
-        -sha256 -days 365 \
-        -subj "/C=KZ/ST=Chicago/L=Chicago/O=Shortugo/OU=Dev/CN=localhost"
-    generates:
-      - certs/cert.crt
-      - certs/cert.key
-    silent: false
+      - mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 127.0.0.1 ::1
+
 
   lint:
     desc: Run linters using golangci-lint
