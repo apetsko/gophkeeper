@@ -1,9 +1,10 @@
 version: "3"
 
 tasks:
-
   run-server:
     desc: run server
+    deps:
+      - gen-certs
     cmds:
       # go install github.com/bokwoon95/wgo@latest раннер wgo
       - wgo run cmd/server/main.go -f config.yaml
@@ -26,6 +27,7 @@ tasks:
           --grpc-gateway_out ./protogen/ \
           --grpc-gateway_opt paths=source_relative \
           $FILES
+    silent: true
 
   clean-gen-proto:
     desc: Delete generate files
@@ -33,11 +35,17 @@ tasks:
       - find protogen -type f ! -name "*proto" -delete
 
   gen-certs:
-    desc: Generate TLS certificates with mkcert
     cmds:
-      - mkdir -p certs
-      - mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 127.0.0.1 ::1
-
+      - |
+        if [ ! -f certs/server.crt ] || ! openssl x509 -checkend 86400 -noout -in certs/server.crt; then
+          mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 127.0.0.1 ::1
+        else
+          echo "Certificate is still valid."
+        fi
+    generates:
+      - certs/server.crt
+      - certs/server.key
+    silent: true
 
   lint:
     desc: Run linters using golangci-lint
