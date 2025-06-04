@@ -1,0 +1,1899 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>config: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/apetsko/gophkeeper/config/config.go (92.0%)</option>
+				
+				<option value="file1">github.com/apetsko/gophkeeper/internal/constants/constants.go (100.0%)</option>
+				
+				<option value="file2">github.com/apetsko/gophkeeper/internal/crypto/envelope.go (77.5%)</option>
+				
+				<option value="file3">github.com/apetsko/gophkeeper/internal/crypto/keys.go (82.9%)</option>
+				
+				<option value="file4">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/data_delete.go (100.0%)</option>
+				
+				<option value="file5">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/data_list.go (100.0%)</option>
+				
+				<option value="file6">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/data_save.go (93.9%)</option>
+				
+				<option value="file7">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/data_view.go (83.0%)</option>
+				
+				<option value="file8">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/login.go (94.1%)</option>
+				
+				<option value="file9">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/ping.go (100.0%)</option>
+				
+				<option value="file10">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/server_admin.go (100.0%)</option>
+				
+				<option value="file11">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/signup.go (84.6%)</option>
+				
+				<option value="file12">github.com/apetsko/gophkeeper/internal/server/grpc/server.go (46.6%)</option>
+				
+				<option value="file13">github.com/apetsko/gophkeeper/internal/server/http/server.go (67.6%)</option>
+				
+				<option value="file14">github.com/apetsko/gophkeeper/internal/storage/postgres.go (80.5%)</option>
+				
+				<option value="file15">github.com/apetsko/gophkeeper/internal/storage/s3.go (74.1%)</option>
+				
+				<option value="file16">github.com/apetsko/gophkeeper/pkg/jwt/jwt.go (100.0%)</option>
+				
+				<option value="file17">github.com/apetsko/gophkeeper/pkg/logging/logger.go (93.9%)</option>
+				
+				<option value="file18">github.com/apetsko/gophkeeper/pkg/password/password.go (100.0%)</option>
+				
+				<option value="file19">github.com/apetsko/gophkeeper/utils/utils.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package config
+
+import (
+        "encoding/hex"
+        "errors"
+        "flag"
+        "fmt"
+        "log/slog"
+        "os"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        "github.com/apetsko/gophkeeper/utils"
+        "github.com/caarlos0/env/v11"
+        "gopkg.in/yaml.v3"
+)
+
+type Config struct {
+        ConfigFile  string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+        DatabaseDSN string `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
+        GRPCAddress string `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
+        HTTPAddress string `env:"HTTP_ADDRESS" yaml:"HTTP_ADDRESS" validate:"required"`
+        StrServerEK string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
+        ServerEK    []byte
+        JWT         JWTConfig `yaml:"JWT"`
+        S3Config    S3Config  `yaml:"S3"`
+        TLSConfig   TLSConfig `yaml:"TLS"`
+}
+type JWTConfig struct {
+        Secret string `env:"JWT_SECRET" yaml:"JWT_SECRET" validate:"required"`
+}
+
+type S3Config struct {
+        AccessKey string `env:"S3_ACCESS_KEY" yaml:"S3_ACCESS_KEY" validate:"required"`
+        SecretKey string `env:"S3_SECRET_KEY" yaml:"S3_SECRET_KEY" validate:"required"`
+        Bucket    string `env:"S3_BUCKET" yaml:"S3_BUCKET" validate:"required"`
+        Endpoint  string `env:"S3_ENDPOINT" yaml:"S3_ENDPOINT" validate:"required"`
+}
+
+type TLSConfig struct {
+        EnableHTTPS bool   `env:"TLS_ENABLE_HTTPS" yaml:"TLS_ENABLE_HTTPS"`
+        CertPath    string `env:"TLS_CERT_PATH" yaml:"TLS_CERT_PATH"`
+        KeyPath     string `env:"TLS_KEY_PATH" yaml:"TLS_KEY_PATH"`
+}
+
+func New() (*Config, error) <span class="cov10" title="6">{
+        var cfg Config
+
+        fs := flag.NewFlagSet("config", flag.ContinueOnError)
+        fs.StringVar(&amp;cfg.ConfigFile, "f", "", "config.yaml or config.yml")
+        _ = fs.Parse(os.Args[1:]) // Не паникуем на ошибке парсинга
+
+        // file or env
+        if cfg.ConfigFile != "" </span><span class="cov4" title="2">{
+                slog.Info("Using config file: " + cfg.ConfigFile)
+                if err := cfg.readConfigFile(); err != nil </span><span class="cov1" title="1">{
+                        return nil, fmt.Errorf("failed to load config from file: %w", err)
+                }</span>
+        } else<span class="cov7" title="4"> {
+                if err := env.Parse(&amp;cfg); err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to load environment: %w", err)
+                }</span>
+        }
+
+        // Validate the loaded configuration
+        <span class="cov9" title="5">if err := utils.ValidateStruct(cfg); err != nil </span><span class="cov1" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov7" title="4">serverKey, errDecode := hex.DecodeString(cfg.StrServerEK)
+        if errDecode != nil </span><span class="cov1" title="1">{
+                return nil, errDecode
+        }</span>
+
+        <span class="cov6" title="3">if len(serverKey) != constants.KeyLength </span><span class="cov1" title="1">{
+                return nil, errors.New("server encryption key must be 32 bytes")
+        }</span>
+
+        <span class="cov4" title="2">cfg.ServerEK = serverKey
+
+        return &amp;cfg, nil</span>
+}
+
+func (cfg *Config) readConfigFile() error <span class="cov4" title="2">{
+        b, err := os.ReadFile(cfg.ConfigFile)
+        if err != nil </span><span class="cov1" title="1">{
+                return err
+        }</span>
+        <span class="cov1" title="1">if err := yaml.Unmarshal(b, &amp;cfg); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package constants
+
+import pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
+
+type mdKey string
+type contextKey string
+
+const (
+        JWT    mdKey      = "jwt"
+        UserID contextKey = "userID"
+)
+
+const (
+        BankCard    string = "bank_card"
+        Credentials string = "credentials"
+        BinaryData  string = "binary_data"
+)
+
+const (
+        KeyLength int    = 32
+        Mem       uint32 = 64 * 1024
+        Threads   uint8  = 4
+)
+
+func MapDataTypeToString(dt pbc.DataType) string <span class="cov10" title="9">{
+        switch dt </span>{
+        case pbc.DataType_DATA_TYPE_BANK_CARD:<span class="cov5" title="3">
+                return BankCard</span>
+        case pbc.DataType_DATA_TYPE_CREDENTIALS:<span class="cov3" title="2">
+                return Credentials</span>
+        case pbc.DataType_DATA_TYPE_BINARY_DATA:<span class="cov5" title="3">
+                return BinaryData</span>
+        default:<span class="cov1" title="1">
+                return "unknown"</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package crypto
+
+import (
+        "context"
+        "crypto/aes"
+        "crypto/cipher"
+        "crypto/rand"
+        "fmt"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        "github.com/apetsko/gophkeeper/models"
+)
+
+//go:generate mockery --dir ./internal/crypto --name=IEnvelopeStorage --output=.../mocks/ --case=underscore
+type IEnvelope interface {
+        EncryptUserData(ctx context.Context, masterKey []byte, data []byte) (*models.EncryptedData, error)
+        DecryptUserData(ctx context.Context, userData models.DBUserData, masterKey []byte) ([]byte, error)
+}
+
+type EnvelopStorage interface {
+        SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error)
+}
+
+type Envelope struct {
+        storage EnvelopStorage
+}
+
+func NewEnvelope(storage EnvelopStorage) *Envelope <span class="cov10" title="3">{
+        return &amp;Envelope{
+                storage: storage,
+        }
+}</span>
+
+func (e *Envelope) EncryptUserData(
+        ctx context.Context,
+        masterKey []byte,
+        data []byte,
+) (*models.EncryptedData, error) <span class="cov10" title="3">{
+        // 1. Генерируем случайный DEK
+        dek := make([]byte, constants.KeyLength)
+        if _, err := rand.Read(dek); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to generate DEK: %w", err)
+        }</span>
+
+        // 2. Шифруем данные DEK
+        <span class="cov10" title="3">block, err := aes.NewCipher(dek)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create cipher for DEK: %w", err)
+        }</span>
+        <span class="cov10" title="3">gcm, err := cipher.NewGCM(block)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create GCM for DEK: %w", err)
+        }</span>
+        <span class="cov10" title="3">dataNonce := make([]byte, gcm.NonceSize())
+        if _, err := rand.Read(dataNonce); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("error generate dataNonce: %w", err)
+        }</span>
+
+        <span class="cov10" title="3">encryptedData := gcm.Seal(nil, dataNonce, data, nil)
+
+        // 3. Шифруем DEK Master Key
+        mkBlock, _ := aes.NewCipher(masterKey)
+        mkGCM, _ := cipher.NewGCM(mkBlock)
+        dekNonce := make([]byte, mkGCM.NonceSize())
+        if _, err := rand.Read(dekNonce); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("error generate dekNonce: %w", err)
+        }</span>
+
+        <span class="cov10" title="3">encryptedDEK := mkGCM.Seal(nil, dekNonce, dek, nil)
+
+        return &amp;models.EncryptedData{
+                EncryptedData: encryptedData,
+                DataNonce:     dataNonce,
+                EncryptedDek:  encryptedDEK,
+                DekNonce:      dekNonce,
+        }, nil</span>
+}
+
+func (e *Envelope) DecryptUserData(
+        ctx context.Context,
+        userData models.DBUserData,
+        masterKey []byte,
+) ([]byte, error) <span class="cov10" title="3">{
+        // 1. Расшифровываем DEK с помощью Master Key
+        mkBlock, err := aes.NewCipher(masterKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create AES cipher for master key: %w", err)
+        }</span>
+
+        <span class="cov10" title="3">mkGCM, err := cipher.NewGCM(mkBlock)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create GCM for master key: %w", err)
+        }</span>
+
+        <span class="cov10" title="3">dek, err := mkGCM.Open(nil, userData.DekNonce, userData.EncryptedDek, nil)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to decrypt DEK: %w", err)
+        }</span>
+
+        // 2. Расшифровываем данные с помощью DEK
+        <span class="cov6" title="2">block, err := aes.NewCipher(dek)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create AES cipher for DEK: %w", err)
+        }</span>
+
+        <span class="cov6" title="2">gcm, err := cipher.NewGCM(block)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create GCM for DEK: %w", err)
+        }</span>
+
+        <span class="cov6" title="2">decryptData, err := gcm.Open(nil, userData.DataNonce, userData.EncryptedData, nil)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to decrypt data: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return decryptData, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package crypto
+
+import (
+        "context"
+        "crypto/aes"
+        "crypto/cipher"
+        "crypto/rand"
+        "crypto/subtle"
+        "errors"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        "github.com/apetsko/gophkeeper/models"
+        "golang.org/x/crypto/argon2"
+)
+
+// Интерфейс для удобства мокирования и внедрения зависимостей
+//
+//go:generate mockery --dir ./internal/crypto --name=KeyManagerInterface --output=../mocks/ --case=underscore
+type KeyManagerInterface interface {
+        GetMasterKey(ctx context.Context, userID int) ([]byte, error)
+        GetOrCreateMasterKey(ctx context.Context, userID int, userPassword string, userSalt []byte) ([]byte, error)
+}
+
+// Убедимся, что KeyManager реализует интерфейс
+var _ KeyManagerInterface = (*KeyManager)(nil)
+
+type KeyStorage interface {
+        GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error)
+        SaveMasterKey(ctx context.Context, userID int, encryptedMK, nonce []byte) (int, error)
+}
+
+type KeyManager struct {
+        storage             KeyStorage
+        serverEncryptionKey []byte
+}
+
+func NewKeyManager(
+        storage KeyStorage,
+        serverEncryptionKey []byte,
+) *KeyManager <span class="cov10" title="5">{
+        return &amp;KeyManager{
+                storage:             storage,
+                serverEncryptionKey: serverEncryptionKey,
+        }
+}</span>
+
+func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, error) <span class="cov4" title="2">{
+        encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov1" title="1">block, _ := aes.NewCipher(m.serverEncryptionKey)
+        gcm, _ := cipher.NewGCM(block)
+
+        mk, err := gcm.Open(nil, encryptedMK.Nonce, encryptedMK.EncryptedMK, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov1" title="1">return mk, nil</span>
+}
+
+func (m *KeyManager) GetOrCreateMasterKey(
+        ctx context.Context,
+        userID int,
+        userPassword string,
+        userSalt []byte,
+) ([]byte, error) <span class="cov7" title="3">{
+        encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
+        if err != nil </span><span class="cov4" title="2">{
+                if errors.Is(err, models.ErrMasterKeyNotFound) </span><span class="cov4" title="2">{
+                        return m.generateAndStoreMasterKey(ctx, userID, userPassword, userSalt)
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        <span class="cov1" title="1">block, _ := aes.NewCipher(m.serverEncryptionKey)
+        gcm, _ := cipher.NewGCM(block)
+
+        mk, err := gcm.Open(nil, encryptedMK.Nonce, encryptedMK.EncryptedMK, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov1" title="1">computedMK := argon2.IDKey([]byte(userPassword), userSalt, 3, constants.Mem, constants.Threads, uint32(constants.KeyLength))
+        if subtle.ConstantTimeCompare(mk, computedMK) != 1 </span><span class="cov1" title="1">{
+                return nil, errors.New("invalid password")
+        }</span>
+
+        <span class="cov0" title="0">return mk, nil</span>
+}
+
+func (m *KeyManager) generateAndStoreMasterKey(
+        ctx context.Context,
+        userID int,
+        userPassword string,
+        userSalt []byte,
+) ([]byte, error) <span class="cov4" title="2">{
+        mk := argon2.IDKey([]byte(userPassword), userSalt, 3, constants.Mem, constants.Threads, uint32(constants.KeyLength))
+
+        block, errBlock := aes.NewCipher(m.serverEncryptionKey)
+        if errBlock != nil </span><span class="cov0" title="0">{
+                return nil, errBlock
+        }</span>
+
+        <span class="cov4" title="2">gcm, _ := cipher.NewGCM(block)
+        nonce := make([]byte, gcm.NonceSize())
+        if _, err := rand.Read(nonce); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("error generate nonce")
+        }</span>
+
+        <span class="cov4" title="2">encryptedMK := gcm.Seal(nil, nonce, mk, nil)
+
+        _, err := m.storage.SaveMasterKey(ctx, userID, encryptedMK, nonce)
+
+        return mk, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package handlers
+
+import (
+        "context"
+
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+)
+
+func (s *ServerAdmin) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) <span class="cov10" title="5">{
+        userID, ok := ctx.Value(constants.UserID).(int)
+        if !ok </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
+        }</span>
+
+        <span class="cov8" title="4">userData, err := s.Storage.GetUserData(ctx, int(in.GetId()))
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.Internal, "ошибка получения данных")
+        }</span>
+
+        <span class="cov7" title="3">if userData.UserID != userID </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.PermissionDenied, "нельзя удалить запись, она не ваша")
+        }</span>
+
+        <span class="cov4" title="2">errDelete := s.Storage.DeleteUserData(ctx, int(in.GetId()))
+        if errDelete != nil </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.Internal, "ошибка удаления данных")
+        }</span>
+
+        <span class="cov1" title="1">return &amp;pbrpc.DataDeleteResponse{
+                Message: "ok",
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package handlers
+
+import (
+        "context"
+        "log/slog"
+
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+        "google.golang.org/protobuf/encoding/protojson"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        pbmodels "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+)
+
+func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) <span class="cov10" title="5">{
+        userID, ok := ctx.Value(constants.UserID).(int)
+        if !ok </span><span class="cov4" title="2">{
+                return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
+        }</span>
+
+        <span class="cov7" title="3">userDataList, err := s.Storage.GetUserDataList(ctx, userID)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.Internal, "ошибка получения данных: %v", err)
+        }</span>
+
+        <span class="cov4" title="2">var records []*pbmodels.Record
+        for _, data := range userDataList </span><span class="cov8" title="4">{
+                // Преобразуем строку Meta (в формате JSON) в pbmodels.Meta
+                var meta pbmodels.Meta
+                if errUnmarshal := protojson.Unmarshal([]byte(data.Meta), &amp;meta); errUnmarshal != nil </span><span class="cov1" title="1">{
+                        slog.Error("failed to unmarshal meta: " + errUnmarshal.Error())
+                        continue</span>
+                }
+
+                <span class="cov7" title="3">record := &amp;pbmodels.Record{
+                        Id:        int32(data.ID),
+                        Type:      data.Type,
+                        Meta:      &amp;meta,
+                        CreatedAt: data.CreatedAt.Format("02.01.2006 15:04"),
+                }
+                records = append(records, record)</span>
+        }
+
+        <span class="cov4" title="2">return &amp;pbrpc.DataListResponse{
+                Records: records,
+                Count:   int32(len(records)), // Или общее количество в базе, если есть пагинация
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package handlers
+
+import (
+        "context"
+        "fmt"
+        "log/slog"
+        "time"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        "github.com/apetsko/gophkeeper/models"
+        pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
+        pbmodels "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+        "google.golang.org/protobuf/encoding/protojson"
+        "google.golang.org/protobuf/proto"
+)
+
+func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) <span class="cov10" title="14">{
+        userID, ok := ctx.Value(constants.UserID).(int)
+        if !ok </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
+        }</span>
+
+        // Валидация типа данных
+        <span class="cov9" title="13">if in.Type == pbc.DataType_DATA_TYPE_UNSPECIFIED </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.InvalidArgument, "тип данных не указан")
+        }</span>
+
+        // TODO: переделать на потокобезопасную in memory мапу
+        <span class="cov9" title="12">encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("error get encryptedMK: %v", err)
+        }</span>
+
+        // Обработка данных в зависимости от типа
+        <span class="cov9" title="11">switch in.Type </span>{
+        case pbc.DataType_DATA_TYPE_BANK_CARD:<span class="cov5" title="4">
+                bankCard := in.GetBankCard()
+                if bankCard == nil </span><span class="cov1" title="1">{
+                        return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные банковской карты")
+                }</span>
+
+                <span class="cov4" title="3">err := s.saveUserData(ctx, userID, in.Type, encryptedMK, bankCard, in.Meta)
+                if err != nil </span><span class="cov3" title="2">{
+                        return nil, err
+                }</span>
+
+        case pbc.DataType_DATA_TYPE_CREDENTIALS:<span class="cov3" title="2">
+                creds := in.GetCredentials()
+                if creds == nil </span><span class="cov1" title="1">{
+                        return nil, status.Errorf(codes.InvalidArgument, "отсутствуют учетные данные")
+                }</span>
+                <span class="cov1" title="1">err := s.saveUserData(ctx, userID, in.Type, encryptedMK, creds, in.Meta)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+        case pbc.DataType_DATA_TYPE_BINARY_DATA:<span class="cov6" title="5">
+                file := in.GetBinaryData()
+                if file == nil </span><span class="cov1" title="1">{
+                        return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные файла")
+                }</span>
+
+                // Шифруем содержимое файла
+                <span class="cov5" title="4">encryptedData, err := s.Envelope.EncryptUserData(ctx, encryptedMK, file.Data)
+                if err != nil </span><span class="cov1" title="1">{
+                        slog.Error("failed to encrypt binary data", "error", err)
+                        return nil, fmt.Errorf("failed to encrypt binary data: %v", err)
+                }</span>
+
+                // Генерируем уникальное имя файла
+                <span class="cov4" title="3">objectName := fmt.Sprintf("%d-%s", time.Now().UnixNano(), file.Name)
+
+                // Загружаем в S3
+                s3UploadData := &amp;models.S3UploadData{
+                        ObjectName:  objectName,
+                        MetaContent: in.Meta.Content,
+                        FileName:    file.Name,
+                        FileType:    file.Type,
+                }
+                _, err = s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
+                if err != nil </span><span class="cov1" title="1">{
+                        return nil, fmt.Errorf("failed to upload file to MinIO: %v", err)
+                }</span>
+
+                // Сохраняем метаданные в БД
+                <span class="cov3" title="2">saveUserData := &amp;models.DBUserData{
+                        UserID:        userID,
+                        Type:          constants.MapDataTypeToString(in.Type),
+                        MinioObjectID: objectName,
+                        DataNonce:     encryptedData.DataNonce,
+                        EncryptedDek:  encryptedData.EncryptedDek,
+                        DekNonce:      encryptedData.DekNonce,
+                        Meta:          protojson.Format(in.Meta),
+                }
+                _, err = s.Storage.SaveUserData(ctx, saveUserData)
+                if err != nil </span><span class="cov1" title="1">{
+                        return nil, err
+                }</span>
+
+        default:<span class="cov0" title="0">
+                return nil, status.Errorf(codes.Unimplemented, "неподдерживаемый тип данных: %v", in.Type)</span>
+        }
+
+        <span class="cov4" title="3">return &amp;pbrpc.DataSaveResponse{
+                Message: fmt.Sprintf("данные типа %s успешно сохранены", in.Type.String()),
+        }, nil</span>
+}
+
+func (s *ServerAdmin) saveUserData(
+        ctx context.Context,
+        userID int,
+        dataType pbc.DataType,
+        encryptedMK []byte,
+        data proto.Message,
+        meta *pbmodels.Meta,
+) error <span class="cov5" title="4">{
+        // Маршал protobuf
+        serialized, err := proto.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("serialize error: %v", err)
+        }</span>
+
+        // Шифруем данные
+        <span class="cov5" title="4">encryptedData, err := s.Envelope.EncryptUserData(ctx, encryptedMK, serialized)
+        if err != nil </span><span class="cov1" title="1">{
+                slog.Error("failed to crypt data: " + err.Error())
+                return fmt.Errorf("encrypt error: %v", err)
+        }</span>
+
+        // Сохраняем в БД
+        <span class="cov4" title="3">saveUserData := &amp;models.DBUserData{
+                UserID:        userID,
+                Type:          constants.MapDataTypeToString(dataType),
+                EncryptedData: encryptedData.EncryptedData,
+                DataNonce:     encryptedData.DataNonce,
+                EncryptedDek:  encryptedData.EncryptedDek,
+                DekNonce:      encryptedData.DekNonce,
+                Meta:          protojson.Format(meta),
+        }
+        _, err = s.Storage.SaveUserData(ctx, saveUserData)
+        return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package handlers
+
+import (
+        "context"
+        "fmt"
+
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+        "google.golang.org/protobuf/encoding/protojson"
+        "google.golang.org/protobuf/proto"
+
+        "github.com/apetsko/gophkeeper/internal/constants"
+        pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
+        "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+)
+
+var stringToDataType = map[string]pbc.DataType{
+        "bank_card":   pbc.DataType_DATA_TYPE_BANK_CARD,
+        "credentials": pbc.DataType_DATA_TYPE_CREDENTIALS,
+        "binary_data": pbc.DataType_DATA_TYPE_BINARY_DATA,
+}
+
+func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) <span class="cov10" title="8">{
+        userID, ok := ctx.Value(constants.UserID).(int)
+        if !ok </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.InvalidArgument, "не удалось получить UserID")
+        }</span>
+
+        <span class="cov10" title="8">userData, err := s.Storage.GetUserData(ctx, int(in.GetId()))
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.Internal, "ошибка получения данных")
+        }</span>
+
+        // Проверка прав доступа
+        <span class="cov9" title="7">if userData.UserID != userID </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.PermissionDenied, "нет доступа к запрошенным данным")
+        }</span>
+
+        <span class="cov8" title="6">encryptedMK, err := s.KeyManager.GetMasterKey(ctx, userID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("error get encryptedMK: %v", err)
+        }</span>
+
+        <span class="cov8" title="6">var decryptData []byte
+        var dataType pbc.DataType
+        var file models.File
+
+        switch userData.Type </span>{
+        case constants.BinaryData:<span class="cov1" title="1">
+                // Обработка бинарных данных (скачивание из MinIO)
+                fileData, fileInfo, errGetObject := s.StorageS3.GetObject(
+                        ctx,
+                        userData.MinioObjectID,
+                )
+                if errGetObject != nil </span><span class="cov0" title="0">{
+                        return nil, status.Errorf(codes.Internal, "ошибка получения файла из хранилища: %v", errGetObject)
+                }</span>
+
+                <span class="cov1" title="1">userData.EncryptedData = fileData
+
+                decryptData, err = s.Envelope.DecryptUserData(ctx, *userData, encryptedMK)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, status.Errorf(codes.Internal, "ошибка расшифровки файла: %v", err)
+                }</span>
+
+                <span class="cov1" title="1">originalName := fileInfo.UserMetadata["original-name"]
+                if originalName == "" </span><span class="cov0" title="0">{
+                        originalName = userData.MinioObjectID
+                }</span>
+
+                <span class="cov1" title="1">file = models.File{
+                        Name: originalName,
+                        Data: decryptData,
+                        Size: int32(len(decryptData)),
+                        Type: fileInfo.ContentType,
+                }
+
+                dataType = pbc.DataType_DATA_TYPE_BINARY_DATA</span>
+        default:<span class="cov7" title="5">
+                decryptData, err = s.Envelope.DecryptUserData(ctx, *userData, encryptedMK)
+                if err != nil </span><span class="cov1" title="1">{
+                        return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
+                }</span>
+
+                <span class="cov7" title="4">var ok bool
+                dataType, ok = stringToDataType[userData.Type]
+                if !ok </span><span class="cov1" title="1">{
+                        return nil, status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных: %s", userData.Type)
+                }</span>
+        }
+
+        <span class="cov7" title="4">var meta models.Meta
+        if errUnmarshal := protojson.Unmarshal([]byte(userData.Meta), &amp;meta); errUnmarshal != nil </span><span class="cov1" title="1">{
+                return nil, status.Errorf(codes.Internal, "ошибка парсинга Meta JSON: %v", errUnmarshal)
+        }</span>
+
+        // 4. Создаем базовый ответ
+        <span class="cov5" title="3">response := &amp;pbrpc.DataViewResponse{
+                Type: dataType,
+                Meta: &amp;meta,
+        }
+
+        // 5. Парсим данные в зависимости от типа
+        if err := parseData(response, dataType, decryptData, &amp;file); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov5" title="3">return response, nil</span>
+}
+
+func parseData(r *pbrpc.DataViewResponse, dataType pbc.DataType, decryptData []byte, file *models.File) error <span class="cov5" title="3">{
+        switch dataType </span>{
+        case pbc.DataType_DATA_TYPE_BANK_CARD:<span class="cov1" title="1">
+                var card models.BankCard
+                if errUnmarshal := proto.Unmarshal(decryptData, &amp;card); errUnmarshal != nil </span><span class="cov0" title="0">{
+                        return status.Errorf(codes.Internal, "ошибка парсинга карты")
+                }</span>
+                <span class="cov1" title="1">r.Data = &amp;pbrpc.DataViewResponse_BankCard{BankCard: &amp;card}</span>
+
+        case pbc.DataType_DATA_TYPE_CREDENTIALS:<span class="cov1" title="1">
+                var credentials models.Credentials
+                if errUnmarshal := proto.Unmarshal(decryptData, &amp;credentials); errUnmarshal != nil </span><span class="cov0" title="0">{
+                        return status.Errorf(codes.Internal, "ошибка парсинга учетных данных")
+                }</span>
+                <span class="cov1" title="1">r.Data = &amp;pbrpc.DataViewResponse_Credentials{Credentials: &amp;credentials}</span>
+
+        case pbc.DataType_DATA_TYPE_BINARY_DATA:<span class="cov1" title="1">
+                r.Data = &amp;pbrpc.DataViewResponse_BinaryData{BinaryData: file}</span>
+
+        default:<span class="cov0" title="0">
+                return status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных")</span>
+        }
+        <span class="cov5" title="3">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package handlers
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "log/slog"
+
+        "github.com/apetsko/gophkeeper/models"
+        "github.com/apetsko/gophkeeper/pkg/jwt"
+        "github.com/apetsko/gophkeeper/pkg/password"
+        pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
+)
+
+func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) <span class="cov10" title="7">{
+        if len(in.Username) &lt; 3 || len(in.Password) &lt; 8 </span><span class="cov4" title="2">{
+                return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")
+        }</span>
+
+        <span class="cov8" title="5">user, err := s.Storage.GetUser(ctx, in.Username)
+        if err != nil </span><span class="cov4" title="2">{
+                if errors.Is(err, models.ErrUserNotFound) </span><span class="cov1" title="1">{
+                        return nil, fmt.Errorf("invalid credentials")
+                }</span>
+                <span class="cov1" title="1">return nil, fmt.Errorf("failed to get user: %w", err)</span>
+        }
+
+        <span class="cov6" title="3">if !password.CheckPasswordHash(in.Password, user.PasswordHash) </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("invalid credentials")
+        }</span>
+
+        <span class="cov4" title="2">token, err := jwt.GenerateJWT(user.ID, user.Username, s.JWTConfig.Secret)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to generate token: %w", err)
+        }</span>
+
+        // TODO: нужно записать в потокобезопасную мапу в памяти
+        <span class="cov4" title="2">_, errMasterKey := s.KeyManager.GetOrCreateMasterKey(
+                ctx,
+                user.ID,
+                in.Password,
+                nil,
+        )
+
+        if errMasterKey != nil </span><span class="cov1" title="1">{
+                slog.Error("failed to generate encrypted master key: " + errMasterKey.Error())
+
+                return nil, errors.New("failed to generate encrypted master key")
+        }</span>
+
+        <span class="cov1" title="1">return &amp;pbrpcu.LoginResponse{
+                Id:       int32(user.ID),
+                Username: user.Username,
+                Token:    token,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">// Package handlers provides gRPC handlers for administrative operations,
+// such as health checks, URL management, and statistics reporting.
+package handlers
+
+import (
+        "context"
+
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+)
+
+// Ping handles a health check request for the gRPC service.
+//
+// This method is used to verify that the server is alive and responding to requests.
+// It does not perform any logic and always returns an empty successful response.
+//
+// Parameters:
+// - ctx: The gRPC context (not used).
+// - in: The PingRequest message (not used).
+//
+// Returns:
+// - *pbrpc.PingResponse: An empty response indicating success.
+// - error: Always nil.
+func (s *ServerAdmin) Ping(_ context.Context, _ *pbrpc.PingRequest) (*pbrpc.PingResponse, error) <span class="cov10" title="2">{
+        return &amp;pbrpc.PingResponse{
+                Message: "pong",
+        }, nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package handlers
+
+import (
+        "github.com/apetsko/gophkeeper/config"
+        "github.com/apetsko/gophkeeper/internal/crypto"
+        "github.com/apetsko/gophkeeper/internal/storage"
+)
+
+type ServerAdmin struct {
+        Storage    storage.IStorage
+        StorageS3  storage.S3Client
+        JWTConfig  config.JWTConfig
+        Envelope   crypto.IEnvelope
+        KeyManager crypto.KeyManagerInterface
+}
+
+func NewServerAdmin(
+        storage storage.IStorage,
+        storageS3 storage.S3Client,
+        jwtConfig config.JWTConfig,
+        envelope crypto.IEnvelope,
+        keyManager crypto.KeyManagerInterface,
+) *ServerAdmin <span class="cov10" title="3">{
+        return &amp;ServerAdmin{
+                Storage:    storage,
+                StorageS3:  storageS3,
+                JWTConfig:  jwtConfig,
+                Envelope:   envelope,
+                KeyManager: keyManager,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package handlers
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/apetsko/gophkeeper/models"
+        "github.com/apetsko/gophkeeper/pkg/jwt"
+        "github.com/apetsko/gophkeeper/pkg/password"
+        pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
+)
+
+func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) <span class="cov10" title="4">{
+        if len(in.Username) &lt; 3 || len(in.Password) &lt; 8 </span><span class="cov5" title="2">{
+                return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")
+        }</span>
+
+        <span class="cov5" title="2">hash, err := password.HashPassword(in.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to hash password: %w", err)
+        }</span>
+
+        <span class="cov5" title="2">user := models.UserEntry{
+                Username:     in.Username,
+                PasswordHash: hash,
+        }
+
+        userID, err := s.Storage.AddUser(ctx, &amp;user)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to create user: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">token, err := jwt.GenerateJWT(userID, in.Username, s.JWTConfig.Secret)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to generate token: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return &amp;pbrpcu.SignupResponse{
+                Id:       int32(user.ID),
+                Username: user.Username,
+                Token:    token,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package grpc
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "log/slog"
+        "net"
+
+        "github.com/golang-jwt/jwt/v5"
+        grpcLogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+        "golang.org/x/sync/errgroup"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/credentials"
+        "google.golang.org/grpc/metadata"
+        "google.golang.org/grpc/reflection"
+        "google.golang.org/grpc/status"
+
+        "github.com/apetsko/gophkeeper/config"
+        "github.com/apetsko/gophkeeper/internal/constants"
+        "github.com/apetsko/gophkeeper/internal/server/grpc/handlers"
+        "github.com/apetsko/gophkeeper/pkg/logging"
+        pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
+        pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
+        pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
+)
+
+type GRPCHandler struct {
+        pb.UnimplementedGophKeeperServer
+        *handlers.ServerAdmin
+}
+
+func NewGRPCHandler(admin *handlers.ServerAdmin) pb.GophKeeperServer <span class="cov10" title="3">{
+        return &amp;GRPCHandler{
+                ServerAdmin: admin,
+        }
+}</span>
+
+func (s *GRPCHandler) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.PingResponse, error) <span class="cov6" title="2">{
+        return s.ServerAdmin.Ping(ctx, in)
+}</span>
+
+func (s *GRPCHandler) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) <span class="cov0" title="0">{
+        return s.ServerAdmin.Login(ctx, in)
+}</span>
+
+func (s *GRPCHandler) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) <span class="cov0" title="0">{
+        return s.ServerAdmin.Signup(ctx, in)
+}</span>
+
+func (s *GRPCHandler) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) <span class="cov1" title="1">{
+        return s.ServerAdmin.DataList(ctx, in)
+}</span>
+
+func (s *GRPCHandler) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) <span class="cov0" title="0">{
+        return s.ServerAdmin.DataSave(ctx, in)
+}</span>
+
+func (s *GRPCHandler) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) <span class="cov0" title="0">{
+        return s.ServerAdmin.DataDelete(ctx, in)
+}</span>
+
+func (s *GRPCHandler) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) <span class="cov0" title="0">{
+        return s.ServerAdmin.DataView(ctx, in)
+}</span>
+
+// RunGRPC запускает gRPC сервер
+func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) (*grpc.Server, error) <span class="cov1" title="1">{
+        lis, err := net.Listen("tcp", cfg.GRPCAddress)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to listen on %s: %v", cfg.GRPCAddress, err)
+        }</span>
+
+        <span class="cov1" title="1">var opts []grpc.ServerOption
+
+        if cfg.TLSConfig.EnableHTTPS </span><span class="cov0" title="0">{
+                creds, err := credentials.NewServerTLSFromFile(cfg.TLSConfig.CertPath, cfg.TLSConfig.KeyPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("failed to load TLS credentials: %v", err)
+                }</span>
+                <span class="cov0" title="0">opts = append(opts, grpc.Creds(creds))</span>
+        }
+
+        <span class="cov1" title="1">opts = append(opts, grpc.ChainUnaryInterceptor(
+                authUnaryInterceptor(
+                        map[string]bool{
+                                "/api.proto.v1.GophKeeper/DataList":   true,
+                                "/api.proto.v1.GophKeeper/DataView":   true,
+                                "/api.proto.v1.GophKeeper/DataSave":   true,
+                                "/api.proto.v1.GophKeeper/DataDelete": true,
+                        },
+                        []byte(cfg.JWT.Secret),
+                ),
+                grpcLogging.UnaryServerInterceptor(logging.InterceptorLogger(log)),
+        ))
+
+        srv := grpc.NewServer(opts...)
+
+        h := NewGRPCHandler(sa)
+
+        pb.RegisterGophKeeperServer(srv, h)
+        reflection.Register(srv)
+
+        g, ctx := errgroup.WithContext(context.Background())
+
+        g.Go(func() error </span><span class="cov1" title="1">{
+                &lt;-ctx.Done()
+                srv.GracefulStop()
+                return nil
+        }</span>)
+
+        <span class="cov1" title="1">g.Go(func() error </span><span class="cov1" title="1">{
+                log.Info(fmt.Sprintf("Starting gRPC server at %s, TLS: %t", cfg.GRPCAddress, cfg.TLSConfig.EnableHTTPS))
+                return srv.Serve(lis)
+        }</span>)
+
+        <span class="cov1" title="1">go func() </span><span class="cov1" title="1">{
+                if err := g.Wait(); err != nil </span><span class="cov0" title="0">{
+                        log.Error("gRPC server error: " + err.Error())
+                }</span>
+        }()
+
+        <span class="cov1" title="1">return srv, nil</span>
+}
+
+func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor <span class="cov1" title="1">{
+        slog.Info("Auth interceptor enabled")
+
+        return func(
+                ctx context.Context,
+                req interface{},
+                info *grpc.UnaryServerInfo,
+                handler grpc.UnaryHandler,
+        ) (interface{}, error) </span><span class="cov1" title="1">{
+                if !protected[info.FullMethod] </span><span class="cov1" title="1">{
+                        return handler(ctx, req)
+                }</span>
+
+                <span class="cov0" title="0">md, ok := metadata.FromIncomingContext(ctx)
+                if !ok </span><span class="cov0" title="0">{
+                        return nil, status.Error(codes.Unauthenticated, "missing metadata")
+                }</span>
+
+                <span class="cov0" title="0">jwtHeader := md.Get(string(constants.JWT))
+                if len(jwtHeader) == 0 || jwtHeader[0] == "" </span><span class="cov0" title="0">{
+                        return nil, status.Error(codes.Unauthenticated, "missing jwt")
+                }</span>
+
+                <span class="cov0" title="0">tokenStr := jwtHeader[0]
+
+                token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) </span><span class="cov0" title="0">{
+                        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok </span><span class="cov0" title="0">{
+                                return nil, errors.New("unexpected signing method")
+                        }</span>
+                        <span class="cov0" title="0">return jwtSecret, nil</span>
+                })
+
+                <span class="cov0" title="0">if err != nil || !token.Valid </span><span class="cov0" title="0">{
+                        return nil, status.Error(codes.Unauthenticated, "invalid jwt")
+                }</span>
+
+                <span class="cov0" title="0">if claims, ok := token.Claims.(jwt.MapClaims); ok </span><span class="cov0" title="0">{
+                        if uidFloat, ok := claims["user_id"].(float64); ok </span><span class="cov0" title="0">{
+                                userID := int(uidFloat)
+                                ctx = context.WithValue(ctx, constants.UserID, userID)
+                        }</span> else<span class="cov0" title="0"> {
+                                return nil, status.Error(codes.InvalidArgument, "user_id not found or not a number")
+                        }</span>
+                }
+
+                <span class="cov0" title="0">ctx = context.WithValue(ctx, constants.JWT, tokenStr)
+                return handler(ctx, req)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package http
+
+import (
+        "context"
+        "crypto/x509"
+        "errors"
+        "fmt"
+        "net/http"
+        "os"
+        "time"
+
+        "github.com/apetsko/gophkeeper/config"
+        "github.com/apetsko/gophkeeper/pkg/logging"
+        pb "github.com/apetsko/gophkeeper/protogen/api/proto/v1"
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+        "github.com/rs/cors"
+        "golang.org/x/sync/errgroup"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/credentials"
+        "google.golang.org/grpc/credentials/insecure"
+        "google.golang.org/grpc/metadata"
+)
+
+// RunHTTP запускает HTTP сервер с gRPC-Gateway и CORS
+func RunHTTP(ctx context.Context, cfg *config.Config, log *logging.Logger) (*http.Server, error) <span class="cov8" title="1">{
+        mux := runtime.NewServeMux(
+                runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD </span><span class="cov8" title="1">{
+                        md := metadata.New(nil)
+                        if auth := req.Header.Get("jwt"); auth != "" </span><span class="cov0" title="0">{
+                                md.Set("jwt", auth)
+                        }</span>
+                        <span class="cov8" title="1">return md</span>
+                }),
+        )
+
+        <span class="cov8" title="1">c := cors.New(cors.Options{
+                AllowedOrigins:   []string{"*"},
+                AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+                AllowedHeaders:   []string{"*"},
+                AllowCredentials: true,
+        })
+        handler := c.Handler(mux)
+
+        var opts []grpc.DialOption
+
+        if cfg.TLSConfig.EnableHTTPS </span><span class="cov0" title="0">{
+                // Загрузить сертификат CA (корневой сертификат), которым подписан сервер gRPC,
+                // чтобы grpc-gateway доверял этому соединению
+                certPool := x509.NewCertPool()
+                caCert, err := os.ReadFile(cfg.TLSConfig.CertPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("failed to read CA cert: %v", err)
+                }</span>
+                <span class="cov0" title="0">if !certPool.AppendCertsFromPEM(caCert) </span><span class="cov0" title="0">{
+                        log.Fatalf("failed to append CA cert")
+                }</span>
+                <span class="cov0" title="0">creds := credentials.NewClientTLSFromCert(certPool, "")
+                opts = append(opts, grpc.WithTransportCredentials(creds))</span>
+        } else<span class="cov8" title="1"> {
+                opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+        }</span>
+
+        <span class="cov8" title="1">if err := pb.RegisterGophKeeperHandlerFromEndpoint(ctx, mux, cfg.GRPCAddress, opts); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to register gRPC-Gateway: %v", err)
+        }</span>
+
+        <span class="cov8" title="1">srv := &amp;http.Server{
+                Addr:              cfg.HTTPAddress,
+                Handler:           handler,
+                ReadHeaderTimeout: 3 * time.Second,
+        }
+
+        g, ctx := errgroup.WithContext(context.Background())
+
+        g.Go(func() error </span><span class="cov8" title="1">{
+                &lt;-ctx.Done()
+                five := 5 * time.Second
+                shutdownCtx, cancel := context.WithTimeout(context.Background(), five)
+                defer cancel()
+                return srv.Shutdown(shutdownCtx)
+        }</span>)
+
+        <span class="cov8" title="1">g.Go(func() error </span><span class="cov8" title="1">{
+                log.Info(fmt.Sprintf("Starting HTTP server at %s, TLS: %t", srv.Addr, cfg.TLSConfig.EnableHTTPS))
+                if cfg.TLSConfig.EnableHTTPS </span><span class="cov0" title="0">{
+                        return srv.ListenAndServeTLS(cfg.TLSConfig.CertPath, cfg.TLSConfig.KeyPath)
+                }</span>
+                <span class="cov8" title="1">return srv.ListenAndServe()</span>
+        })
+
+        <span class="cov8" title="1">go func() </span><span class="cov8" title="1">{
+                if err := g.Wait(); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
+                        log.Error("HTTP server error: " + err.Error())
+                }</span>
+        }()
+
+        <span class="cov8" title="1">return srv, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package storage
+
+import (
+        "context"
+        "database/sql"
+        "embed"
+        "errors"
+        "fmt"
+
+        "github.com/jackc/pgx/v5"
+        "github.com/jackc/pgx/v5/pgconn"
+        "github.com/pressly/goose/v3"
+
+        "github.com/jackc/pgx/v5/pgxpool"
+        _ "github.com/jackc/pgx/v5/stdlib"
+
+        "github.com/apetsko/gophkeeper/models"
+)
+
+type PgxPoolIface interface {
+        QueryRow(context.Context, string, ...interface{}) pgx.Row
+        Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+        Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+        Begin(context.Context) (pgx.Tx, error)
+        Close()
+        Ping(context.Context) error
+}
+
+//go:embed migrations/*.sql
+var migrations embed.FS
+
+type Storage struct {
+        DB PgxPoolIface
+}
+
+func migrate(conn string) error <span class="cov10" title="20">{
+        goose.SetBaseFS(migrations)
+        db, err := sql.Open("pgx", conn)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("goose: failed to open DB: %w", err)
+        }</span>
+        <span class="cov10" title="20">defer db.Close()
+
+        err = goose.Up(db, "migrations")
+        if err != nil </span><span class="cov4" title="3">{
+                return fmt.Errorf("failed to apply migrations: %w", err)
+        }</span>
+
+        <span class="cov9" title="17">return nil</span>
+}
+
+func NewPostgresClient(conn string) (IStorage, error) <span class="cov10" title="20">{
+        if err := migrate(conn); err != nil </span><span class="cov4" title="3">{
+                return nil, err
+        }</span>
+
+        <span class="cov9" title="17">ctx := context.Background()
+        pool, err := pgxpool.New(ctx, conn)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("unable to connect to database: %w", err)
+        }</span>
+
+        <span class="cov9" title="17">return &amp;Storage{DB: pool}, nil</span>
+}
+
+func (p *Storage) Close() error <span class="cov9" title="17">{
+        p.DB.Close()
+        return nil
+}</span>
+
+func (p *Storage) AddUser(ctx context.Context, u *models.UserEntry) (int, error) <span class="cov5" title="5">{
+        const insertUser = `
+        INSERT INTO users (username, password_hash, created_at, updated_at)
+        VALUES ($1, $2, NOW(), NOW())
+        ON CONFLICT (username) DO NOTHING
+        RETURNING id;
+    `
+
+        var id int
+        err := p.DB.QueryRow(ctx, insertUser, u.Username, u.PasswordHash).Scan(&amp;id)
+
+        switch </span>{
+        case err == nil:<span class="cov4" title="3">
+                return id, nil</span> // Успешное создание
+        case errors.Is(err, pgx.ErrNoRows):<span class="cov1" title="1">
+                return 0, models.ErrUserExists</span> // Конфликт по username
+        default:<span class="cov1" title="1">
+                return 0, fmt.Errorf("failed to insertUser user: %w", err)</span>
+        }
+}
+
+func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEntry, error) <span class="cov4" title="3">{
+        const getUser = `
+                SELECT id, username, password_hash FROM users
+                WHERE username = $1;
+        `
+
+        var u models.UserEntry
+
+        err := p.DB.QueryRow(ctx, getUser, username).Scan(&amp;u.ID, &amp;u.Username, &amp;u.PasswordHash)
+        if err != nil </span><span class="cov3" title="2">{
+                if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
+                        return nil, models.ErrUserNotFound
+                }</span>
+                <span class="cov1" title="1">return nil, err</span>
+        }
+        <span class="cov1" title="1">return &amp;u, nil</span>
+}
+
+func (p *Storage) SaveMasterKey(
+        ctx context.Context,
+        userID int,
+        encryptedMK []byte,
+        nonce []byte,
+) (int, error) <span class="cov3" title="2">{
+        const insertSQL = `
+        INSERT INTO user_keys (user_id, encrypted_master_key, nonce) 
+        VALUES ($1, $2, $3)
+        RETURNING id;
+    `
+
+        var id int
+
+        err := p.DB.QueryRow(ctx, insertSQL, userID, encryptedMK, nonce).Scan(&amp;id)
+        if err != nil </span><span class="cov1" title="1">{
+                return 0, fmt.Errorf("failed to save master key: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return id, err</span>
+}
+
+func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error) <span class="cov4" title="3">{
+        const selectSQL = `
+        SELECT encrypted_master_key, nonce FROM user_keys 
+        WHERE user_id = $1;
+    `
+
+        var encryptedMK models.EncryptedMK
+        err := p.DB.QueryRow(ctx, selectSQL, userID).Scan(&amp;encryptedMK.EncryptedMK, &amp;encryptedMK.Nonce)
+        if err != nil </span><span class="cov3" title="2">{
+                if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
+                        return nil, models.ErrMasterKeyNotFound
+                }</span>
+                <span class="cov1" title="1">return nil, err</span>
+        }
+
+        <span class="cov1" title="1">return &amp;encryptedMK, err</span>
+}
+
+func (p *Storage) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) <span class="cov1" title="1">{
+        const insertSQL = `
+        INSERT INTO user_data (user_id, type, minio_object_id, encrypted_data, data_nonce, encrypted_dek, dek_nonce, meta) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id;
+    `
+
+        var id int
+
+        err := p.DB.QueryRow(
+                ctx,
+                insertSQL,
+                userData.UserID,
+                userData.Type,
+                userData.MinioObjectID,
+                userData.EncryptedData,
+                userData.DataNonce,
+                userData.EncryptedDek,
+                userData.DekNonce,
+                userData.Meta,
+        ).Scan(&amp;id)
+        if err != nil </span><span class="cov1" title="1">{
+                return 0, fmt.Errorf("failed to save user data: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return id, err</span>
+}
+
+func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DBUserData, error) <span class="cov3" title="2">{
+        const selectSQL = `
+        SELECT user_id, 
+               type,
+               minio_object_id,
+               encrypted_data,
+               data_nonce,
+               encrypted_dek,
+               dek_nonce,
+               meta FROM user_data 
+        WHERE id = $1;
+    `
+
+        var userData models.DBUserData
+
+        err := p.DB.QueryRow(ctx, selectSQL, userDataID).Scan(
+                &amp;userData.UserID,
+                &amp;userData.Type,
+                &amp;userData.MinioObjectID,
+                &amp;userData.EncryptedData,
+                &amp;userData.DataNonce,
+                &amp;userData.EncryptedDek,
+                &amp;userData.DekNonce,
+                &amp;userData.Meta,
+        )
+        if err != nil </span><span class="cov3" title="2">{
+                return &amp;userData, fmt.Errorf("failed to get user data: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;userData, err</span>
+}
+
+func (p *Storage) GetUserDataList(ctx context.Context, userID int) ([]models.UserDataListItem, error) <span class="cov1" title="1">{
+        const selectSQL = `
+        SELECT id,
+               user_id, 
+               type,
+               meta,
+               created_at
+        FROM user_data 
+        WHERE user_id = $1
+        ORDER BY id DESC;
+    `
+
+        rows, err := p.DB.Query(ctx, selectSQL, userID)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to query user data list: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer rows.Close()
+
+        var result []models.UserDataListItem
+        for rows.Next() </span><span class="cov0" title="0">{
+                var data models.UserDataListItem
+                err := rows.Scan(
+                        &amp;data.ID,
+                        &amp;data.UserID,
+                        &amp;data.Type,
+                        &amp;data.Meta,
+                        &amp;data.CreatedAt,
+                )
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to scan row: %w", err)
+                }</span>
+                <span class="cov0" title="0">result = append(result, data)</span>
+        }
+
+        <span class="cov0" title="0">if err := rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("rows error: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return result, nil</span>
+}
+
+func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error <span class="cov3" title="2">{
+        const deleteSQL = `
+        DELETE FROM user_data 
+        WHERE id = $1
+        RETURNING id;
+    `
+
+        var deletedID int
+        err := p.DB.QueryRow(ctx, deleteSQL, userDataID).Scan(&amp;deletedID)
+        if err != nil </span><span class="cov3" title="2">{
+                if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
+                        return fmt.Errorf("user data with ID %d not found", userDataID)
+                }</span>
+                <span class="cov1" title="1">return fmt.Errorf("failed to delete user data: %w", err)</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package storage
+
+import (
+        "bytes"
+        "context"
+        "fmt"
+        "io"
+        "time"
+
+        "github.com/minio/minio-go/v7"
+        "github.com/minio/minio-go/v7/pkg/credentials"
+
+        "github.com/apetsko/gophkeeper/config"
+        "github.com/apetsko/gophkeeper/models"
+)
+
+type S3Client interface {
+        Upload(ctx context.Context, data []byte, s3UploadData *models.S3UploadData) (*minio.UploadInfo, error)
+        GetObject(ctx context.Context, objectName string) ([]byte, *minio.ObjectInfo, error)
+}
+
+type S3 struct {
+        MinioClient *minio.Client
+        MinioBucket string
+}
+
+func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) <span class="cov1" title="1">{
+        var err error
+
+        minioClient, err := minio.New(cfg.Endpoint, &amp;minio.Options{
+                Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
+                Secure: false,
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("error init minio client: %v", err)
+        }</span>
+
+        <span class="cov1" title="1">bucketExists, err := minioClient.BucketExists(ctx, cfg.Bucket)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to check bucket existence: %v", err)
+        }</span>
+
+        <span class="cov1" title="1">if !bucketExists </span><span class="cov0" title="0">{
+                if errMakeBucket := minioClient.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); errMakeBucket != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to create bucket: %v", errMakeBucket)
+                }</span>
+        }
+
+        <span class="cov1" title="1">return &amp;S3{
+                MinioClient: minioClient,
+                MinioBucket: cfg.Bucket,
+        }, err</span>
+}
+
+func (s *S3) Upload(
+        ctx context.Context,
+        data []byte,
+        s3UploadData *models.S3UploadData,
+) (*minio.UploadInfo, error) <span class="cov1" title="1">{
+        info, errPutObject := s.MinioClient.PutObject(
+                ctx,
+                s.MinioBucket,
+                s3UploadData.ObjectName,
+                bytes.NewReader(data),
+                int64(len(data)),
+                minio.PutObjectOptions{
+                        ContentType: s3UploadData.FileType,
+                        UserMetadata: map[string]string{
+                                "original-name": s3UploadData.FileName,
+                                "meta-content":  s3UploadData.MetaContent,
+                                "upload-time":   time.Now().Format(time.RFC3339),
+                                "is-encrypted":  "true",
+                        },
+                },
+        )
+
+        if errPutObject != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to upload file to MinIO: %v", errPutObject)
+        }</span>
+
+        <span class="cov1" title="1">return &amp;info, nil</span>
+}
+
+func (s *S3) GetObject(
+        ctx context.Context,
+        objectName string,
+) ([]byte, *minio.ObjectInfo, error) <span class="cov10" title="2">{
+        object, err := s.MinioClient.GetObject(
+                ctx,
+                s.MinioBucket,
+                objectName,
+                minio.GetObjectOptions{},
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, fmt.Errorf("failed to get object from MinIO: %v", err)
+        }</span>
+        <span class="cov10" title="2">defer object.Close()
+
+        objectInfo, err := object.Stat()
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, nil, fmt.Errorf("failed to get object info: %v", err)
+        }</span>
+
+        <span class="cov1" title="1">data := make([]byte, objectInfo.Size)
+        _, err = io.ReadFull(object, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, fmt.Errorf("failed to read object data: %v", err)
+        }</span>
+
+        <span class="cov1" title="1">return data, &amp;objectInfo, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package jwt
+
+import (
+        "time"
+
+        "github.com/golang-jwt/jwt/v5"
+)
+
+func GenerateJWT(userID int, username, jwtSecret string) (string, error) <span class="cov10" title="4">{
+        claims := jwt.MapClaims{
+                "user_id": userID,
+                "name":    username,
+                "iat":     time.Now().Unix(),
+        }
+
+        token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+        return token.SignedString([]byte(jwtSecret))
+}</span>
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package logging
+
+import (
+        "context"
+        "fmt"
+        "log/slog"
+        "os"
+        "path/filepath"
+        "time"
+
+        grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+)
+
+func LogHandler(level slog.Level) *slog.Logger <span class="cov5" title="9">{
+        handler := slog.NewJSONHandler(os.Stdout, &amp;slog.HandlerOptions{
+                Level:     level,
+                AddSource: true,
+                ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr </span><span class="cov10" title="100">{
+                        if a.Key == slog.TimeKey </span><span class="cov6" title="19">{
+                                if t, ok := a.Value.Any().(time.Time); ok </span><span class="cov6" title="19">{
+                                        a = slog.Attr{
+                                                Key:   a.Key,
+                                                Value: slog.StringValue(t.Format("2006-01-02T15:04:05.000Z07:00")),
+                                        }
+                                }</span>
+                        }
+
+                        <span class="cov10" title="100">if a.Key == slog.SourceKey </span><span class="cov6" title="19">{
+                                src, ok := a.Value.Any().(*slog.Source)
+                                if ok </span><span class="cov6" title="19">{
+                                        link := fmt.Sprintf("file://%s:%d", src.File, src.Line)
+                                        a = slog.Attr{
+                                                Key:   filepath.Base(src.Function),
+                                                Value: slog.StringValue(link),
+                                        }
+                                }</span>
+                        }
+                        <span class="cov10" title="100">return a</span>
+                },
+        })
+        <span class="cov5" title="9">return slog.New(handler)</span>
+}
+
+type Logger struct {
+        *slog.Logger
+}
+
+func NewLogger(level slog.Level) *Logger <span class="cov5" title="9">{
+        base := LogHandler(level)
+        return &amp;Logger{Logger: base}
+}</span>
+
+func (l *Logger) Debugf(format string, args ...any) <span class="cov1" title="1">{
+        l.Debug(fmt.Sprintf(format, args...))
+}</span>
+
+func (l *Logger) Infof(format string, args ...any) <span class="cov1" title="1">{
+        l.Info(fmt.Sprintf(format, args...))
+}</span>
+
+func (l *Logger) Warnf(format string, args ...any) <span class="cov1" title="1">{
+        l.Warn(fmt.Sprintf(format, args...))
+}</span>
+
+func (l *Logger) Errorf(format string, args ...any) <span class="cov1" title="1">{
+        l.Error(fmt.Sprintf(format, args...))
+}</span>
+
+func (l *Logger) Fatal(msg string) <span class="cov1" title="1">{
+        l.Log(context.Background(), slog.LevelError, msg)
+        os.Exit(1)
+}</span>
+
+func (l *Logger) Fatalf(format string, args ...any) <span class="cov1" title="1">{
+        l.Log(context.Background(), slog.LevelError, fmt.Sprintf(format, args...))
+        os.Exit(1)
+}</span>
+
+// InterceptorLogger returns a grpc-compatible slog logger.
+func InterceptorLogger(l *Logger) grpc_logging.Logger <span class="cov2" title="2">{
+        return grpc_logging.LoggerFunc(func(ctx context.Context, lvl grpc_logging.Level, msg string, fields ...any) </span><span class="cov4" title="6">{
+                args := make([]any, 0, len(fields))
+
+                for i := 0; i &lt; len(fields); i += 2 </span><span class="cov6" title="21">{
+                        key := fields[i]
+                        value := fields[i+1]
+                        args = append(args, key, value)
+                }</span>
+
+                <span class="cov4" title="6">switch lvl </span>{
+                case grpc_logging.LevelDebug:<span class="cov1" title="1">
+                        l.Debug(msg, args...)</span>
+                case grpc_logging.LevelInfo:<span class="cov3" title="4">
+                        l.Info(msg, args...)</span>
+                case grpc_logging.LevelWarn:<span class="cov0" title="0">
+                        slog.Warn(msg, args...)</span>
+                case grpc_logging.LevelError:<span class="cov1" title="1">
+                        l.Error(msg, args...)</span>
+                default:<span class="cov0" title="0">
+                        panic(fmt.Sprintf("unknown level %v", lvl))</span>
+                }
+        })
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package password
+
+import "golang.org/x/crypto/bcrypt"
+
+const passwordCost = 14
+
+func HashPassword(password string) (string, error) <span class="cov8" title="4">{
+        bytes, err := bcrypt.GenerateFromPassword([]byte(password), passwordCost)
+        return string(bytes), err
+}</span>
+
+func CheckPasswordHash(password, hash string) bool <span class="cov10" title="5">{
+        err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+        return err == nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package utils
+
+import (
+        "crypto/sha256"
+        "encoding/base64"
+
+        "github.com/go-playground/validator/v10"
+        "golang.org/x/crypto/bcrypt"
+)
+
+type PasswordHasher interface {
+        HashPassword(password string) ([]byte, error)
+}
+
+type BcryptHasher struct{}
+
+func (b *BcryptHasher) HashPassword(password string) ([]byte, error) <span class="cov1" title="1">{
+        return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+}</span>
+
+func ComparePassword(hash, password string) bool <span class="cov4" title="2">{
+        return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+}</span>
+
+func HashPassword(password string) ([]byte, error) <span class="cov4" title="2">{
+        return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+}</span>
+
+func GenerateID(s string, length int) (id string) <span class="cov4" title="2">{
+        hash := sha256.Sum256([]byte(s))
+        id = base64.RawURLEncoding.EncodeToString(hash[:length])[:length]
+        return
+}</span>
+
+func ValidateStruct(a any) error <span class="cov10" title="7">{
+        return validator.New().Struct(a)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

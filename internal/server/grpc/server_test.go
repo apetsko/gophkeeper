@@ -50,3 +50,25 @@ func TestGRPCHandler_Ping(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 }
+
+func TestGRPCHandler_Protected_NoJWT(t *testing.T) {
+	st := mocks.NewIStorage(t)
+	s3 := mocks.NewS3Client(t)
+	env := mocks.NewIEnvelope(t)
+	km := mocks.NewKeyManagerInterface(t)
+	cfg := config.JWTConfig{Secret: "testsecret"}
+
+	admin := handlers.NewServerAdmin(st, s3, cfg, env, km)
+	srv := grpc.NewServer()
+	pb.RegisterGophKeeperServer(srv, NewGRPCHandler(admin))
+
+	ctx := context.Background()
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(dialer(srv)), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := pb.NewGophKeeperClient(conn)
+	// DataList is protected
+	_, err = client.DataList(ctx, &pbrpc.DataListRequest{})
+	require.Error(t, err)
+}

@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"context"
+	"crypto/rand"
 	"testing"
 
 	"github.com/apetsko/gophkeeper/models"
@@ -9,6 +10,10 @@ import (
 )
 
 type mockStorage struct{}
+
+var randRead = func(b []byte) (int, error) {
+	return rand.Read(b)
+}
 
 func (m *mockStorage) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) {
 	return 0, nil

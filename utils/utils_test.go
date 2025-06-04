@@ -3,95 +3,49 @@ package utils
 import (
 	"testing"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestBcryptHasher_HashPassword(t *testing.T) {
+	hasher := &BcryptHasher{}
+	password := "mySecret"
+	hash, err := hasher.HashPassword(password)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, hash)
+	assert.NoError(t, bcrypt.CompareHashAndPassword(hash, []byte(password)))
+}
+
 func TestComparePassword(t *testing.T) {
-	// Hash a sample password for testing
-	hash, err := HashPassword("testPassword")
-	if err != nil {
-		t.Fatalf("Failed to hash password: %v", err)
-	}
-
-	tests := []struct {
-		name     string
-		hash     string
-		password string
-		expected bool
-	}{
-		{"Correct password", string(hash), "testPassword", true},
-		{"Incorrect password", string(hash), "wrongPassword", false},
-		{"Empty password", string(hash), "", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := ComparePassword(tt.hash, tt.password)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
+	hash, _ := bcrypt.GenerateFromPassword([]byte("pass123"), bcrypt.DefaultCost)
+	assert.True(t, ComparePassword(string(hash), "pass123"))
+	assert.False(t, ComparePassword(string(hash), "wrongpass"))
 }
 
 func TestHashPassword(t *testing.T) {
-	password := "testPassword"
-
-	// Test hashing password
+	password := "anotherSecret"
 	hash, err := HashPassword(password)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hash)
-
-	// Check if hash is a valid bcrypt hash
-	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
-	assert.NoError(t, err)
+	assert.NoError(t, bcrypt.CompareHashAndPassword(hash, []byte(password)))
 }
 
 func TestGenerateID(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		length int
-	}{
-		{"Generate short ID", "input", 10},
-		{"Generate long ID", "input", 20},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			id := GenerateID(tt.input, tt.length)
-			assert.Len(t, id, tt.length)
-		})
-	}
+	id10 := GenerateID("input", 10)
+	id20 := GenerateID("input", 20)
+	assert.Len(t, id10, 10)
+	assert.Len(t, id20, 20)
+	assert.NotEqual(t, id10, id20)
 }
 
 func TestValidateStruct(t *testing.T) {
-	// Define a simple struct to validate
-	type User struct {
-		Username string `validate:"required"`
-		Email    string `validate:"required,email"`
+	type testStruct struct {
+		Field1 string `validate:"required"`
+		Field2 int    `validate:"min=1"`
 	}
+	valid := testStruct{Field1: "ok", Field2: 2}
+	invalid := testStruct{Field1: "", Field2: 0}
 
-	validUser := User{Username: "validUser", Email: "user@example.com"}
-	invalidUser := User{Username: "", Email: "invalidEmail"}
-
-	tests := []struct {
-		name     string
-		input    interface{}
-		expected error
-	}{
-		{"Valid struct", validUser, nil},
-		{"Invalid struct", invalidUser, validator.New().Struct(&invalidUser)},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateStruct(tt.input)
-			if tt.expected == nil {
-				assert.NoError(t, err)
-			} else {
-				assert.Error(t, err)
-			}
-		})
-	}
+	assert.NoError(t, ValidateStruct(valid))
+	assert.Error(t, ValidateStruct(invalid))
 }

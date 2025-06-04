@@ -197,3 +197,57 @@ func TestStorage_Ping(t *testing.T) {
 	defer cancel()
 	require.NoError(t, st.(*Storage).DB.Ping(ctx))
 }
+
+func TestNewPostgresClient_BadConnString(t *testing.T) {
+	_, err := NewPostgresClient("invalid-conn-string")
+	require.Error(t, err)
+}
+
+func TestStorage_AddUser_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close() // Close pool to force error
+	_, err := st.AddUser(context.Background(), &models.UserEntry{Username: "x", PasswordHash: "y"})
+	require.Error(t, err)
+}
+
+func TestStorage_SaveMasterKey_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	_, err := st.SaveMasterKey(context.Background(), 1, []byte("a"), []byte("b"))
+	require.Error(t, err)
+}
+
+func TestStorage_GetMasterKey_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	_, err := st.GetMasterKey(context.Background(), 1)
+	require.Error(t, err)
+}
+
+func TestStorage_SaveUserData_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	_, err := st.SaveUserData(context.Background(), &models.DBUserData{})
+	require.Error(t, err)
+}
+
+func TestStorage_GetUserData_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	_, err := st.GetUserData(context.Background(), 1)
+	require.Error(t, err)
+}
+
+func TestStorage_GetUserDataList_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	_, err := st.GetUserDataList(context.Background(), 1)
+	require.Error(t, err)
+}
+
+func TestStorage_DeleteUserData_DBError(t *testing.T) {
+	st := setupTestStorage(t)
+	st.(*Storage).DB.Close()
+	err := st.DeleteUserData(context.Background(), 1)
+	require.Error(t, err)
+}
