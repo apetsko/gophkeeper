@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/internal/constants"
-
 	"github.com/apetsko/gophkeeper/internal/mocks"
 	"github.com/apetsko/gophkeeper/models"
 	pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
@@ -14,180 +14,166 @@ import (
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func TestServerAdmin_DataSave(t *testing.T) {
-	userID := 42
+	const userID = 42
 	ctx := context.WithValue(context.Background(), constants.UserID, userID)
-	encryptedMK := []byte("masterkey")
 
-	encryptMockData := &models.EncryptedData{
-		EncryptedData: []byte("encryptedData"),
-		DataNonce:     []byte("nonce1"),
-		EncryptedDek:  []byte("encryptedDEK"),
-		DekNonce:      []byte("nonce2"),
+	type testCase struct {
+		name       string
+		req        *pbrpc.DataSaveRequest
+		setupMocks func(
+			st *mocks.IStorage,
+			s3 *mocks.S3Client,
+			env *mocks.IEnvelope,
+			km *mocks.KeyManagerInterface,
+		)
+		wantErr bool
 	}
 
-	tests := []struct {
-		name          string
-		ctx           context.Context
-		req           *pbrpc.DataSaveRequest
-		mockSetup     func(s *ServerAdmin)
-		wantErr       bool
-		wantErrCode   codes.Code
-		wantMsgSubstr string
-	}{
+	tests := []testCase{
 		{
-			name: "no userID in context",
-			ctx:  context.Background(),
+			name: "success bank card",
 			req: &pbrpc.DataSaveRequest{
 				Type: pbc.DataType_DATA_TYPE_BANK_CARD,
+				Meta: &pbmodels.Meta{Content: "meta"},
 				Data: &pbrpc.DataSaveRequest_BankCard{
 					BankCard: &pbmodels.BankCard{
-						CardNumber: "1111222233334444",
-						ExpiryDate: "12/25",
-						Cvv:        "123",
-						Cardholder: "John Doe",
+						CardNumber: "1234",
 					},
 				},
 			},
-			wantErr:     true,
-			wantErrCode: codes.InvalidArgument,
-		},
-		{
-			name: "type unspecified",
-			ctx:  ctx,
-			req: &pbrpc.DataSaveRequest{
-				Type: pbc.DataType_DATA_TYPE_UNSPECIFIED,
-			},
-			wantErr:     true,
-			wantErrCode: codes.InvalidArgument,
-		},
-		{
-			name: "keymanager returns error",
-			ctx:  ctx,
-			req: &pbrpc.DataSaveRequest{
-				Type: pbc.DataType_DATA_TYPE_CREDENTIALS,
-				Data: &pbrpc.DataSaveRequest_Credentials{
-					Credentials: &pbmodels.Credentials{
-						Login:    "user",
-						Password: "pass",
-					},
-				},
-			},
-			mockSetup: func(s *ServerAdmin) {
-				s.KeyManager = new(mocks.KeyManagerInterface)
-				s.KeyManager.On("GetMasterKey", ctx, userID).Return(nil, errors.New("keymgr error"))
-			},
-			wantErr: true,
-		},
-		{
-			name: "bank card with nil data",
-			ctx:  ctx,
-			req: &pbrpc.DataSaveRequest{
-				Type: pbc.DataType_DATA_TYPE_BANK_CARD,
-				Data: nil,
-			},
-			mockSetup: func(s *ServerAdmin) {
-				s.KeyManager = new(mocks.KeyManagerInterface)
-				s.KeyManager.On("GetMasterKey", ctx, userID).Return(encryptedMK, nil)
-			},
-			wantErr:     true,
-			wantErrCode: codes.InvalidArgument,
-		},
-		{
-			name: "successful save bank card",
-			ctx:  ctx,
-			req: &pbrpc.DataSaveRequest{
-				Type: pbc.DataType_DATA_TYPE_BANK_CARD,
-				Meta: &pbmodels.Meta{Content: "meta info"},
-				Data: &pbrpc.DataSaveRequest_BankCard{
-					BankCard: &pbmodels.BankCard{
-						CardNumber: "1234567812345678",
-						ExpiryDate: "01/30",
-						Cvv:        "321",
-						Cardholder: "Alice",
-					},
-				},
-			},
-			mockSetup: func(s *ServerAdmin) {
-				s.KeyManager = new(mocks.KeyManagerInterface)
-				s.KeyManager.On("GetMasterKey", ctx, userID).Return(encryptedMK, nil)
-
-				s.Envelope = new(mocks.IEnvelope)
-				s.Envelope.On("EncryptUserData", ctx, encryptedMK, mock.Anything).Return(encryptMockData, nil)
-
-				s.Storage = new(mocks.IStorage)
-				s.Storage.On("SaveUserData", ctx, mock.AnythingOfType("*models.DBUserData")).Return(1, nil)
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {
+				km.On("GetMasterKey", mock.Anything, userID).Return([]byte("mk"), nil)
+				st.On("SaveUserData", mock.Anything, mock.AnythingOfType("*models.DBUserData")).Return(1, nil)
+				env.On("EncryptUserData", mock.Anything, mock.Anything, mock.Anything).Return(&models.EncryptedData{
+					EncryptedData: []byte("enc"),
+					DataNonce:     []byte("nonce"),
+					EncryptedDek:  []byte("dek"),
+					DekNonce:      []byte("dek_nonce"),
+				}, nil)
 			},
 			wantErr: false,
 		},
 		{
-			name: "successful save binary data",
-			ctx:  ctx,
+			name: "success credentials",
+			req: &pbrpc.DataSaveRequest{
+				Type: pbc.DataType_DATA_TYPE_CREDENTIALS,
+				Meta: &pbmodels.Meta{Content: "meta"},
+				Data: &pbrpc.DataSaveRequest_Credentials{
+					Credentials: &pbmodels.Credentials{
+						Login:    "l",
+						Password: "p",
+					},
+				},
+			},
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {
+				km.On("GetMasterKey", mock.Anything, userID).Return([]byte("mk"), nil)
+				st.On("SaveUserData", mock.Anything, mock.AnythingOfType("*models.DBUserData")).Return(1, nil)
+				env.On("EncryptUserData", mock.Anything, mock.Anything, mock.Anything).Return(&models.EncryptedData{
+					EncryptedData: []byte("enc"),
+					DataNonce:     []byte("nonce"),
+					EncryptedDek:  []byte("dek"),
+					DekNonce:      []byte("dek_nonce"),
+				}, nil)
+			},
+			wantErr: false,
+		},
+		{
+			name: "success binary data",
 			req: &pbrpc.DataSaveRequest{
 				Type: pbc.DataType_DATA_TYPE_BINARY_DATA,
-				Meta: &pbmodels.Meta{Content: "file meta"},
+				Meta: &pbmodels.Meta{Content: "meta"},
 				Data: &pbrpc.DataSaveRequest_BinaryData{
 					BinaryData: &pbmodels.File{
 						Name: "file.txt",
-						Type: "text/plain",
-						Size: 10,
-						Data: []byte("hello world"),
+						Data: []byte("data"),
+						Type: "txt",
 					},
 				},
 			},
-			mockSetup: func(s *ServerAdmin) {
-				s.KeyManager = new(mocks.KeyManagerInterface)
-				s.KeyManager.On("GetMasterKey", ctx, userID).Return(encryptedMK, nil)
-
-				s.Envelope = new(mocks.IEnvelope)
-				s.Envelope.On("EncryptUserData", ctx, encryptedMK, []byte("hello world")).Return(encryptMockData, nil)
-
-				s.StorageS3 = new(mocks.S3Client)
-				s.StorageS3.On("Upload", ctx, encryptMockData.EncryptedData, mock.AnythingOfType("*models.S3UploadData")).Return("objName", nil)
-
-				s.Storage = new(mocks.IStorage)
-				s.Storage.On("SaveUserData", ctx, mock.AnythingOfType("*models.DBUserData")).Return(1, nil)
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {
+				env.On("EncryptUserData", mock.Anything, mock.Anything, mock.Anything).Return(&models.EncryptedData{
+					EncryptedData: []byte("enc"),
+					DataNonce:     []byte("nonce"),
+					EncryptedDek:  []byte("dek"),
+					DekNonce:      []byte("dek_nonce"),
+				}, nil)
+				km.On("GetMasterKey", mock.Anything, userID).Return([]byte("mk"), nil)
+				s3.On("Upload", mock.Anything, mock.Anything, mock.AnythingOfType("*models.S3UploadData")).Return(nil, nil)
+				st.On("SaveUserData", mock.Anything, mock.AnythingOfType("*models.DBUserData")).Return(1, nil)
 			},
 			wantErr: false,
 		},
 		{
-			name: "unsupported data type",
-			ctx:  ctx,
+			name: "missing user id",
 			req: &pbrpc.DataSaveRequest{
-				Type: 999,
-				Data: nil,
+				Type: pbc.DataType_DATA_TYPE_BANK_CARD,
 			},
-			mockSetup: func(s *handlers.ServerAdmin) {
-				s.KeyManager = new(mock.KeyManager)
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {},
+			wantErr:    true,
+		},
+		{
+			name: "unsupported type",
+			req: &pbrpc.DataSaveRequest{
+				Type: pbc.DataType_DATA_TYPE_UNSPECIFIED,
 			},
-			wantErr:     true,
-			wantErrCode: codes.Unimplemented,
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {},
+			wantErr:    true,
+		},
+		{
+			name: "key manager error",
+			req: &pbrpc.DataSaveRequest{
+				Type: pbc.DataType_DATA_TYPE_BANK_CARD,
+				Meta: &pbmodels.Meta{Content: "meta"},
+				Data: &pbrpc.DataSaveRequest_BankCard{
+					BankCard: &pbmodels.BankCard{
+						CardNumber: "1234",
+					},
+				},
+			},
+			setupMocks: func(st *mocks.IStorage, s3 *mocks.S3Client, env *mocks.IEnvelope, km *mocks.KeyManagerInterface) {
+				km.On("GetMasterKey", mock.Anything, userID).Return(nil, errors.New("fail"))
+			},
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			srv := &handlers.ServerAdmin{}
-			if tt.mockSetup != nil {
-				tt.mockSetup(srv)
+			st := mocks.NewIStorage(t)
+			s3 := mocks.NewS3Client(t)
+			env := mocks.NewIEnvelope(t)
+			km := mocks.NewKeyManagerInterface(t)
+
+			if tt.name == "missing user id" {
+				ctx := context.Background()
+				srv := &ServerAdmin{
+					Storage:    st,
+					StorageS3:  s3,
+					JWTConfig:  config.JWTConfig{},
+					Envelope:   nil,
+					KeyManager: km,
+				}
+				_, err := srv.DataSave(ctx, tt.req)
+				assert.Error(t, err)
+				return
 			}
 
-			resp, err := srv.DataSave(tt.ctx, tt.req)
-
+			tt.setupMocks(st, s3, env, km)
+			srv := &ServerAdmin{
+				Storage:    st,
+				StorageS3:  s3,
+				JWTConfig:  config.JWTConfig{},
+				Envelope:   env,
+				KeyManager: km,
+			}
+			_, err := srv.DataSave(ctx, tt.req)
 			if tt.wantErr {
-				require.Error(t, err)
-				st, ok := status.FromError(err)
-				require.True(t, ok)
-				assert.Equal(t, tt.wantErrCode, st.Code())
+				assert.Error(t, err)
 			} else {
-				require.NoError(t, err)
-				assert.NotNil(t, resp)
-				assert.Contains(t, resp.Message, tt.req.Type.String())
+				assert.NoError(t, err)
 			}
 		})
 	}

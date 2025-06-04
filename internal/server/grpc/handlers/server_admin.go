@@ -10,7 +10,7 @@ type ServerAdmin struct {
 	Storage    storage.IStorage
 	StorageS3  storage.S3Client
 	JWTConfig  config.JWTConfig
-	Envelope   *crypto.Envelope
+	Envelope   crypto.IEnvelope
 	KeyManager crypto.KeyManagerInterface
 }
 
@@ -18,7 +18,7 @@ func NewServerAdmin(
 	storage storage.IStorage,
 	storageS3 storage.S3Client,
 	jwtConfig config.JWTConfig,
-	envelope *crypto.Envelope,
+	envelope crypto.IEnvelope,
 	keyManager crypto.KeyManagerInterface,
 ) *ServerAdmin {
 	return &ServerAdmin{
