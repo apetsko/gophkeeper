@@ -23,6 +23,7 @@ type PgxPoolIface interface {
 	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
 	Begin(context.Context) (pgx.Tx, error)
 	Close()
+	Ping(context.Context) error
 }
 
 //go:embed migrations/*.sql
@@ -48,7 +49,7 @@ func migrate(conn string) error {
 	return nil
 }
 
-func NewPostrgesClient(conn string) (*Storage, error) {
+func NewPostgresClient(conn string) (IStorage, error) {
 	if err := migrate(conn); err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.Encrypt
 	err := p.DB.QueryRow(ctx, selectSQL, userID).Scan(&encryptedMK.EncryptedMK, &encryptedMK.Nonce)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, models.MasterKeyNotFound
+			return nil, models.ErrMasterKeyNotFound
 		}
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.Encrypt
 	return &encryptedMK, err
 }
 
-func (p *Storage) SaveUserData(ctx context.Context, userData *models.DbUserData) (int, error) {
+func (p *Storage) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) {
 	const insertSQL = `
         INSERT INTO user_data (user_id, type, minio_object_id, encrypted_data, data_nonce, encrypted_dek, dek_nonce, meta) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -174,7 +175,7 @@ func (p *Storage) SaveUserData(ctx context.Context, userData *models.DbUserData)
 	return id, err
 }
 
-func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DbUserData, error) {
+func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DBUserData, error) {
 	const selectSQL = `
         SELECT user_id, 
                type,
@@ -187,7 +188,7 @@ func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DbUs
         WHERE id = $1;
     `
 
-	var userData models.DbUserData
+	var userData models.DBUserData
 
 	err := p.DB.QueryRow(ctx, selectSQL, userDataID).Scan(
 		&userData.UserID,

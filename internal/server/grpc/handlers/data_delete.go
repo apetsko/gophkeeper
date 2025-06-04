@@ -27,7 +27,7 @@ func (s *ServerAdmin) DataDelete(ctx context.Context, in *pbrpc.DataDeleteReques
 
 	errDelete := s.Storage.DeleteUserData(ctx, int(in.GetId()))
 	if errDelete != nil {
-		return nil, status.Errorf(codes.Internal, "ошибка получения данных")
+		return nil, status.Errorf(codes.Internal, "ошибка удаления данных")
 	}
 
 	return &pbrpc.DataDeleteResponse{

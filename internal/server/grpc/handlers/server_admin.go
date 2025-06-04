@@ -7,9 +7,25 @@ import (
 )
 
 type ServerAdmin struct {
-	Storage    *storage.Storage
-	StorageS3  *storage.S3
+	Storage    storage.IStorage
+	StorageS3  storage.S3Client
 	JWTConfig  config.JWTConfig
-	Envelop    *crypto.Envelop
-	KeyManager *crypto.KeyManager
+	Envelope   *crypto.Envelope
+	KeyManager crypto.KeyManagerInterface
+}
+
+func NewServerAdmin(
+	storage storage.IStorage,
+	storageS3 storage.S3Client,
+	jwtConfig config.JWTConfig,
+	envelope *crypto.Envelope,
+	keyManager crypto.KeyManagerInterface,
+) *ServerAdmin {
+	return &ServerAdmin{
+		Storage:    storage,
+		StorageS3:  storageS3,
+		JWTConfig:  jwtConfig,
+		Envelope:   envelope,
+		KeyManager: keyManager,
+	}
 }

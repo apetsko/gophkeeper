@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/apetsko/gophkeeper/internal/constants"
 	"github.com/apetsko/gophkeeper/utils"
 	"github.com/caarlos0/env/v11"
 	"gopkg.in/yaml.v3"
@@ -43,10 +44,12 @@ type TLSConfig struct {
 
 func New() (*Config, error) {
 	var cfg Config
-	flag.StringVar(&cfg.ConfigFile, "f", "", "config.yaml or config.yml")
-	flag.Parse()
 
-	//file or env
+	fs := flag.NewFlagSet("config", flag.ContinueOnError)
+	fs.StringVar(&cfg.ConfigFile, "f", "", "config.yaml or config.yml")
+	_ = fs.Parse(os.Args[1:]) // Не паникуем на ошибке парсинга
+
+	// file or env
 	if cfg.ConfigFile != "" {
 		slog.Info("Using config file: " + cfg.ConfigFile)
 		if err := cfg.readConfigFile(); err != nil {
@@ -68,7 +71,7 @@ func New() (*Config, error) {
 		return nil, errDecode
 	}
 
-	if len(serverKey) != 32 {
+	if len(serverKey) != constants.KeyLength {
 		return nil, errors.New("server encryption key must be 32 bytes")
 	}
 

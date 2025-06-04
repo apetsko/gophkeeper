@@ -8,10 +8,21 @@ import (
 	"crypto/subtle"
 	"errors"
 
-	"golang.org/x/crypto/argon2"
-
+	"github.com/apetsko/gophkeeper/internal/constants"
 	"github.com/apetsko/gophkeeper/models"
+	"golang.org/x/crypto/argon2"
 )
+
+// Интерфейс для удобства мокирования и внедрения зависимостей
+//
+//go:generate mockery --dir ./internal/crypto --name=KeyManagerInterface --output=../mocks/ --case=underscore
+type KeyManagerInterface interface {
+	GetMasterKey(ctx context.Context, userID int) ([]byte, error)
+	GetOrCreateMasterKey(ctx context.Context, userID int, userPassword string, userSalt []byte) ([]byte, error)
+}
+
+// Убедимся, что KeyManager реализует интерфейс
+var _ KeyManagerInterface = (*KeyManager)(nil)
 
 type KeyStorage interface {
 	GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error)
@@ -34,13 +45,11 @@ func NewKeyManager(
 }
 
 func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, error) {
-	// 1. Получаем зашифрованный MK из БД
 	encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Расшифровываем серверным ключом
 	block, _ := aes.NewCipher(m.serverEncryptionKey)
 	gcm, _ := cipher.NewGCM(block)
 
@@ -58,22 +67,14 @@ func (m *KeyManager) GetOrCreateMasterKey(
 	userPassword string,
 	userSalt []byte,
 ) ([]byte, error) {
-	// 1. Получаем зашифрованный MK из БД
 	encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
 	if err != nil {
-		if errors.Is(err, models.MasterKeyNotFound) {
-			return m.generateAndStoreMasterKey(
-				ctx,
-				userID,
-				userPassword,
-				userSalt,
-			)
+		if errors.Is(err, models.ErrMasterKeyNotFound) {
+			return m.generateAndStoreMasterKey(ctx, userID, userPassword, userSalt)
 		}
-
 		return nil, err
 	}
 
-	// 2. Расшифровываем серверным ключом
 	block, _ := aes.NewCipher(m.serverEncryptionKey)
 	gcm, _ := cipher.NewGCM(block)
 
@@ -82,8 +83,7 @@ func (m *KeyManager) GetOrCreateMasterKey(
 		return nil, err
 	}
 
-	// Верифицируем
-	computedMK := argon2.IDKey([]byte(userPassword), userSalt, 3, 64*1024, 4, 32)
+	computedMK := argon2.IDKey([]byte(userPassword), userSalt, 3, constants.Mem, constants.Threads, uint32(constants.KeyLength))
 	if subtle.ConstantTimeCompare(mk, computedMK) != 1 {
 		return nil, errors.New("invalid password")
 	}
@@ -97,10 +97,8 @@ func (m *KeyManager) generateAndStoreMasterKey(
 	userPassword string,
 	userSalt []byte,
 ) ([]byte, error) {
-	// 1. Генерируем Master Key из пароля пользователя
-	mk := argon2.IDKey([]byte(userPassword), userSalt, 3, 64*1024, 4, 32)
+	mk := argon2.IDKey([]byte(userPassword), userSalt, 3, constants.Mem, constants.Threads, uint32(constants.KeyLength))
 
-	// 2. Шифруем Master Key серверным ключом
 	block, errBlock := aes.NewCipher(m.serverEncryptionKey)
 	if errBlock != nil {
 		return nil, errBlock
@@ -114,7 +112,6 @@ func (m *KeyManager) generateAndStoreMasterKey(
 
 	encryptedMK := gcm.Seal(nil, nonce, mk, nil)
 
-	// 3. Сохраняем в БД (user_id, encrypted_mk, nonce)
 	_, err := m.storage.SaveMasterKey(ctx, userID, encryptedMK, nonce)
 
 	return mk, err

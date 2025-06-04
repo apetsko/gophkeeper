@@ -43,7 +43,7 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 	)
 
 	if errMasterKey != nil {
-		slog.Error("failed to generate encrypted master key: %w", errMasterKey)
+		slog.Error("failed to generate encrypted master key: " + errMasterKey.Error())
 
 		return nil, errors.New("failed to generate encrypted master key")
 	}

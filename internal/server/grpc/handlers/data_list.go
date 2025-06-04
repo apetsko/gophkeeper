@@ -29,7 +29,7 @@ func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (
 		// Преобразуем строку Meta (в формате JSON) в pbmodels.Meta
 		var meta pbmodels.Meta
 		if errUnmarshal := protojson.Unmarshal([]byte(data.Meta), &meta); errUnmarshal != nil {
-			slog.Error("failed to unmarshal meta: %w", errUnmarshal)
+			slog.Error("failed to unmarshal meta: " + errUnmarshal.Error())
 			continue
 		}
 

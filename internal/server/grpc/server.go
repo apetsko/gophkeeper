@@ -65,61 +65,8 @@ func (s *GRPCHandler) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 	return s.ServerAdmin.DataView(ctx, in)
 }
 
-func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
-	slog.Info("Auth interceptor enabled")
-
-	return func(
-		ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler,
-	) (interface{}, error) {
-		if !protected[info.FullMethod] {
-			return handler(ctx, req)
-		}
-
-		md, ok := metadata.FromIncomingContext(ctx)
-		if !ok {
-			return nil, status.Error(codes.Unauthenticated, "missing metadata")
-		}
-
-		jwtHeader := md.Get(string(constants.JWT))
-		if len(jwtHeader) == 0 || jwtHeader[0] == "" {
-			return nil, status.Error(codes.Unauthenticated, "missing jwt")
-		}
-
-		tokenStr := jwtHeader[0]
-
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
-			}
-			return jwtSecret, nil
-		})
-
-		if err != nil || !token.Valid {
-			return nil, status.Error(codes.Unauthenticated, "invalid jwt")
-		}
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			fmt.Println(claims)
-
-			if uidFloat, ok := claims["user_id"].(float64); ok {
-				userID := int(uidFloat)
-				ctx = context.WithValue(ctx, constants.UserID, userID)
-			} else {
-				return nil, status.Error(codes.InvalidArgument, "user_id not found or not a number")
-			}
-		}
-
-		ctx = context.WithValue(ctx, constants.JWT, tokenStr)
-		return handler(ctx, req)
-	}
-}
-
 // RunGRPC запускает gRPC сервер
 func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) (*grpc.Server, error) {
-
 	lis, err := net.Listen("tcp", cfg.GRPCAddress)
 	if err != nil {
 		log.Fatalf("failed to listen on %s: %v", cfg.GRPCAddress, err)
@@ -170,9 +117,59 @@ func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) 
 
 	go func() {
 		if err := g.Wait(); err != nil {
-			log.Error("gRPC server error", err)
+			log.Error("gRPC server error: " + err.Error())
 		}
 	}()
 
 	return srv, nil
+}
+
+func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
+	slog.Info("Auth interceptor enabled")
+
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		if !protected[info.FullMethod] {
+			return handler(ctx, req)
+		}
+
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return nil, status.Error(codes.Unauthenticated, "missing metadata")
+		}
+
+		jwtHeader := md.Get(string(constants.JWT))
+		if len(jwtHeader) == 0 || jwtHeader[0] == "" {
+			return nil, status.Error(codes.Unauthenticated, "missing jwt")
+		}
+
+		tokenStr := jwtHeader[0]
+
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			return nil, status.Error(codes.Unauthenticated, "invalid jwt")
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if uidFloat, ok := claims["user_id"].(float64); ok {
+				userID := int(uidFloat)
+				ctx = context.WithValue(ctx, constants.UserID, userID)
+			} else {
+				return nil, status.Error(codes.InvalidArgument, "user_id not found or not a number")
+			}
+		}
+
+		ctx = context.WithValue(ctx, constants.JWT, tokenStr)
+		return handler(ctx, req)
+	}
 }

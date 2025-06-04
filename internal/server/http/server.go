@@ -90,7 +90,7 @@ func RunHTTP(ctx context.Context, cfg *config.Config, log *logging.Logger) (*htt
 
 	go func() {
 		if err := g.Wait(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("HTTP server error", err)
+			log.Error("HTTP server error: " + err.Error())
 		}
 	}()
 

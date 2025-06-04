@@ -50,15 +50,15 @@ tasks:
   lint:
     desc: Run linters using golangci-lint
     cmds:
-      - golangci-lint run --config ./pkg/version/.golangci.yml
+      - golangci-lint run --config .golangci.yml
     silent: true
 
   cover:
     desc: Check test coverage
     cmds:
       - go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
-      - grep -vE "/(mocks|main|noexit|multichecker|shortugo.pb.go|shortugo_grpc.pb.go)" cover.tmp.out > cover.out #exception by name in filepath
-      - go-test-coverage --config=./.testcoverage.yml
+      - grep -vE "/(mocks|main|google|protogen|client)" cover.tmp.out > cover.out #exception by name in filepath
+      - go-test-coverage --config=./testcoverage.yml
       - go tool cover -html=cover.out -o coverage.html
     silent: true
 

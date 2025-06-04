@@ -14,6 +14,11 @@ import (
 	"github.com/apetsko/gophkeeper/models"
 )
 
+type S3Client interface {
+	Upload(ctx context.Context, data []byte, s3UploadData *models.S3UploadData) (*minio.UploadInfo, error)
+	GetObject(ctx context.Context, objectName string) ([]byte, *minio.ObjectInfo, error)
+}
+
 type S3 struct {
 	MinioClient *minio.Client
 	MinioBucket string

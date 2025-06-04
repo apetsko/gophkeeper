@@ -23,38 +23,37 @@ func main() {
 
 	cfg, err := config.New()
 	if err != nil {
-		log.Fatalf("config read err %v", err)
+		log.Errorf("config read err %v", err)
+		return
 	}
 
-	dbClient, err := storage.NewPostrgesClient(cfg.DatabaseDSN)
+	dbClient, err := storage.NewPostgresClient(cfg.DatabaseDSN)
 	if err != nil {
-		log.Fatalf("database client init err %v", err)
+		log.Errorf("database client init err %v", err)
+		return
 	}
 
 	s3Client, err := storage.NewS3Client(ctx, cfg.S3Config)
 	if err != nil {
-		log.Fatalf("minio client init err %v", err)
+		log.Errorf("minio client init err %v", err)
+		return
 	}
 
-	envelop := crypto.NewEnvelop(dbClient)
+	envelope := crypto.NewEnvelope(dbClient)
 	keyManager := crypto.NewKeyManager(dbClient, cfg.ServerEK)
 
-	sa := handlers.ServerAdmin{
-		Storage:    dbClient,
-		StorageS3:  s3Client,
-		JWTConfig:  cfg.JWT,
-		Envelop:    envelop,
-		KeyManager: keyManager,
-	}
+	sa := handlers.NewServerAdmin(dbClient, s3Client, cfg.JWT, envelope, keyManager)
 
 	// Start gRPC server
-	if _, err := grpcsrv.RunGRPC(cfg, &sa, log); err != nil {
-		log.Fatal("gRPC server failed: " + err.Error())
+	if _, err := grpcsrv.RunGRPC(cfg, sa, log); err != nil {
+		log.Errorf("gRPC server failed: %v", err.Error())
+		return
 	}
 
 	// Start HTTP server
 	if _, err := httpsrv.RunHTTP(ctx, cfg, log); err != nil {
-		log.Fatal("HTTP server failed: " + err.Error())
+		log.Errorf("HTTP server failed:%v ", err.Error())
+		return
 	}
 
 	// Graceful shutdown

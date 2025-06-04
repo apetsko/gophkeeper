@@ -6,15 +6,15 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/apetsko/gophkeeper/internal/constants"
+	"github.com/apetsko/gophkeeper/models"
+	pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
+	pbmodels "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models"
+	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/apetsko/gophkeeper/internal/constants"
-	"github.com/apetsko/gophkeeper/models"
-	pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
-	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
 func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
@@ -42,33 +42,9 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные банковской карты")
 		}
 
-		data, errMarshal := proto.Marshal(in.GetBankCard())
-		if errMarshal != nil {
-			return nil, fmt.Errorf("error serialize: %v", errMarshal)
-		}
-
-		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
-			ctx,
-			encryptedMK,
-			data,
-		)
-		if errEncrypt != nil {
-			slog.Error("failed to crypt data: %w", errEncrypt)
-			return nil, fmt.Errorf("failed to crypt data: %v", errEncrypt)
-		}
-
-		saveUserData := &models.DbUserData{
-			UserID:        userID,
-			Type:          constants.BankCard,
-			EncryptedData: encryptedData.EncryptedData,
-			DataNonce:     encryptedData.DataNonce,
-			EncryptedDek:  encryptedData.EncryptedDek,
-			DekNonce:      encryptedData.DekNonce,
-			Meta:          protojson.Format(in.Meta),
-		}
-		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
-		if errSave != nil {
-			return nil, errSave
+		err := s.saveUserData(ctx, userID, in.Type, encryptedMK, bankCard, in.Meta)
+		if err != nil {
+			return nil, err
 		}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
@@ -76,34 +52,9 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 		if creds == nil {
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют учетные данные")
 		}
-
-		data, errMarshal := proto.Marshal(in.GetCredentials())
-		if errMarshal != nil {
-			return nil, fmt.Errorf("error serialize: %v", errMarshal)
-		}
-
-		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
-			ctx,
-			encryptedMK,
-			data,
-		)
-		if errEncrypt != nil {
-			slog.Error("failed to crypt data: %w", errEncrypt)
-			return nil, fmt.Errorf("failed to crypt data: %v", errEncrypt)
-		}
-
-		saveUserData := &models.DbUserData{
-			UserID:        userID,
-			Type:          constants.Credentials,
-			EncryptedData: encryptedData.EncryptedData,
-			DataNonce:     encryptedData.DataNonce,
-			EncryptedDek:  encryptedData.EncryptedDek,
-			DekNonce:      encryptedData.DekNonce,
-			Meta:          protojson.Format(in.Meta),
-		}
-		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
-		if errSave != nil {
-			return nil, errSave
+		err := s.saveUserData(ctx, userID, in.Type, encryptedMK, creds, in.Meta)
+		if err != nil {
+			return nil, err
 		}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
@@ -112,44 +63,41 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 			return nil, status.Errorf(codes.InvalidArgument, "отсутствуют данные файла")
 		}
 
-		// Шифруем данные файла
-		encryptedData, errEncrypt := s.Envelop.EncryptUserData(
-			ctx,
-			encryptedMK,
-			file.Data,
-		)
-		if errEncrypt != nil {
-			slog.Error("failed to encrypt binary data", "error", errEncrypt)
-			return nil, fmt.Errorf("failed to encrypt binary data: %v", errEncrypt)
+		// Шифруем содержимое файла
+		encryptedData, err := s.Envelope.EncryptUserData(ctx, encryptedMK, file.Data)
+		if err != nil {
+			slog.Error("failed to encrypt binary data", "error", err)
+			return nil, fmt.Errorf("failed to encrypt binary data: %v", err)
 		}
 
 		// Генерируем уникальное имя файла
 		objectName := fmt.Sprintf("%d-%s", time.Now().UnixNano(), file.Name)
 
+		// Загружаем в S3
 		s3UploadData := &models.S3UploadData{
 			ObjectName:  objectName,
 			MetaContent: in.Meta.Content,
 			FileName:    file.Name,
 			FileType:    file.Type,
 		}
-
-		_, errUpload := s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
-		if errUpload != nil {
-			return nil, fmt.Errorf("failed to upload file to MinIO: %v", errUpload)
+		_, err = s.StorageS3.Upload(ctx, encryptedData.EncryptedData, s3UploadData)
+		if err != nil {
+			return nil, fmt.Errorf("failed to upload file to MinIO: %v", err)
 		}
 
-		saveUserData := &models.DbUserData{
+		// Сохраняем метаданные в БД
+		saveUserData := &models.DBUserData{
 			UserID:        userID,
-			Type:          constants.BinaryData,
+			Type:          constants.MapDataTypeToString(in.Type),
 			MinioObjectID: objectName,
 			DataNonce:     encryptedData.DataNonce,
 			EncryptedDek:  encryptedData.EncryptedDek,
 			DekNonce:      encryptedData.DekNonce,
 			Meta:          protojson.Format(in.Meta),
 		}
-		_, errSave := s.Storage.SaveUserData(ctx, saveUserData)
-		if errSave != nil {
-			return nil, errSave
+		_, err = s.Storage.SaveUserData(ctx, saveUserData)
+		if err != nil {
+			return nil, err
 		}
 
 	default:
@@ -159,4 +107,39 @@ func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (
 	return &pbrpc.DataSaveResponse{
 		Message: fmt.Sprintf("данные типа %s успешно сохранены", in.Type.String()),
 	}, nil
+}
+
+func (s *ServerAdmin) saveUserData(
+	ctx context.Context,
+	userID int,
+	dataType pbc.DataType,
+	encryptedMK []byte,
+	data proto.Message,
+	meta *pbmodels.Meta,
+) error {
+	// Маршал protobuf
+	serialized, err := proto.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("serialize error: %v", err)
+	}
+
+	// Шифруем данные
+	encryptedData, err := s.Envelope.EncryptUserData(ctx, encryptedMK, serialized)
+	if err != nil {
+		slog.Error("failed to crypt data: " + err.Error())
+		return fmt.Errorf("encrypt error: %v", err)
+	}
+
+	// Сохраняем в БД
+	saveUserData := &models.DBUserData{
+		UserID:        userID,
+		Type:          constants.MapDataTypeToString(dataType),
+		EncryptedData: encryptedData.EncryptedData,
+		DataNonce:     encryptedData.DataNonce,
+		EncryptedDek:  encryptedData.EncryptedDek,
+		DekNonce:      encryptedData.DekNonce,
+		Meta:          protojson.Format(meta),
+	}
+	_, err = s.Storage.SaveUserData(ctx, saveUserData)
+	return err
 }

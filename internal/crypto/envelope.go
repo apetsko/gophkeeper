@@ -5,45 +5,62 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"errors"
 	"fmt"
 
+	"github.com/apetsko/gophkeeper/internal/constants"
 	"github.com/apetsko/gophkeeper/models"
 )
 
-type EnvelopStorage interface {
-	SaveUserData(ctx context.Context, userData *models.DbUserData) (int, error)
+//go:generate mockery --dir ./internal/crypto --name=IEnvelopeStorage --output=.../mocks/ --case=underscore
+type IEnvelope interface {
+	EncryptUserData(ctx context.Context, masterKey []byte, data []byte) (*models.EncryptedData, error)
+	DecryptUserData(ctx context.Context, userData models.DBUserData, masterKey []byte) ([]byte, error)
 }
 
-type Envelop struct {
+type EnvelopStorage interface {
+	SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error)
+}
+
+type Envelope struct {
 	storage EnvelopStorage
 }
 
-func NewEnvelop(
+func (e *Envelope) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func NewEnvelope(
 	storage EnvelopStorage,
-) *Envelop {
-	return &Envelop{
+) *Envelope {
+	return &Envelope{
 		storage: storage,
 	}
 }
 
-func (e *Envelop) EncryptUserData(
+func (e *Envelope) EncryptUserData(
 	ctx context.Context,
 	masterKey []byte,
 	data []byte,
 ) (*models.EncryptedData, error) {
 	// 1. Генерируем случайный DEK
-	dek := make([]byte, 32)
+	dek := make([]byte, constants.KeyLength)
 	if _, err := rand.Read(dek); err != nil {
-		return nil, errors.New("error generate DEK")
+		return nil, fmt.Errorf("failed to generate DEK: %w", err)
 	}
 
 	// 2. Шифруем данные DEK
-	block, _ := aes.NewCipher(dek)
-	gcm, _ := cipher.NewGCM(block)
+	block, err := aes.NewCipher(dek)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cipher for DEK: %w", err)
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GCM for DEK: %w", err)
+	}
 	dataNonce := make([]byte, gcm.NonceSize())
 	if _, err := rand.Read(dataNonce); err != nil {
-		return nil, errors.New("error generate dataNonce")
+		return nil, fmt.Errorf("error generate dataNonce: %w", err)
 	}
 
 	encryptedData := gcm.Seal(nil, dataNonce, data, nil)
@@ -53,7 +70,7 @@ func (e *Envelop) EncryptUserData(
 	mkGCM, _ := cipher.NewGCM(mkBlock)
 	dekNonce := make([]byte, mkGCM.NonceSize())
 	if _, err := rand.Read(dekNonce); err != nil {
-		return nil, errors.New("error generate dekNonce")
+		return nil, fmt.Errorf("error generate dekNonce: %w", err)
 	}
 
 	encryptedDEK := mkGCM.Seal(nil, dekNonce, dek, nil)
@@ -66,9 +83,9 @@ func (e *Envelop) EncryptUserData(
 	}, nil
 }
 
-func (e *Envelop) DecryptUserData(
+func (e *Envelope) DecryptUserData(
 	ctx context.Context,
-	userData models.DbUserData,
+	userData models.DBUserData,
 	masterKey []byte,
 ) ([]byte, error) {
 	// 1. Расшифровываем DEK с помощью Master Key

@@ -59,7 +59,7 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 
 		userData.EncryptedData = fileData
 
-		decryptData, err = s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
+		decryptData, err = s.Envelope.DecryptUserData(ctx, *userData, encryptedMK)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "ошибка расшифровки файла: %v", err)
 		}
@@ -78,7 +78,7 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 
 		dataType = pbc.DataType_DATA_TYPE_BINARY_DATA
 	default:
-		decryptData, err = s.Envelop.DecryptUserData(ctx, *userData, encryptedMK)
+		decryptData, err = s.Envelope.DecryptUserData(ctx, *userData, encryptedMK)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "ошибка расшифровки данных")
 		}
@@ -102,27 +102,33 @@ func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (
 	}
 
 	// 5. Парсим данные в зависимости от типа
+	if err := parseData(response, dataType, decryptData, &file); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func parseData(r *pbrpc.DataViewResponse, dataType pbc.DataType, decryptData []byte, file *models.File) error {
 	switch dataType {
 	case pbc.DataType_DATA_TYPE_BANK_CARD:
 		var card models.BankCard
 		if errUnmarshal := proto.Unmarshal(decryptData, &card); errUnmarshal != nil {
-			return nil, status.Errorf(codes.Internal, "ошибка парсинга карты")
+			return status.Errorf(codes.Internal, "ошибка парсинга карты")
 		}
-		response.Data = &pbrpc.DataViewResponse_BankCard{BankCard: &card}
+		r.Data = &pbrpc.DataViewResponse_BankCard{BankCard: &card}
 
 	case pbc.DataType_DATA_TYPE_CREDENTIALS:
 		var credentials models.Credentials
 		if errUnmarshal := proto.Unmarshal(decryptData, &credentials); errUnmarshal != nil {
-			return nil, status.Errorf(codes.Internal, "ошибка парсинга учетных данных")
+			return status.Errorf(codes.Internal, "ошибка парсинга учетных данных")
 		}
-		response.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &credentials}
+		r.Data = &pbrpc.DataViewResponse_Credentials{Credentials: &credentials}
 
 	case pbc.DataType_DATA_TYPE_BINARY_DATA:
-		response.Data = &pbrpc.DataViewResponse_BinaryData{BinaryData: &file}
+		r.Data = &pbrpc.DataViewResponse_BinaryData{BinaryData: file}
 
 	default:
-		return nil, status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных")
+		return status.Errorf(codes.InvalidArgument, "неподдерживаемый тип данных")
 	}
-
-	return response, nil
+	return nil
 }
