@@ -1,0 +1,7 @@
+.idea
+/gophstorage/
+.env
+uploads/*
+certs/*
+/cover.tmp.out
+/cover.out

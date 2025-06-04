@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package api.proto.v1.models;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models";
+
+message File {
+  string name = 1;
+  string type = 2;
+  int32 size = 3;
+  bytes data = 4;
+}

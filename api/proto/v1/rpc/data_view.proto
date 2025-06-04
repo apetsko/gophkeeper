@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package api.proto.v1.rpc;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc";
+
+import "api/proto/v1/models/meta.proto";
+import "api/proto/v1/models/file.proto";
+import "api/proto/v1/models/bank_card.proto";
+import "api/proto/v1/models/credentials.proto";
+import "api/proto/v1/common/enums.proto";
+
+message DataViewRequest {
+  int32 id = 1;
+}
+
+message DataViewResponse {
+  api.proto.v1.common.DataType type = 1;
+  api.proto.v1.models.Meta meta = 2;
+
+  oneof data {
+    api.proto.v1.models.BankCard bank_card = 3;
+    api.proto.v1.models.Credentials credentials = 4;
+    api.proto.v1.models.File binary_data = 5;
+  }
+}

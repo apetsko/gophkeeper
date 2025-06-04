@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package api.proto.v1.rpc;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc";
+
+message DataDeleteRequest {
+  int32 id = 1;
+}
+
+message DataDeleteResponse {
+  string message = 1;
+}
