@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - master 
+      - master
 
 jobs:
   local_tests:
@@ -33,7 +33,7 @@ jobs:
           --health-retries 5
         ports:
           - 9000:9000
-        command: server /data
+        command: "server /data"
 
     name: Test coverage
     runs-on: ubuntu-latest
@@ -46,11 +46,11 @@ jobs:
         run: |
           go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
           grep -vE "/(mocks|main|google|protogen|client)" cover.tmp.out > cover.out
-      - name: Show coverage summary 
+      - name: Show coverage summary
         run: go tool cover -func=cover.out
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report 
+          name: coverage-report
           path: cover.out
