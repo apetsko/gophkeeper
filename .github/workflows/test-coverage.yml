@@ -13,13 +13,27 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: praktikum
+          POSTGRES_USER: gophkeeper_user
+          POSTGRES_PASSWORD: gophkeeper_pass
+          POSTGRES_DB: gophkeeper_db
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 9000:9000
+        command: server /data
 
     name: Test coverage
     runs-on: ubuntu-latest
