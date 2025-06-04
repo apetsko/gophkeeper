@@ -43,7 +43,7 @@ func TestLogger_FatalMethods(t *testing.T) {
 	if os.Getenv("TEST_FATAL") == "1" {
 		log.Fatal("fatal message")
 	}
-	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_FatalMethods")
+	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_FatalMethods") // #nosec G204
 	cmd.Env = append(os.Environ(), "TEST_FATAL=1")
 	err := cmd.Run()
 	if e, ok := err.(*exec.ExitError); !ok || e.ExitCode() == 0 {
@@ -56,7 +56,7 @@ func TestLogger_FatalfMethods(t *testing.T) {
 	if os.Getenv("TEST_FATALF") == "1" {
 		log.Fatalf("fatalf %s", "message")
 	}
-	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_FatalfMethods")
+	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_FatalfMethods") // #nosec G204
 	cmd.Env = append(os.Environ(), "TEST_FATALF=1")
 	err := cmd.Run()
 	if e, ok := err.(*exec.ExitError); !ok || e.ExitCode() == 0 {

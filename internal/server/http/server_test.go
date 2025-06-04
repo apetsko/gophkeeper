@@ -16,6 +16,7 @@ import (
 	"github.com/apetsko/gophkeeper/internal/server/grpc"
 	"github.com/apetsko/gophkeeper/internal/server/grpc/handlers"
 	"github.com/apetsko/gophkeeper/pkg/logging"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHTTPServer_Ping(t *testing.T) {
@@ -72,16 +73,18 @@ func TestHTTPServer_Ping(t *testing.T) {
 		t.Fatal("HTTP server is still listening on :0")
 	}
 
-	url := fmt.Sprintf("http://%s/v1/ping", addr)
-	resp, err := http.Get(url)
+	u := fmt.Sprintf("http://%s/v1/ping", addr)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u, nil)
 	if err != nil {
-		t.Fatalf("failed to GET /v1/ping: %v", err)
+		t.Fatalf("failed to create request: %v", err)
 	}
-	defer resp.Body.Close()
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status: %d", resp.StatusCode)
 	}
+	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 	var result map[string]interface{}

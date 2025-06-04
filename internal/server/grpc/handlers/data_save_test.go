@@ -333,11 +333,3 @@ func TestServerAdmin_DataSave_ErrorBranches(t *testing.T) {
 		})
 	}
 }
-
-// brokenProto is a proto.Message that always fails to marshal
-type brokenProto struct{ pbmodels.BankCard }
-
-func (b *brokenProto) Reset()                   {}
-func (b *brokenProto) String() string           { return "" }
-func (b *brokenProto) ProtoMessage()            {}
-func (b *brokenProto) Marshal() ([]byte, error) { return nil, errors.New("fail") }

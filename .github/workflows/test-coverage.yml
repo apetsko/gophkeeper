@@ -1,0 +1,43 @@
+name: test coverage
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master 
+
+jobs:
+  local_tests:
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: praktikum
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    name: Test coverage
+    runs-on: ubuntu-latest
+    container: golang:1.23
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run go tests
+        run: |
+          go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
+          grep -vE "/(mocks|main|noexit|multichecker|shortugo.pb.go|shortugo_grpc.pb.go)" cover.tmp.out > cover.out
+
+      - name: Show coverage summary 
+        run: go tool cover -func=cover.out
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report 
+          path: cover.out
