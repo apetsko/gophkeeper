@@ -25,14 +25,7 @@ type Envelope struct {
 	storage EnvelopStorage
 }
 
-func (e *Envelope) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewEnvelope(
-	storage EnvelopStorage,
-) *Envelope {
+func NewEnvelope(storage EnvelopStorage) *Envelope {
 	return &Envelope{
 		storage: storage,
 	}
