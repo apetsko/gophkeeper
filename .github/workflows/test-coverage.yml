@@ -28,23 +28,27 @@ jobs:
         image: minio/minio
         ports:
           - 9000:9000
-          - 9001:9001 # UI порт
+          - 9001:9001  # веб-интерфейс
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
         options: >-
           --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
           --health-interval 5s
-          --health-timeout 5s
+          --health-timeout 10s
           --health-retries 5
-        command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
-
+        entrypoint: /bin/sh
+        args: -c "minio server /data --console-address :9001"
 
 
     name: Test coverage
     runs-on: ubuntu-latest
     container: golang:1.24.2
     steps:
+      - name: CHECK MinIO
+        run: |
+          curl -v http://localhost:9000/minio/health/ready
+
       - name: Checkout code
         uses: actions/checkout@v2
 
