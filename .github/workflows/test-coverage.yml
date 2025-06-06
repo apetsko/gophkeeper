@@ -1,11 +1,10 @@
 name: test coverage
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master, dev]
 
 jobs:
   local_tests:
