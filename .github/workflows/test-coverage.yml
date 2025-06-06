@@ -28,14 +28,16 @@ jobs:
         image: minio/minio
         ports:
           - 9000:9000
-        options: >-
-          --health-cmd "curl -f minio://minio:9000/minio/health/ready || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
+          - 9001:9001 # UI порт
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
 
 
 
