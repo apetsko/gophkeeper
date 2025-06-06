@@ -15,8 +15,9 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: praktikum
+          POSTGRES_USER: gophkeeper_user
+          POSTGRES_PASSWORD: gophkeeper_pass
+          POSTGRES_DB: gophkeeper_db
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
@@ -35,7 +36,7 @@ jobs:
         run: go mod verify
 
       - name: Build
-        run: go build ./cmd/server -buildvcs=false -v ./...
+        run: go build ./cmd/server/main.go
 
       - name: Run go vet
         run: go vet ./...
