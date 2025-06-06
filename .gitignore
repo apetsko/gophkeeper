@@ -5,3 +5,4 @@ uploads/*
 certs/*
 /cover.tmp.out
 /cover.out
+/cmd/server/bin/

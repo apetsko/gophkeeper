@@ -1,3 +1,4 @@
+// Package crypto provides cryptographic utilities for data encryption and decryption using envelope encryption.
 package crypto
 
 import (
@@ -13,7 +14,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// Интерфейс для удобства мокирования и внедрения зависимостей
+// KeyManagerInterface defines methods for managing user master keys.
 //
 //go:generate mockery --dir ./internal/crypto --name=KeyManagerInterface --output=../mocks/ --case=underscore
 type KeyManagerInterface interface {
@@ -24,16 +25,21 @@ type KeyManagerInterface interface {
 // Убедимся, что KeyManager реализует интерфейс
 var _ KeyManagerInterface = (*KeyManager)(nil)
 
+// KeyStorage defines the interface for persisting and retrieving encrypted master keys.
 type KeyStorage interface {
+	// GetMasterKey fetches the encrypted master key for the user.
 	GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error)
+	// SaveMasterKey stores the encrypted master key and its nonce for the user.
 	SaveMasterKey(ctx context.Context, userID int, encryptedMK, nonce []byte) (int, error)
 }
 
+// KeyManager implements KeyManagerInterface and handles master key encryption and decryption.
 type KeyManager struct {
 	storage             KeyStorage
 	serverEncryptionKey []byte
 }
 
+// NewKeyManager creates a new KeyManager with the given storage and server encryption key.
 func NewKeyManager(
 	storage KeyStorage,
 	serverEncryptionKey []byte,
@@ -44,6 +50,7 @@ func NewKeyManager(
 	}
 }
 
+// GetMasterKey retrieves and decrypts the user's master key using the server encryption key.
 func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, error) {
 	encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
 	if err != nil {
@@ -61,6 +68,8 @@ func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, erro
 	return mk, nil
 }
 
+// GetOrCreateMasterKey retrieves the user's master key if it exists and validates the password,
+// or generates and stores a new master key if not found.
 func (m *KeyManager) GetOrCreateMasterKey(
 	ctx context.Context,
 	userID int,
@@ -91,6 +100,8 @@ func (m *KeyManager) GetOrCreateMasterKey(
 	return mk, nil
 }
 
+// generateAndStoreMasterKey generates a new master key from the user's password and salt,
+// encrypts it with the server key, stores it, and returns the plaintext master key.
 func (m *KeyManager) generateAndStoreMasterKey(
 	ctx context.Context,
 	userID int,

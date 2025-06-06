@@ -1,3 +1,8 @@
+// Package main is the entry point for the GophKeeper server application.
+//
+// This server initializes configuration, logging, database (Postgres), and object storage (MinIO/S3) clients.
+// It sets up cryptographic services, JWT authentication, and starts both gRPC and HTTP servers.
+// The application supports graceful shutdown on SIGTERM, SIGINT, or SIGQUIT signals.
 package main
 
 import (
@@ -13,9 +18,15 @@ import (
 	httpsrv "github.com/apetsko/gophkeeper/internal/server/http"
 	"github.com/apetsko/gophkeeper/internal/storage"
 	"github.com/apetsko/gophkeeper/pkg/logging"
+	"github.com/apetsko/gophkeeper/pkg/version"
 )
 
+// main initializes all server dependencies and starts the gRPC and HTTP servers.
+// It handles configuration loading, logging setup, database and S3 client creation,
+// cryptographic envelope and key manager setup, and graceful shutdown.
 func main() {
+	version.PrintVersion()
+
 	slog.SetDefault(logging.LogHandler(slog.LevelDebug))
 	log := logging.NewLogger(slog.LevelDebug)
 	ctx, cancel := context.WithCancel(context.Background())

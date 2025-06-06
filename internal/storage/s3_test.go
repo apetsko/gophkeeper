@@ -3,6 +3,9 @@ package storage
 import (
 	"context"
 	"fmt"
+	"net"
+	"os"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -11,6 +14,43 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/require"
 )
+
+const (
+	minioContainerName = "test_minio_container"
+	minioEndpoint      = "localhost:9000"
+)
+
+func startTestMinio() {
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"--name", minioContainerName,
+		"-e", "MINIO_ROOT_USER=minioadmin",
+		"-e", "MINIO_ROOT_PASSWORD=minioadmin",
+		"-p", "9000:9000",
+		"minio/minio", "server", "/data")
+	_ = cmd.Run()
+	waitForMinio()
+}
+
+func stopTestMinio() {
+	_ = exec.Command("docker", "stop", minioContainerName).Run()
+}
+
+func waitForMinio() {
+	timeout := time.After(20 * time.Second)
+	tick := time.Tick(1 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			os.Exit(1)
+		case <-tick:
+			conn, err := net.DialTimeout("tcp", minioEndpoint, 1*time.Second)
+			if err == nil {
+				conn.Close()
+				return
+			}
+		}
+	}
+}
 
 func getTestS3Config() config.S3Config {
 	return config.S3Config{

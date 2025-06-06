@@ -85,10 +85,12 @@ func TestMain(m *testing.M) {
 	} else {
 		connStr = localConnString
 		startTestDB()
+		startTestMinio()
 		time.Sleep(5 * time.Second)
 	}
 	code := m.Run()
 	stopTestDB()
+	stopTestMinio()
 	os.Exit(code)
 }
 

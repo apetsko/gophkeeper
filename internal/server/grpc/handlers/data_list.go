@@ -1,3 +1,5 @@
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -13,6 +15,18 @@ import (
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches and decrypts the data (including files from S3 if needed),
+// parses the data according to its type, and returns it in the response.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The DataViewRequest message with the data record ID.
+//
+// Returns:
+// - *pbrpc.DataViewResponse: The requested data record.
+// - error: An error if access is denied or retrieval fails.
 func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) {
 	userID, ok := ctx.Value(constants.UserID).(int)
 	if !ok {

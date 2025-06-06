@@ -1,7 +1,19 @@
+// Package version contains build-time version information for the application.
 package version
 
-var (
-	Version    = "v1.0.0"
-	BuildDate  = "2025-05-17"
-	CommitHash = "abc123"
+import (
+	"fmt"
 )
+
+// Version is the current application version.
+var Version = ""
+
+// BuildDate is the date when the application was built.
+var BuildTime = ""
+
+// CommitHash is the git commit hash of the build.
+var CommitHash = ""
+
+func PrintVersion() {
+	fmt.Printf("Version: %s\nBuild time: %s\nCommitHash: %s\n", Version, BuildTime, CommitHash)
+}

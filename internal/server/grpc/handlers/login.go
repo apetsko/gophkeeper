@@ -1,3 +1,5 @@
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -12,6 +14,18 @@ import (
 	pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
+// Login handles the gRPC request for user authentication.
+//
+// This method validates the username and password, checks credentials against the database,
+// generates a JWT token upon successful authentication, and ensures the user's master key exists.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The LoginRequest message with user credentials.
+//
+// Returns:
+// - *pbrpcu.LoginResponse: User details and authentication token.
+// - error: An error if authentication fails.
 func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) {
 	if len(in.Username) < 3 || len(in.Password) < 8 {
 		return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")

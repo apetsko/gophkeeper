@@ -1,3 +1,5 @@
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -21,6 +23,19 @@ var stringToDataType = map[string]pbc.DataType{
 	"binary_data": pbc.DataType_DATA_TYPE_BINARY_DATA,
 }
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches the encrypted data from the database or S3 (for binary files),
+// decrypts the data using the user's master key, parses it according to its type (bank card, credentials, or binary data),
+// and returns the result in the response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataViewRequest message containing the record ID.
+//
+// Returns:
+//   - *pbrpc.DataViewResponse: The requested user data record.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) {
 	userID, ok := ctx.Value(constants.UserID).(int)
 	if !ok {

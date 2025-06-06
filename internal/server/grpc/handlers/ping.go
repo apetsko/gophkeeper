@@ -1,5 +1,5 @@
-// Package handlers provides gRPC handlers for administrative operations,
-// such as health checks, URL management, and statistics reporting.
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (

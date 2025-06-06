@@ -1,3 +1,8 @@
+// Package http provides the HTTP server implementation for the GophKeeper service.
+//
+// It sets up an HTTP server with gRPC-Gateway for proxying RESTful requests to the gRPC backend,
+// configures CORS middleware, and manages TLS support. The package handles server startup,
+// graceful shutdown, and integration with application configuration and logging.
 package http
 
 import (
@@ -21,7 +26,20 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// RunHTTP запускает HTTP сервер с gRPC-Gateway и CORS
+// RunHTTP starts the HTTP server with gRPC-Gateway and CORS support.
+//
+// This function configures the HTTP server to proxy requests to the gRPC backend using gRPC-Gateway,
+// sets up CORS middleware, and manages TLS if enabled. It listens on the configured address and
+// gracefully shuts down the server on context cancellation.
+//
+// Parameters:
+//   - ctx: The context for server lifecycle management.
+//   - cfg: Pointer to the application configuration.
+//   - log: Logger instance for server logging.
+//
+// Returns:
+//   - *http.Server: The running HTTP server instance.
+//   - error: An error if the server fails to start.
 func RunHTTP(ctx context.Context, cfg *config.Config, log *logging.Logger) (*http.Server, error) {
 	mux := runtime.NewServeMux(
 		runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {

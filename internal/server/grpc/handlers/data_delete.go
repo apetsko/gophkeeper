@@ -1,3 +1,5 @@
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -10,6 +12,18 @@ import (
 	pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
+// DataDelete handles the gRPC request to delete a user's data record.
+//
+// This method checks user authorization, verifies ownership of the data record,
+// and deletes the record from storage if permitted.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataDeleteRequest message with the data record ID.
+//
+// Returns:
+//   - *pbrpc.DataDeleteResponse: Success message if deletion is successful.
+//   - error: A gRPC error if the user is not authorized or an internal error occurs.
 func (s *ServerAdmin) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) {
 	userID, ok := ctx.Value(constants.UserID).(int)
 	if !ok {

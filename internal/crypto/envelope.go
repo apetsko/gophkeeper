@@ -1,3 +1,4 @@
+// Package crypto provides cryptographic utilities for data encryption and decryption using envelope encryption.
 package crypto
 
 import (
@@ -11,26 +12,36 @@ import (
 	"github.com/apetsko/gophkeeper/models"
 )
 
+// IEnvelope defines the interface for envelope encryption and decryption of user data.
+//
 //go:generate mockery --dir ./internal/crypto --name=IEnvelopeStorage --output=.../mocks/ --case=underscore
 type IEnvelope interface {
+	// EncryptUserData encrypts the given data with a randomly generated DEK, which is itself encrypted with the master key.
 	EncryptUserData(ctx context.Context, masterKey []byte, data []byte) (*models.EncryptedData, error)
+	// DecryptUserData decrypts the user data using the provided master key.
 	DecryptUserData(ctx context.Context, userData models.DBUserData, masterKey []byte) ([]byte, error)
 }
 
+// EnvelopStorage defines the interface for persisting user data.
 type EnvelopStorage interface {
+	// SaveUserData saves the user data and returns the new record's ID.
 	SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error)
 }
 
+// Envelope implements the IEnvelope interface and provides envelope encryption logic.
 type Envelope struct {
 	storage EnvelopStorage
 }
 
+// NewEnvelope creates a new Envelope with the given storage backend.
 func NewEnvelope(storage EnvelopStorage) *Envelope {
 	return &Envelope{
 		storage: storage,
 	}
 }
 
+// EncryptUserData encrypts the provided data using a randomly generated DEK, which is then encrypted with the master key.
+// Returns the encrypted data, encrypted DEK, and their nonces.
 func (e *Envelope) EncryptUserData(
 	ctx context.Context,
 	masterKey []byte,
@@ -76,6 +87,8 @@ func (e *Envelope) EncryptUserData(
 	}, nil
 }
 
+// DecryptUserData decrypts the encrypted user data using the master key.
+// It first decrypts the DEK, then uses it to decrypt the actual data.
 func (e *Envelope) DecryptUserData(
 	ctx context.Context,
 	userData models.DBUserData,

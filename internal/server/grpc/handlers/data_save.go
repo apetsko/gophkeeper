@@ -1,3 +1,5 @@
+// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -17,6 +19,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// DataSave handles the gRPC request to save user data.
+//
+// This method validates the request, retrieves the user's master key, encrypts the data,
+// and stores it in the database or S3 depending on the data type.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The DataSaveRequest message containing user data.
+//
+// Returns:
+// - *pbrpc.DataSaveResponse: A response indicating success.
+// - error: An error if validation or storage fails.
 func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
 	userID, ok := ctx.Value(constants.UserID).(int)
 	if !ok {

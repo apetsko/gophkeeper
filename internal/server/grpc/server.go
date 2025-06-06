@@ -1,3 +1,7 @@
+// Package grpc provides the gRPC server implementation for the GophKeeper service.
+//
+// This package sets up the gRPC server, configures authentication middleware,
+// registers service handlers, and manages server lifecycle and TLS settings.
 package grpc
 
 import (
@@ -26,21 +30,57 @@ import (
 	pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
+// GRPCHandler implements the gRPC server interface for the GophKeeper service.
+//
+// This struct embeds ServerAdmin to delegate business logic for user and data operations.
+// It provides gRPC method handlers for health checks, user authentication, registration,
+// and CRUD operations on user data records.
 type GRPCHandler struct {
 	pb.UnimplementedGophKeeperServer
 	*handlers.ServerAdmin
 }
 
+// NewGRPCHandler creates a new GRPCHandler instance.
+//
+// Parameters:
+//   - admin: Pointer to ServerAdmin containing business logic.
+//
+// Returns:
+//   - pb.GophKeeperServer: The gRPC server handler.
 func NewGRPCHandler(admin *handlers.ServerAdmin) pb.GophKeeperServer {
 	return &GRPCHandler{
 		ServerAdmin: admin,
 	}
 }
 
+// Ping handles a health check request for the gRPC service.
+//
+// This method verifies that the server is alive and responding to requests.
+// It delegates the call to ServerAdmin and always returns a successful response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The PingRequest message.
+//
+// Returns:
+//   - *pbrpc.PingResponse: An empty response indicating success.
+//   - error: Always nil.
 func (s *GRPCHandler) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.PingResponse, error) {
 	return s.ServerAdmin.Ping(ctx, in)
 }
 
+// Login handles the gRPC request for user authentication.
+//
+// This method validates the username and password, checks credentials against the database,
+// generates a JWT token upon successful authentication, and ensures the user's master key exists.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The LoginRequest message with user credentials.
+//
+// Returns:
+//   - *pbrpcu.LoginResponse: User details and authentication token.
+//   - error: An error if authentication fails.
 func (s *GRPCHandler) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) {
 	return s.ServerAdmin.Login(ctx, in)
 }
@@ -49,23 +89,84 @@ func (s *GRPCHandler) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
 	return s.ServerAdmin.Signup(ctx, in)
 }
 
+// DataList handles the gRPC request to list all user data records.
+//
+// This method checks user authorization and retrieves a list of data records
+// associated with the authenticated user.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataListRequest message.
+//
+// Returns:
+//   - *pbrpc.DataListResponse: List of user data records.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) {
 	return s.ServerAdmin.DataList(ctx, in)
 }
 
+// DataSave handles the gRPC request to create or update a user data record.
+//
+// This method checks user authorization, validates the input, encrypts the data,
+// and saves it to the database or storage.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataSaveRequest message with data to save.
+//
+// Returns:
+//   - *pbrpc.DataSaveResponse: Confirmation of save operation.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) {
 	return s.ServerAdmin.DataSave(ctx, in)
 }
 
+// DataDelete handles the gRPC request to delete a user's data record.
+//
+// This method checks user authorization, verifies ownership of the data record,
+// and deletes the record from storage if permitted.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataDeleteRequest message with the data record ID.
+//
+// Returns:
+//   - *pbrpc.DataDeleteResponse: Success message if deletion is successful.
+//   - error: A gRPC error if the user is not authorized or an internal error occurs.
 func (s *GRPCHandler) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) {
 	return s.ServerAdmin.DataDelete(ctx, in)
 }
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches the encrypted data from storage,
+// decrypts it, and returns the result in the response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataViewRequest message containing the record ID.
+//
+// Returns:
+//   - *pbrpc.DataViewResponse: The requested user data record.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) {
 	return s.ServerAdmin.DataView(ctx, in)
 }
 
-// RunGRPC запускает gRPC сервер
+// RunGRPC starts the gRPC server for the GophKeeper service.
+//
+// This function configures the gRPC server with optional TLS, authentication middleware,
+// logging interceptors, and registers the service handlers. It listens on the configured
+// address and manages the server lifecycle using an error group.
+//
+// Parameters:
+//   - cfg: Pointer to the application configuration.
+//   - sa: Pointer to ServerAdmin containing business logic.
+//   - log: Logger instance for server logging.
+//
+// Returns:
+//   - *grpc.Server: The running gRPC server instance.
+//   - error: An error if the server fails to start.
 func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) (*grpc.Server, error) {
 	lis, err := net.Listen("tcp", cfg.GRPCAddress)
 	if err != nil {
@@ -124,6 +225,18 @@ func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) 
 	return srv, nil
 }
 
+// authUnaryInterceptor returns a gRPC unary server interceptor for JWT authentication.
+//
+// This interceptor checks if the called method requires authentication. For protected methods,
+// it extracts and validates the JWT from the request metadata, verifies the signing method and claims,
+// and injects the user ID and JWT into the context for downstream handlers.
+//
+// Parameters:
+//   - protected: Map of gRPC method names that require authentication.
+//   - jwtSecret: Secret key used to validate JWT tokens.
+//
+// Returns:
+//   - grpc.UnaryServerInterceptor: The configured authentication interceptor.
 func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor {
 	slog.Info("Auth interceptor enabled")
 
