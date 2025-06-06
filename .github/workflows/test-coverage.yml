@@ -45,10 +45,6 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.24.2
     steps:
-      - name: CHECK MinIO
-        run: |
-          curl -v http://localhost:9000/minio/health/ready
-
       - name: Checkout code
         uses: actions/checkout@v2
 

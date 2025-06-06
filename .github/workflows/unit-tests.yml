@@ -43,11 +43,6 @@ jobs:
         args: -c "minio server /data --console-address :9001"
 
     steps:
-
-      - name: CHECK MinIO
-        run: |
-          curl -v http://localhost:9000/minio/health/ready  
-
       - uses: actions/checkout@v4
 
       - name: Set up Go
