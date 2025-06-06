@@ -20,13 +20,16 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 25432:5432
+
 
       minio:
         image: minio/minio
         ports:
           - 9000:9000
         options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-cmd "curl -f http://minio:9000/minio/health/ready || exit 1"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
