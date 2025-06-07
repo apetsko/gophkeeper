@@ -73,12 +73,17 @@ func TestS3_FullFlow(t *testing.T) {
 	s3, err := NewS3Client(ctx, cfg)
 	require.NoError(t, err)
 
-	// Ensure bucket exists
-	exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
-	require.NoError(t, err)
-	if !exists {
-		err = s3.MinioClient.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{})
-		require.NoError(t, err)
+	// Wait for bucket to be ready before upload
+	maxAttempts := 10
+	for i := 0; i < maxAttempts; i++ {
+		exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
+		if err == nil && exists {
+			break
+		}
+		time.Sleep(1 * time.Second)
+		if i == maxAttempts-1 {
+			require.NoError(t, fmt.Errorf("bucket not ready after retries: %v", err))
+		}
 	}
 
 	objectName := "test-object.txt"
