@@ -53,11 +53,15 @@ func waitForMinio() {
 }
 
 func getTestS3Config() config.S3Config {
+	endpoint := "localhost:9000"
+	if isCI {
+		endpoint = minioContainerName + ":9000"
+	}
 	return config.S3Config{
 		AccessKey: "minioadmin",
 		SecretKey: "minioadmin",
 		Bucket:    "gophkeeper",
-		Endpoint:  "localhost:9000",
+		Endpoint:  endpoint,
 	}
 }
 
