@@ -2,9 +2,9 @@ name: test coverage
 
 on:
   push:
-    branches: [main, master, dev]
+    branches: [ main, master, dev ]
   pull_request:
-    branches: [main, master, dev]
+    branches: [ main, master, dev ]
 
 jobs:
   local_tests:
@@ -12,9 +12,9 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: gophkeeper_user
-          POSTGRES_PASSWORD: gophkeeper_pass
-          POSTGRES_DB: gophkeeper_db
+          POSTGRES_USER: ${{ secrets.secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
@@ -23,6 +23,17 @@ jobs:
         ports:
           - 25432:5432
 
+      minio:
+        image: lazybit/minio
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+        volumes:
+          - ${{ github.workspace }}/data:/data
+        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
+
 
     name: Test coverage
     runs-on: ubuntu-latest
@@ -30,16 +41,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Minio Deploy
-        uses: mamal72/minio-perfect-deploy-action@main
-        with:
-          endpoint: localhost:9000
-          access_key: minioadmin
-          secret_key: minioadmin
-          bucket: 'gophkeeper'
-          source_dir: 'public'
-          target_dir: '/'
 
       - name: Run go tests
         run: |
