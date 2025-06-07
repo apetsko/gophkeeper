@@ -73,6 +73,14 @@ func TestS3_FullFlow(t *testing.T) {
 	s3, err := NewS3Client(ctx, cfg)
 	require.NoError(t, err)
 
+	// Ensure bucket exists
+	exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
+	require.NoError(t, err)
+	if !exists {
+		err = s3.MinioClient.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{})
+		require.NoError(t, err)
+	}
+
 	objectName := "test-object.txt"
 	content := []byte("hello minio test")
 	uploadData := &models.S3UploadData{
