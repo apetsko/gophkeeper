@@ -57,6 +57,7 @@ func getTestS3Config() config.S3Config {
 	if isCI {
 		endpoint = "minio:9000"
 	}
+	fmt.Println("MINIO endpoint: ", endpoint)
 	return config.S3Config{
 		AccessKey: "minioadmin",
 		SecretKey: "minioadmin",
@@ -78,6 +79,7 @@ func TestS3_FullFlow(t *testing.T) {
 	for i := 0; i < maxAttempts; i++ {
 		exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
 		if err == nil && exists {
+			fmt.Println("Bucket exists")
 			break
 		}
 		time.Sleep(1 * time.Second)
