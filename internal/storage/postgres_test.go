@@ -16,7 +16,7 @@ import (
 const (
 	localContainerName = "test_postgres_container"
 	localConnString    = "postgres://testuser:testpass@localhost:54321/testdb?sslmode=disable"
-	ciConnString       = "postgres://gophkeeper_user:gophkeeper_pass@postgres:25432/gophkeeper_db?sslmode=disable"
+	ciConnString       = "postgres://gophkeeper_user:gophkeeper_pass@postgres:5432/gophkeeper_db?sslmode=disable"
 )
 
 var (
