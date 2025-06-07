@@ -24,16 +24,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      minio:
-        image: minio/minio:latest-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: ${{ secrets.MINIO_ACCESS_KEY }}
-          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_SECRET_KEY }}
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
 
     steps:
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio \
+            -e MINIO_ROOT_USER=${{ secrets.MINIO_ACCESS_KEY }} \
+            -e MINIO_ROOT_PASSWORD=${{ secrets.MINIO_SECRET_KEY }} \
+            -p 9000:9000 \
+            minio/minio:latest-cicd server /data
+          sleep 10
+
       - name: Dump MinIO logs on failure
         if: failure()
         run: docker logs minio || true
