@@ -54,9 +54,9 @@ func waitForMinio() {
 
 func getTestS3Config() config.S3Config {
 	endpoint := "localhost:9000"
-	if isCI {
-		endpoint = "minio:9000"
-	}
+	//if isCI {
+	//	endpoint = "minio:9000"
+	//}
 	fmt.Println("MINIO endpoint: ", endpoint)
 	return config.S3Config{
 		AccessKey: "minioadmin",
@@ -68,9 +68,6 @@ func getTestS3Config() config.S3Config {
 
 func TestS3_FullFlow(t *testing.T) {
 	//TODO fix workflow
-	if isCI {
-		return
-	}
 
 	cfg := getTestS3Config()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
