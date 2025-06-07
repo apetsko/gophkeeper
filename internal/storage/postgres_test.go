@@ -86,6 +86,7 @@ func TestMain(m *testing.M) {
 		connStr = localConnString
 		startTestDB()
 		startTestMinio()
+		waitForMinioReady()
 		time.Sleep(5 * time.Second)
 	}
 	code := m.Run()

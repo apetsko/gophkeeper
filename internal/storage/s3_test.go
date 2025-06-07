@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"testing"
@@ -47,6 +48,30 @@ func waitForMinio() {
 			if err == nil {
 				conn.Close()
 				return
+			}
+		}
+	}
+}
+
+func waitForMinioReady() {
+	url := "http://localhost:9000/minio/health/ready"
+	if isCI {
+		url = "http://minio:9000/minio/health/ready"
+	}
+	timeout := time.After(60 * time.Second)
+	tick := time.Tick(2 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			panic("Timeout waiting for MinIO to be ready")
+		case <-tick:
+			resp, err := http.Get(url)
+			if err == nil && resp.StatusCode == 200 {
+				resp.Body.Close()
+				return
+			}
+			if resp != nil {
+				resp.Body.Close()
 			}
 		}
 	}
