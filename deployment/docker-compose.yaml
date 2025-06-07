@@ -18,8 +18,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.backend
-    ports:
-      - "8080:8080"
+#    ports:
+#      - "8080:8080"
     container_name: gophkeeper_backend
     networks:
       - gophkeeper_net
@@ -29,16 +29,16 @@ services:
   gophkeeper_minio_build:
     image: minio/minio:latest
     container_name: gophkeeper_minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
     volumes:
-      - ../gophstorage/minio/data:/data
-      - ../gophstorage/minio/config:/root/.minio
+      - ../gophstorage_docker/minio/data:/data
+      - ../gophstorage_docker/minio/config:/root/.minio
     networks:
       - gophkeeper_net
     healthcheck:
@@ -51,8 +51,8 @@ services:
     image: postgres:17
     container_name: gophkeeper_postgres
     restart: always
-    ports:
-      - "25432:5432"
+#    ports:
+#      - "25432:5432"
     environment:
       POSTGRES_USER: gophkeeper_user
       POSTGRES_PASSWORD: gophkeeper_pass

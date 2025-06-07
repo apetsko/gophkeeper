@@ -21,6 +21,6 @@ COPY --from=builder /app/server .
 
 # Копируем config и certs, если они в корне проекта (скорректируйте пути при необходимости)
 COPY --from=builder /app/deployment/backend/config.yaml .
-COPY --from=builder /app/deployment/certs ./certs
+
 
 CMD ["./server", "-f", "config.yaml"]
