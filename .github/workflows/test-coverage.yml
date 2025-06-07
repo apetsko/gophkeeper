@@ -15,15 +15,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run go tests with coverage
+      - name: Run go tests
         run: |
           go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
           grep -vE "/(mocks|main|google|protogen|client)" cover.tmp.out > cover.out
-          go-test-coverage --config=./testcoverage.yml
-          go tool cover -html=cover.out -o coverage.html
+
+      - name: Show coverage summary
+        run: go tool cover -func=cover.out
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage.html
+          path: cover.out
