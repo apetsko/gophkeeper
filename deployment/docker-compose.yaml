@@ -29,25 +29,39 @@ services:
       - certs_data:/app/certs
 
   gophkeeper_minio_build:
-    image: minio/minio:latest
     container_name: gophkeeper_minio
+    image: minio/minio:latest
     ports:
       - "9000:9000"
       - "9001:9001"
+    volumes:
+      - ../../gophstorage_docker/minio/data:/data
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
-    volumes:
-      - ../../gophstorage_docker/minio/data:/data
-      - ../../gophstorage_docker/minio/config:/root/.minio
+    command: server /data --console-address :9001
     networks:
       - gophkeeper_net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  create-bucket:
+    image: minio/mc:latest
+    environment:
+      MC_HOST_minio: http://${minioadmin}:${minioadmin}@gophkeeper_minio:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until mc ls minio > /dev/null 2>&1; do
+          sleep 0.5
+        done
+
+        mc mb gophkeeper_minio/post-bucket
 
   gophkeeper_postgres_build:
     image: postgres:17
