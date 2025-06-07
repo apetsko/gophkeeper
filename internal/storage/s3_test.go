@@ -95,7 +95,7 @@ func TestS3_FullFlow(t *testing.T) {
 	//TODO fix workflow
 
 	cfg := getTestS3Config()
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	s3, err := NewS3Client(ctx, cfg)
@@ -107,9 +107,10 @@ func TestS3_FullFlow(t *testing.T) {
 		exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
 		if err == nil && exists {
 			fmt.Println("Bucket exists")
+			time.Sleep(2 * time.Second)
 			break
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 		if i == maxAttempts-1 {
 			require.NoError(t, fmt.Errorf("bucket not ready after retries: %v", err))
 		}
