@@ -42,7 +42,18 @@ jobs:
           --entrypoint sh -c "minio server /data --console-address ':9001'"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Minio Deploy
+        uses: mamal72/minio-perfect-deploy-action@main
+        with:
+          endpoint: localhost:9000
+          access_key: minioadmin
+          secret_key: minioadmin
+          bucket: 'gophkeeper'
+          source_dir: 'public'
+          target_dir: '/'
 
       - name: Set up Go
         uses: actions/setup-go@v4
