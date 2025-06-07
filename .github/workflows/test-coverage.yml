@@ -8,37 +8,10 @@ on:
 
 jobs:
   local_tests:
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
-      minio:
-        image: minio/minio:latest-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: ${{ secrets.MINIO_ACCESS_KEY }}
-          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_SECRET_KEY }}
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
-
-
     name: Test coverage
     runs-on: ubuntu-latest
     container: golang:1.24.2
     steps:
-      - name: Dump MinIO logs on failure
-        if: failure()
-        run: docker logs minio || true
-
       - name: Checkout code
         uses: actions/checkout@v4
 

@@ -3,10 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"os/exec"
 	"testing"
 	"time"
 
@@ -14,102 +10,71 @@ import (
 	"github.com/apetsko/gophkeeper/models"
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/require"
+	tc "github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const (
-	minioContainerName = "test_minio_container"
-	minioEndpoint      = "localhost:9000"
-)
+var minioContainer tc.Container
 
-func startTestMinio() {
-	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"--name", minioContainerName,
-		"-e", "MINIO_ROOT_USER=minioadmin",
-		"-e", "MINIO_ROOT_PASSWORD=minioadmin",
-		"-p", "9000:9000",
-		"minio/minio", "server", "/data")
-	_ = cmd.Run()
-	waitForMinio()
-}
-
-func stopTestMinio() {
-	_ = exec.Command("docker", "stop", minioContainerName).Run()
-}
-
-func waitForMinio() {
-	timeout := time.After(20 * time.Second)
-	tick := time.Tick(1 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			os.Exit(1)
-		case <-tick:
-			conn, err := net.DialTimeout("tcp", minioEndpoint, 1*time.Second)
-			if err == nil {
-				conn.Close()
-				return
-			}
+func startTestMinio(t *testing.T) (endpoint string, terminate func(), err error) {
+	ctx := context.Background()
+	req := tc.ContainerRequest{
+		Image:        "minio/minio:latest",
+		ExposedPorts: []string{"9000/tcp"},
+		Env: map[string]string{
+			"MINIO_ROOT_USER":     "minioadmin",
+			"MINIO_ROOT_PASSWORD": "minioadmin",
+		},
+		Cmd:        []string{"server", "/data"},
+		WaitingFor: wait.ForListeningPort("9000/tcp").WithStartupTimeout(20 * time.Second),
+	}
+	container, err := tc.GenericContainer(ctx, tc.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		if t != nil {
+			require.NoError(t, err)
 		}
+		return "", nil, err
 	}
-}
+	minioContainer = container
 
-func waitForMinioReady() {
-	url := "http://localhost:9000/minio/health/ready"
-	if isCI {
-		url = "http://minio:9000/minio/health/ready"
-	}
-	timeout := time.After(60 * time.Second)
-	tick := time.Tick(2 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			panic("Timeout waiting for MinIO to be ready")
-		case <-tick:
-			resp, err := http.Get(url)
-			if err == nil && resp.StatusCode == 200 {
-				resp.Body.Close()
-				return
-			}
-			if resp != nil {
-				resp.Body.Close()
-			}
+	host, err := container.Host(ctx)
+	if err != nil {
+		if t != nil {
+			require.NoError(t, err)
 		}
+		return "", nil, err
 	}
-}
+	port, err := container.MappedPort(ctx, "9000")
+	if err != nil {
+		if t != nil {
+			require.NoError(t, err)
+		}
+		return "", nil, err
+	}
+	endpoint = fmt.Sprintf("%s:%s", host, port.Port())
 
-func getTestS3Config() config.S3Config {
-	return config.S3Config{
-		AccessKey: "minioadmin",
-		SecretKey: "minioadmin",
-		Bucket:    "gophkeeper",
-		Endpoint:  "localhost:9000",
-	}
+	return endpoint, func() { _ = container.Terminate(ctx) }, nil
 }
 
 func TestS3_FullFlow(t *testing.T) {
-	//TODO fix workflow
+	endpoint, terminate, err := startTestMinio(t)
+	require.NoError(t, err)
+	defer terminate()
 
-	cfg := getTestS3Config()
+	cfg := config.S3Config{
+		AccessKey: "minioadmin",
+		SecretKey: "minioadmin",
+		Bucket:    "gophkeeper",
+		Endpoint:  endpoint,
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	s3, err := NewS3Client(ctx, cfg)
 	require.NoError(t, err)
-
-	// Wait for bucket to be ready before upload
-	maxAttempts := 10
-	for i := 0; i < maxAttempts; i++ {
-		exists, err := s3.MinioClient.BucketExists(ctx, cfg.Bucket)
-		if err == nil && exists {
-			fmt.Println("Bucket exists")
-			time.Sleep(2 * time.Second)
-			break
-		}
-		time.Sleep(2 * time.Second)
-		if i == maxAttempts-1 {
-			require.NoError(t, fmt.Errorf("bucket not ready after retries: %v", err))
-		}
-	}
 
 	objectName := "test-object.txt"
 	content := []byte("hello minio test")

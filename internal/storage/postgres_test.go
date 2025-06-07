@@ -4,71 +4,52 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"os/exec"
 	"testing"
 	"time"
 
 	"github.com/apetsko/gophkeeper/models"
 	"github.com/apetsko/gophkeeper/pkg/logging"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	localContainerName = "test_postgres_container"
-	localConnString    = "postgres://testuser:testpass@localhost:54321/testdb?sslmode=disable"
-	ciConnString       = "postgres://gophkeeper_user:gophkeeper_pass@postgres:5432/gophkeeper_db?sslmode=disable"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 var (
-	logger  = logging.NewLogger(slog.LevelDebug)
-	connStr string
-	isCI    = os.Getenv("CI") == "true"
+	logger      = logging.NewLogger(slog.LevelDebug)
+	connStr     string
+	pgContainer *postgres.PostgresContainer
 )
 
 func startTestDB() {
-	if isCI {
-		connStr = ciConnString
-		logger.Info("🔄 Tests are running in CI. Using built-in PostgreSQL...")
-		return
+	ctx := context.Background()
+	var err error
+	pgContainer, err = postgres.Run(ctx,
+		"postgres:15.3-alpine",
+		postgres.WithDatabase("testdb"),
+		postgres.WithUsername("testuser"),
+		postgres.WithPassword("testpass"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).WithStartupTimeout(15*time.Second)),
+	)
+	if err != nil {
+		logger.Error("failed to start postgres container", slog.Any("err", err))
+		os.Exit(1)
 	}
 
-	connStr = localConnString
-	logger.Info("🔄 Starting test database in Docker...")
-
-	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"--name", localContainerName,
-		"-e", "POSTGRES_DB=testdb",
-		"-e", "POSTGRES_USER=testuser",
-		"-e", "POSTGRES_PASSWORD=testpass",
-		"-p", "54321:5432",
-		"postgres:17")
-	require.NoError(nil, cmd.Run())
-	waitForTestDB()
+	connStr, err = pgContainer.ConnectionString(ctx, "sslmode=disable")
+	if err != nil {
+		logger.Error("failed to get connection string", slog.Any("err", err))
+		os.Exit(1)
+	}
+	logger.Info("✅ PostgreSQL test container started")
 }
 
 func stopTestDB() {
-	if !isCI {
-		logger.Info("🛑 Stopping local test database...")
-		_ = exec.Command("docker", "stop", localContainerName).Run()
-	}
-}
-
-func waitForTestDB() {
-	timeout := time.After(30 * time.Second)
-	tick := time.Tick(1 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			logger.Error("❌ Timeout while waiting for PostgreSQL")
-			os.Exit(1)
-		case <-tick:
-			storage, err := NewPostgresClient(connStr)
-			if err == nil {
-				_ = storage.Close()
-				logger.Info("✅ PostgreSQL is ready")
-				return
-			}
-		}
+	if pgContainer != nil {
+		logger.Info("🛑 Stopping test database container...")
+		_ = pgContainer.Terminate(context.Background())
 	}
 }
 
@@ -80,18 +61,17 @@ func setupTestStorage(t *testing.T) IStorage {
 }
 
 func TestMain(m *testing.M) {
-	if isCI {
-		connStr = ciConnString
-	} else {
-		connStr = localConnString
-		startTestDB()
-		startTestMinio()
-		waitForMinioReady()
-		time.Sleep(5 * time.Second)
+	startTestDB()
+	_, terminateMinio, err := startTestMinio(nil)
+	if err != nil {
+		logger.Error("failed to start minio container", slog.Any("err", err))
+		stopTestDB()
+		os.Exit(1)
 	}
+	time.Sleep(5 * time.Second)
 	code := m.Run()
 	stopTestDB()
-	stopTestMinio()
+	terminateMinio()
 	os.Exit(code)
 }
 

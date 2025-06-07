@@ -2,43 +2,16 @@ name: Go unit tests
 
 on:
   push:
-    branches: [main, master, dev]
+    branches: [ main, master, dev ]
   pull_request:
-    branches: [main, master, dev]
+    branches: [ main, master, dev ]
 
 jobs:
   unittest:
     runs-on: ubuntu-latest
-#    container: golang:1.24.2
-
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
+    container: golang:1.24.2
 
     steps:
-      - name: Start MinIO
-        run: |
-          docker run -d --name minio \
-            -e MINIO_ROOT_USER=${{ secrets.MINIO_ACCESS_KEY }} \
-            -e MINIO_ROOT_PASSWORD=${{ secrets.MINIO_SECRET_KEY }} \
-            -p 9000:9000 \
-            minio/minio:latest-cicd server /data
-          sleep 10
-
-      - name: Dump MinIO logs on failure
-        if: failure()
-        run: docker logs minio || true
-
       - name: Checkout code
         uses: actions/checkout@v4
 
