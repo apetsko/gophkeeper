@@ -12,6 +12,9 @@ services:
       - certs_data:/usr/share/nginx/html/certs
 
   backend:
+    depends_on:
+      - gophkeeper_postgres_build
+      - gophkeeper_minio_build
     build:
       context: ./backend
       dockerfile: Dockerfile.backend
@@ -38,6 +41,11 @@ services:
       - ../gophstorage/minio/config:/root/.minio
     networks:
       - gophkeeper_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   gophkeeper_postgres_build:
     image: postgres:17

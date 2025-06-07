@@ -2,15 +2,25 @@ FROM golang:1.24.2 AS builder
 
 WORKDIR /app
 
-RUN git clone  --branch dev --single-branch https://github.com/apetsko/gophkeeper.git . \
-    && go build ./cmd/server
+# Клонируем нужную ветку
+RUN git clone --branch dev --single-branch https://github.com/apetsko/gophkeeper.git .
+
+# Собираем бинарник с ldflags
+RUN go build -ldflags "\
+    -X 'gophkeeper/pkg/version.Version=1.0.0' \
+    -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+    -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+    -o server ./cmd/server
 
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/server/ .
-COPY --from=builder /app/deployment/backend/config.yaml .
-COPY --from=builder /app/certs .
+# Копируем собранный бинарник
+COPY --from=builder /app/server .
+
+# Копируем config и certs, если они в корне проекта (скорректируйте пути при необходимости)
+COPY config.yaml .
+COPY --from=builder /app/certs ./certs
 
 CMD ["./server", "-f", "config.yaml"]

@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -56,7 +57,10 @@ func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) {
 		return nil, fmt.Errorf("error init minio client: %v", err)
 	}
 
+	log.Printf("Checking if bucket %s exists...", cfg.Bucket)
 	bucketExists, err := minioClient.BucketExists(ctx, cfg.Bucket)
+	log.Printf("BucketExists call returned: %v, err: %v", bucketExists, err)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to check bucket existence: %v", err)
 	}
