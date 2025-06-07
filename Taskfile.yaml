@@ -110,7 +110,7 @@ tasks:
     desc: build and run everything in docker
     dir: deployment
     cmds:
-      - mkdir certs
+      - mkdir certs -p
       - mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 127.0.0.1 ::1
       - docker compose up --build
 
