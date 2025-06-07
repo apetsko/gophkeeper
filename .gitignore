@@ -9,3 +9,6 @@ certs/*
 /server
 /deployment/certs/server.crt
 /deployment/certs/server.key
+gophstorage_docker/*
+/deployment/frontend/certs/server.crt
+/deployment/frontend/certs/server.key
