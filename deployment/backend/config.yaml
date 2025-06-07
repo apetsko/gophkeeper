@@ -1,0 +1,20 @@
+GRPC_ADDRESS: ":3007"
+HTTP_ADDRESS: ":8082"
+
+SERVER_ENCRYPTION_KEY: "f7c13a8b6e42d9a0fd3e1b2c8d75e4f1a93cb1d5e4f6a89bcde123456789abcd"
+
+DATABASE_DSN: "postgresql://gophkeeper_user:gophkeeper_pass@gophkeeper_postgres_build:5432/gophkeeper_db?sslmode=disable"
+
+JWT:
+  JWT_SECRET: "secretkey"
+
+S3:
+  S3_ACCESS_KEY: "minioadmin"
+  S3_SECRET_KEY: "minioadmin"
+  S3_BUCKET: "gophkeeper"
+  S3_ENDPOINT: "gophkeeper_minio_build:9000"
+
+TLS:
+  TLS_ENABLE_HTTPS: false
+  TLS_CERT_PATH: "certs/server.crt"
+  TLS_KEY_PATH: "certs/server.key"

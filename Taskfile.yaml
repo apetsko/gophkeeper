@@ -106,4 +106,13 @@ tasks:
       - docker compose -f docker-compose.storage.yaml down
 
 
+  docker-up:
+    desc: build and run everything in docker
+    dir: deployment
+    cmds:
+      - mkdir frontend/certs -p
+      - mkcert -cert-file frontend/certs/server.crt -key-file frontend/certs/server.key localhost 127.0.0.1 ::1
+      - docker compose up --build
+
+
 

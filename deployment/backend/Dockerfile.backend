@@ -1,0 +1,16 @@
+FROM golang:1.24.2 AS builder
+
+WORKDIR /app
+
+RUN git clone  --branch dev --single-branch https://github.com/apetsko/gophkeeper.git . \
+    && go build ./cmd/server
+
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/server/ .
+COPY --from=builder /app/deployment/backend/config.yaml .
+COPY --from=builder /app/certs .
+
+CMD ["./server", "-f", "config.yaml"]
