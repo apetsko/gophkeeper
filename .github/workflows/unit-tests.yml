@@ -36,6 +36,10 @@ jobs:
         options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
 
     steps:
+      - name: Dump MinIO logs on failure
+      - if: failure()
+        run: docker logs minio || true
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -57,3 +61,5 @@ jobs:
         env:
           CI: "true"
         run: go test -race -v ./...
+
+
