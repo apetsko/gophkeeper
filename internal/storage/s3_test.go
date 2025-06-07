@@ -97,9 +97,19 @@ func TestS3_FullFlow(t *testing.T) {
 		MetaContent: "test-meta",
 	}
 
-	// Upload
-	uploadInfo, err := s3.Upload(ctx, content, uploadData)
-	require.NoError(t, err)
+	// Retry upload if MinIO is not ready
+	var uploadInfo *minio.UploadInfo
+	maxUploadAttempts := 10
+	for i := 0; i < maxUploadAttempts; i++ {
+		uploadInfo, err = s3.Upload(ctx, content, uploadData)
+		if err == nil {
+			break
+		}
+		if i == maxUploadAttempts-1 {
+			require.NoError(t, err, "failed to upload after retries")
+		}
+		time.Sleep(1 * time.Second)
+	}
 	require.Equal(t, objectName, uploadInfo.Key)
 
 	// Download
