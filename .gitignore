@@ -7,3 +7,5 @@ certs/*
 /cover.out
 /cmd/server/bin/
 /server
+/deployment/certs/server.crt
+/deployment/certs/server.key
