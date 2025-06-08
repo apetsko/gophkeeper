@@ -3,17 +3,30 @@ version: "3"
 tasks:
   run:
     desc: run all
-    cmds:
-      - go-task -p front run-server
+    deps:
+      - run-server
+      - front
+
 
   front:
     watch: true
     desc: run local gophkeeper
     dir: front
     cmds:
+      - npm install
       - npm run dev -- --port 3000 --host
 
   run-server:
+    watch: true
+    desc: run server
+    deps:
+      - dev:storage-up
+      - gen-certs
+    cmds:
+      - go run cmd/server/main.go -f config.yaml
+    silent: true
+
+  wgos:
     watch: true
     desc: run server
     deps:
@@ -108,16 +121,26 @@ tasks:
     cmds:
       - go test ./...
 
+  dev:storage-up:
+    desc: run docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml up -d
+
+  dev:storage-down:
+    desc: stop docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml down
+
 
   storage-up:
     desc: run docker minio & postgresql
     cmds:
-      - docker compose -f docker-compose.storage.yaml up -d
+      - docker compose -f ./deployment/docker-compose.storage.yaml up -d
 
   storage-down:
     desc: stop docker minio & postgresql
     cmds:
-      - docker compose -f docker-compose.storage.yaml down
+      - docker compose -f ./deployment/docker-compose.storage.yaml down
 
 
   docker-up:

@@ -4,7 +4,9 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/apetsko/gophkeeper/models"
 	"github.com/apetsko/gophkeeper/pkg/jwt"
@@ -47,6 +49,20 @@ func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
 	token, err := jwt.GenerateJWT(userID, in.Username, s.JWTConfig.Secret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	// TODO: нужно записать в потокобезопасную мапу в памяти
+	_, errMasterKey := s.KeyManager.GetOrCreateMasterKey(
+		ctx,
+		userID,
+		in.Password,
+		nil,
+	)
+
+	if errMasterKey != nil {
+		slog.Error("failed to generate encrypted master key: " + errMasterKey.Error())
+
+		return nil, errors.New("failed to generate encrypted master key")
 	}
 
 	return &pbrpcu.SignupResponse{
