@@ -57,6 +57,15 @@ GophKeeper is a secure backend service written in Go for storing and managing se
 - **Password Hashing:** bcrypt
 - **Authentication:** JWT
 
+## Quick Start
+
+To build and run the project locally, use the following command:
+
+```sh
+task run
+```
+
+
 ## Intended Use
 
 GophKeeper is suitable for applications where users need to securely store, retrieve, and manage sensitive data with strong authentication and encryption.
