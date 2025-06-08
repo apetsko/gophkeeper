@@ -11,6 +11,8 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -55,17 +57,29 @@ type Storage struct {
 //   - error: An error if migrations fail, otherwise nil.
 func migrate(conn string) error {
 	goose.SetBaseFS(migrations)
-	db, err := sql.Open("pgx", conn)
+
+	var db *sql.DB
+	var err error
+	for i := 0; i < 10; i++ {
+		db, err = sql.Open("pgx", conn)
+		if err == nil {
+			err = db.Ping()
+			if err == nil {
+				break // подключились!
+			}
+		}
+		log.Printf("waiting for DB... (%d/10)", i+1)
+		time.Sleep(2 * time.Second)
+	}
 	if err != nil {
-		return fmt.Errorf("goose: failed to open DB: %w", err)
+		return fmt.Errorf("goose: failed to connect to DB after retries: %w", err)
 	}
 	defer db.Close()
 
 	err = goose.Up(db, "migrations")
 	if err != nil {
-		return fmt.Errorf("failed to apply migrations: %w", err)
+		return fmt.Errorf("goose: migration failed: %w", err)
 	}
-
 	return nil
 }
 
