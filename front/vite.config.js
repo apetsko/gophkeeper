@@ -19,8 +19,8 @@ export default defineConfig({
   },
     server: {
       https: {
-        key: 'certs/server.key',
-        cert: 'certs/server.crt',
+        key: '../certs/server.key',
+        cert: '../certs/server.crt',
       },
    }
 })
