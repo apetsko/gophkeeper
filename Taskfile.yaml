@@ -9,7 +9,6 @@ tasks:
 
 
   front:
-    watch: true
     desc: run local gophkeeper
     dir: front
     cmds:
@@ -17,7 +16,6 @@ tasks:
       - npm run dev -- --port 3000 --host
 
   run-server:
-    watch: true
     desc: run server
     deps:
       - dev:storage-up
@@ -27,7 +25,6 @@ tasks:
     silent: true
 
   wgos:
-    watch: true
     desc: run server
     deps:
       - storage-up
