@@ -8,8 +8,6 @@ services:
     ports:
       - "3000:443"
     container_name: gophkeeper_frontend
-    networks:
-      - gophkeeper_net
     volumes:
       - certs_data:/usr/share/nginx/html/certs
 
@@ -20,14 +18,8 @@ services:
     ports:
       - "8082:8082"
     container_name: gophkeeper_backend
-    networks:
-      - gophkeeper_net
     volumes:
       - certs_data:/app/certs
-
-networks:
-  gophkeeper_net:
-    driver: bridge
 
 volumes:
   certs_data:
