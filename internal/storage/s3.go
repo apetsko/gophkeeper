@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -18,16 +17,6 @@ import (
 	"github.com/apetsko/gophkeeper/config"
 	"github.com/apetsko/gophkeeper/models"
 )
-
-type hostRoundTripper struct {
-	host string
-	rt   http.RoundTripper
-}
-
-func (h *hostRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Host = h.host
-	return h.rt.RoundTrip(req)
-}
 
 // S3Client defines the interface for S3-compatible object storage operations.
 //
@@ -58,15 +47,10 @@ type S3 struct {
 //   - error: An error if initialization fails.
 func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) {
 	var err error
-	customTransport := &hostRoundTripper{
-		rt:   http.DefaultTransport,
-		host: "localhost",
-	}
 
 	minioClient, err := minio.New(cfg.Endpoint, &minio.Options{
-		Creds:     credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
-		Secure:    false,
-		Transport: customTransport,
+		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
+		Secure: false,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error init minio client: %v", err)

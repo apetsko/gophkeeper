@@ -14,12 +14,9 @@ services:
       - certs_data:/usr/share/nginx/html/certs
 
   backend:
-    depends_on:
-      - gophkeeper_minio_build
-      - gophkeeper_postgres_build
     build:
       context: ./backend
-      dockerfile: Dockerfile.backend
+      dockerfile: Dockerfile.backend.local
     ports:
       - "8082:8082"
     container_name: gophkeeper_backend
@@ -27,62 +24,6 @@ services:
       - gophkeeper_net
     volumes:
       - certs_data:/app/certs
-
-  gophkeeper_minio_build:
-    container_name: gophkeeper_minio
-    image: minio/minio:latest
-    ports:
-      - "9000:9000"
-    volumes:
-      - ../../gophstorage_docker/minio/data:/data
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address :9001
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add gophkeeper_minio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc rm -r --force gophkeeper_minio/gophkeeper;
-      /usr/bin/mc mb gophkeeper_minio/gophkeeper;
-      /usr/bin/mc policy download gophkeeper_minio/gophkeeper;
-      exit 0;
-      "
-    networks:
-      - gophkeeper_net
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY;
-      /usr/bin/mc rm -r --force myminio/somebucketname;
-      /usr/bin/mc mb myminio/somebucketname;
-      /usr/bin/mc policy download myminio/somebucketname;
-      exit 0;
-      "
-
-  gophkeeper_postgres_build:
-    image: postgres:17
-    container_name: gophkeeper_postgres
-    restart: always
-#    ports:
-#      - "25432:5432"
-    environment:
-      POSTGRES_USER: gophkeeper_user
-      POSTGRES_PASSWORD: gophkeeper_pass
-      POSTGRES_DB: gophkeeper_db
-    volumes:
-      - ../../gophstorage_docker/postgres/data:/var/lib/postgresql/data
-    networks:
-      - gophkeeper_net
 
 networks:
   gophkeeper_net:

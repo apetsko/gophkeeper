@@ -107,6 +107,8 @@ tasks:
 
 
   docker-up:
+    deps:
+      - storage-up
     desc: build and run everything in docker
     dir: deployment
     cmds:

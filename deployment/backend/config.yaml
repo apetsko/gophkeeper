@@ -3,7 +3,7 @@ HTTP_ADDRESS: ":8082"
 
 SERVER_ENCRYPTION_KEY: "f7c13a8b6e42d9a0fd3e1b2c8d75e4f1a93cb1d5e4f6a89bcde123456789abcd"
 
-DATABASE_DSN: "postgresql://gophkeeper_user:gophkeeper_pass@gophkeeper_postgres:5432/gophkeeper_db?sslmode=disable"
+DATABASE_DSN: "postgresql://gophkeeper_user:gophkeeper_pass@localhost:5432/gophkeeper_db?sslmode=disable"
 
 JWT:
   JWT_SECRET: "secretkey"
