@@ -77,15 +77,15 @@
 				
 				<option value="file10">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/server_admin.go (100.0%)</option>
 				
-				<option value="file11">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/signup.go (84.6%)</option>
+				<option value="file11">github.com/apetsko/gophkeeper/internal/server/grpc/handlers/signup.go (88.2%)</option>
 				
 				<option value="file12">github.com/apetsko/gophkeeper/internal/server/grpc/server.go (46.6%)</option>
 				
 				<option value="file13">github.com/apetsko/gophkeeper/internal/server/http/server.go (67.6%)</option>
 				
-				<option value="file14">github.com/apetsko/gophkeeper/internal/storage/postgres.go (80.5%)</option>
+				<option value="file14">github.com/apetsko/gophkeeper/internal/storage/postgres.go (82.4%)</option>
 				
-				<option value="file15">github.com/apetsko/gophkeeper/internal/storage/s3.go (74.1%)</option>
+				<option value="file15">github.com/apetsko/gophkeeper/internal/storage/s3.go (79.3%)</option>
 				
 				<option value="file16">github.com/apetsko/gophkeeper/pkg/jwt/jwt.go (100.0%)</option>
 				
@@ -93,7 +93,9 @@
 				
 				<option value="file18">github.com/apetsko/gophkeeper/pkg/password/password.go (100.0%)</option>
 				
-				<option value="file19">github.com/apetsko/gophkeeper/utils/utils.go (100.0%)</option>
+				<option value="file19">github.com/apetsko/gophkeeper/pkg/version/version.go (0.0%)</option>
+				
+				<option value="file20">github.com/apetsko/gophkeeper/utils/utils.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -116,7 +118,12 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package config
+		<pre class="file" id="file0" style="display: none">// Package config provides configuration loading and validation for the GophKeeper application.
+//
+// It supports loading configuration from environment variables or a YAML file, and validates required fields.
+// The Config struct holds all application settings, including database, server, JWT, S3, and TLS options.
+// The New function loads and validates the configuration, decoding the server encryption key as needed.
+package config
 
 import (
         "encoding/hex"
@@ -132,34 +139,58 @@ import (
         "gopkg.in/yaml.v3"
 )
 
+// Config holds all application configuration settings, loaded from environment variables or a YAML file.
 type Config struct {
-        ConfigFile  string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+        // ConfigFile is the path to the YAML configuration file.
+        ConfigFile string `env:"CONFIG_FILE" yaml:"CONFIG_FILE"`
+        // DatabaseDSN is the Data Source Name for connecting to the Postgres database.
         DatabaseDSN string `env:"DATABASE_DSN" yaml:"DATABASE_DSN" validate:"required"`
+        // GRPCAddress is the address for the gRPC server to listen on.
         GRPCAddress string `env:"GRPC_ADDRESS" yaml:"GRPC_ADDRESS" validate:"required"`
+        // HTTPAddress is the address for the HTTP server to listen on.
         HTTPAddress string `env:"HTTP_ADDRESS" yaml:"HTTP_ADDRESS" validate:"required"`
+        // StrServerEK is the hex-encoded server encryption key.
         StrServerEK string `env:"SERVER_ENCRYPTION_KEY" yaml:"SERVER_ENCRYPTION_KEY" validate:"required"`
-        ServerEK    []byte
-        JWT         JWTConfig `yaml:"JWT"`
-        S3Config    S3Config  `yaml:"S3"`
-        TLSConfig   TLSConfig `yaml:"TLS"`
+        // ServerEK is the decoded server encryption key as a byte slice.
+        ServerEK []byte
+        // JWT holds JWT-related configuration.
+        JWT JWTConfig `yaml:"JWT"`
+        // S3Config holds S3/MinIO-related configuration.
+        S3Config S3Config `yaml:"S3"`
+        // TLSConfig holds TLS/HTTPS-related configuration.
+        TLSConfig TLSConfig `yaml:"TLS"`
 }
+
+// JWTConfig contains settings for JWT authentication.
 type JWTConfig struct {
+        // Secret is the secret key for signing JWT tokens.
         Secret string `env:"JWT_SECRET" yaml:"JWT_SECRET" validate:"required"`
 }
 
+// S3Config contains settings for S3/MinIO object storage.
 type S3Config struct {
+        // AccessKey is the S3 access key.
         AccessKey string `env:"S3_ACCESS_KEY" yaml:"S3_ACCESS_KEY" validate:"required"`
+        // SecretKey is the S3 secret key.
         SecretKey string `env:"S3_SECRET_KEY" yaml:"S3_SECRET_KEY" validate:"required"`
-        Bucket    string `env:"S3_BUCKET" yaml:"S3_BUCKET" validate:"required"`
-        Endpoint  string `env:"S3_ENDPOINT" yaml:"S3_ENDPOINT" validate:"required"`
+        // Bucket is the S3 bucket name.
+        Bucket string `env:"S3_BUCKET" yaml:"S3_BUCKET" validate:"required"`
+        // Endpoint is the S3 service endpoint.
+        Endpoint string `env:"S3_ENDPOINT" yaml:"S3_ENDPOINT" validate:"required"`
 }
 
+// TLSConfig contains settings for enabling HTTPS/TLS.
 type TLSConfig struct {
-        EnableHTTPS bool   `env:"TLS_ENABLE_HTTPS" yaml:"TLS_ENABLE_HTTPS"`
-        CertPath    string `env:"TLS_CERT_PATH" yaml:"TLS_CERT_PATH"`
-        KeyPath     string `env:"TLS_KEY_PATH" yaml:"TLS_KEY_PATH"`
+        // EnableHTTPS enables HTTPS if set to true.
+        EnableHTTPS bool `env:"TLS_ENABLE_HTTPS" yaml:"TLS_ENABLE_HTTPS"`
+        // CertPath is the path to the TLS certificate file.
+        CertPath string `env:"TLS_CERT_PATH" yaml:"TLS_CERT_PATH"`
+        // KeyPath is the path to the TLS private key file.
+        KeyPath string `env:"TLS_KEY_PATH" yaml:"TLS_KEY_PATH"`
 }
 
+// New loads and validates the application configuration from a YAML file or environment variables.
+// It decodes the server encryption key and returns a Config instance.
 func New() (*Config, error) <span class="cov10" title="6">{
         var cfg Config
 
@@ -198,6 +229,7 @@ func New() (*Config, error) <span class="cov10" title="6">{
         return &amp;cfg, nil</span>
 }
 
+// readConfigFile loads configuration from the specified YAML file into the Config struct.
 func (cfg *Config) readConfigFile() error <span class="cov4" title="2">{
         b, err := os.ReadFile(cfg.ConfigFile)
         if err != nil </span><span class="cov1" title="1">{
@@ -210,30 +242,46 @@ func (cfg *Config) readConfigFile() error <span class="cov4" title="2">{
 }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package constants
+		<pre class="file" id="file1" style="display: none">// Package constants defines common constants and utility functions used across the GophKeeper application.
+package constants
 
 import pbc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/common"
 
+// mdKey is a custom type for metadata keys used in context.
 type mdKey string
+
+// contextKey is a custom type for context keys.
 type contextKey string
 
 const (
-        JWT    mdKey      = "jwt"
+        // JWT is the context key for storing JWT tokens in metadata.
+        JWT mdKey = "jwt"
+        // UserID is the context key for storing user ID in context.
         UserID contextKey = "userID"
 )
 
 const (
-        BankCard    string = "bank_card"
+        // BankCard represents the data type for bank card information.
+        BankCard string = "bank_card"
+        // Credentials represents the data type for user credentials.
         Credentials string = "credentials"
-        BinaryData  string = "binary_data"
+        // BinaryData represents the data type for binary data.
+        BinaryData string = "binary_data"
 )
 
 const (
-        KeyLength int    = 32
-        Mem       uint32 = 64 * 1024
-        Threads   uint8  = 4
+        // KeyLength is the required length (in bytes) for encryption keys.
+        KeyLength int = 32
+        // Mem is the memory parameter for cryptographic operations (e.g., Argon2).
+        Mem uint32 = 64 * 1024
+        // Threads is the number of threads for cryptographic operations.
+        Threads uint8 = 4
 )
 
+// MapDataTypeToString maps a protobuf DataType to its string representation.
+//
+// Returns the corresponding string constant for the given DataType.
+// If the type is unknown, returns "unknown".
 func MapDataTypeToString(dt pbc.DataType) string <span class="cov10" title="9">{
         switch dt </span>{
         case pbc.DataType_DATA_TYPE_BANK_CARD:<span class="cov5" title="3">
@@ -248,7 +296,8 @@ func MapDataTypeToString(dt pbc.DataType) string <span class="cov10" title="9">{
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package crypto
+		<pre class="file" id="file2" style="display: none">// Package crypto provides cryptographic utilities for data encryption and decryption using envelope encryption.
+package crypto
 
 import (
         "context"
@@ -261,26 +310,36 @@ import (
         "github.com/apetsko/gophkeeper/models"
 )
 
+// IEnvelope defines the interface for envelope encryption and decryption of user data.
+//
 //go:generate mockery --dir ./internal/crypto --name=IEnvelopeStorage --output=.../mocks/ --case=underscore
 type IEnvelope interface {
+        // EncryptUserData encrypts the given data with a randomly generated DEK, which is itself encrypted with the master key.
         EncryptUserData(ctx context.Context, masterKey []byte, data []byte) (*models.EncryptedData, error)
+        // DecryptUserData decrypts the user data using the provided master key.
         DecryptUserData(ctx context.Context, userData models.DBUserData, masterKey []byte) ([]byte, error)
 }
 
+// EnvelopStorage defines the interface for persisting user data.
 type EnvelopStorage interface {
+        // SaveUserData saves the user data and returns the new record's ID.
         SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error)
 }
 
+// Envelope implements the IEnvelope interface and provides envelope encryption logic.
 type Envelope struct {
         storage EnvelopStorage
 }
 
+// NewEnvelope creates a new Envelope with the given storage backend.
 func NewEnvelope(storage EnvelopStorage) *Envelope <span class="cov10" title="3">{
         return &amp;Envelope{
                 storage: storage,
         }
 }</span>
 
+// EncryptUserData encrypts the provided data using a randomly generated DEK, which is then encrypted with the master key.
+// Returns the encrypted data, encrypted DEK, and their nonces.
 func (e *Envelope) EncryptUserData(
         ctx context.Context,
         masterKey []byte,
@@ -326,6 +385,8 @@ func (e *Envelope) EncryptUserData(
         }, nil</span>
 }
 
+// DecryptUserData decrypts the encrypted user data using the master key.
+// It first decrypts the DEK, then uses it to decrypt the actual data.
 func (e *Envelope) DecryptUserData(
         ctx context.Context,
         userData models.DBUserData,
@@ -367,7 +428,8 @@ func (e *Envelope) DecryptUserData(
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package crypto
+		<pre class="file" id="file3" style="display: none">// Package crypto provides cryptographic utilities for data encryption and decryption using envelope encryption.
+package crypto
 
 import (
         "context"
@@ -382,7 +444,7 @@ import (
         "golang.org/x/crypto/argon2"
 )
 
-// Интерфейс для удобства мокирования и внедрения зависимостей
+// KeyManagerInterface defines methods for managing user master keys.
 //
 //go:generate mockery --dir ./internal/crypto --name=KeyManagerInterface --output=../mocks/ --case=underscore
 type KeyManagerInterface interface {
@@ -393,16 +455,21 @@ type KeyManagerInterface interface {
 // Убедимся, что KeyManager реализует интерфейс
 var _ KeyManagerInterface = (*KeyManager)(nil)
 
+// KeyStorage defines the interface for persisting and retrieving encrypted master keys.
 type KeyStorage interface {
+        // GetMasterKey fetches the encrypted master key for the user.
         GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error)
+        // SaveMasterKey stores the encrypted master key and its nonce for the user.
         SaveMasterKey(ctx context.Context, userID int, encryptedMK, nonce []byte) (int, error)
 }
 
+// KeyManager implements KeyManagerInterface and handles master key encryption and decryption.
 type KeyManager struct {
         storage             KeyStorage
         serverEncryptionKey []byte
 }
 
+// NewKeyManager creates a new KeyManager with the given storage and server encryption key.
 func NewKeyManager(
         storage KeyStorage,
         serverEncryptionKey []byte,
@@ -413,6 +480,7 @@ func NewKeyManager(
         }
 }</span>
 
+// GetMasterKey retrieves and decrypts the user's master key using the server encryption key.
 func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, error) <span class="cov4" title="2">{
         encryptedMK, err := m.storage.GetMasterKey(ctx, userID)
         if err != nil </span><span class="cov1" title="1">{
@@ -430,6 +498,8 @@ func (m *KeyManager) GetMasterKey(ctx context.Context, userID int) ([]byte, erro
         <span class="cov1" title="1">return mk, nil</span>
 }
 
+// GetOrCreateMasterKey retrieves the user's master key if it exists and validates the password,
+// or generates and stores a new master key if not found.
 func (m *KeyManager) GetOrCreateMasterKey(
         ctx context.Context,
         userID int,
@@ -460,6 +530,8 @@ func (m *KeyManager) GetOrCreateMasterKey(
         <span class="cov0" title="0">return mk, nil</span>
 }
 
+// generateAndStoreMasterKey generates a new master key from the user's password and salt,
+// encrypts it with the server key, stores it, and returns the plaintext master key.
 func (m *KeyManager) generateAndStoreMasterKey(
         ctx context.Context,
         userID int,
@@ -487,7 +559,9 @@ func (m *KeyManager) generateAndStoreMasterKey(
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package handlers
+		<pre class="file" id="file4" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
@@ -499,6 +573,18 @@ import (
         pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
+// DataDelete handles the gRPC request to delete a user's data record.
+//
+// This method checks user authorization, verifies ownership of the data record,
+// and deletes the record from storage if permitted.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataDeleteRequest message with the data record ID.
+//
+// Returns:
+//   - *pbrpc.DataDeleteResponse: Success message if deletion is successful.
+//   - error: A gRPC error if the user is not authorized or an internal error occurs.
 func (s *ServerAdmin) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) <span class="cov10" title="5">{
         userID, ok := ctx.Value(constants.UserID).(int)
         if !ok </span><span class="cov1" title="1">{
@@ -525,7 +611,9 @@ func (s *ServerAdmin) DataDelete(ctx context.Context, in *pbrpc.DataDeleteReques
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package handlers
+		<pre class="file" id="file5" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
@@ -540,6 +628,18 @@ import (
         pbrpc "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc"
 )
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches and decrypts the data (including files from S3 if needed),
+// parses the data according to its type, and returns it in the response.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The DataViewRequest message with the data record ID.
+//
+// Returns:
+// - *pbrpc.DataViewResponse: The requested data record.
+// - error: An error if access is denied or retrieval fails.
 func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) <span class="cov10" title="5">{
         userID, ok := ctx.Value(constants.UserID).(int)
         if !ok </span><span class="cov4" title="2">{
@@ -576,7 +676,9 @@ func (s *ServerAdmin) DataList(ctx context.Context, in *pbrpc.DataListRequest) (
 }
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package handlers
+		<pre class="file" id="file6" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
@@ -595,6 +697,18 @@ import (
         "google.golang.org/protobuf/proto"
 )
 
+// DataSave handles the gRPC request to save user data.
+//
+// This method validates the request, retrieves the user's master key, encrypts the data,
+// and stores it in the database or S3 depending on the data type.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The DataSaveRequest message containing user data.
+//
+// Returns:
+// - *pbrpc.DataSaveResponse: A response indicating success.
+// - error: An error if validation or storage fails.
 func (s *ServerAdmin) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) <span class="cov10" title="14">{
         userID, ok := ctx.Value(constants.UserID).(int)
         if !ok </span><span class="cov1" title="1">{
@@ -723,7 +837,9 @@ func (s *ServerAdmin) saveUserData(
 }
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package handlers
+		<pre class="file" id="file7" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
@@ -746,6 +862,19 @@ var stringToDataType = map[string]pbc.DataType{
         "binary_data": pbc.DataType_DATA_TYPE_BINARY_DATA,
 }
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches the encrypted data from the database or S3 (for binary files),
+// decrypts the data using the user's master key, parses it according to its type (bank card, credentials, or binary data),
+// and returns the result in the response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataViewRequest message containing the record ID.
+//
+// Returns:
+//   - *pbrpc.DataViewResponse: The requested user data record.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *ServerAdmin) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) <span class="cov10" title="8">{
         userID, ok := ctx.Value(constants.UserID).(int)
         if !ok </span><span class="cov0" title="0">{
@@ -859,7 +988,9 @@ func parseData(r *pbrpc.DataViewResponse, dataType pbc.DataType, decryptData []b
 }
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package handlers
+		<pre class="file" id="file8" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
@@ -873,6 +1004,18 @@ import (
         pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
+// Login handles the gRPC request for user authentication.
+//
+// This method validates the username and password, checks credentials against the database,
+// generates a JWT token upon successful authentication, and ensures the user's master key exists.
+//
+// Parameters:
+// - ctx: The gRPC context.
+// - in: The LoginRequest message with user credentials.
+//
+// Returns:
+// - *pbrpcu.LoginResponse: User details and authentication token.
+// - error: An error if authentication fails.
 func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) <span class="cov10" title="7">{
         if len(in.Username) &lt; 3 || len(in.Password) &lt; 8 </span><span class="cov4" title="2">{
                 return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")
@@ -917,8 +1060,8 @@ func (s *ServerAdmin) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrp
 }
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">// Package handlers provides gRPC handlers for administrative operations,
-// such as health checks, URL management, and statistics reporting.
+		<pre class="file" id="file9" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
 package handlers
 
 import (
@@ -979,11 +1122,15 @@ func NewServerAdmin(
 }</span>
 </pre>
 		
-		<pre class="file" id="file11" style="display: none">package handlers
+		<pre class="file" id="file11" style="display: none">// Package handlers provides gRPC server handlers for managing user data operations,
+// including creation, retrieval, update, and deletion of user records.
+package handlers
 
 import (
         "context"
+        "errors"
         "fmt"
+        "log/slog"
 
         "github.com/apetsko/gophkeeper/models"
         "github.com/apetsko/gophkeeper/pkg/jwt"
@@ -991,17 +1138,29 @@ import (
         pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
-func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) <span class="cov10" title="4">{
-        if len(in.Username) &lt; 3 || len(in.Password) &lt; 8 </span><span class="cov5" title="2">{
+// Signup handles the gRPC request for user registration.
+//
+// This method validates the username and password, hashes the password,
+// creates a new user record in the database, and generates a JWT token for the user.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The SignupRequest message with user credentials.
+//
+// Returns:
+//   - *pbrpcu.SignupResponse: User details and authentication token.
+//   - error: An error if registration fails.
+func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pbrpcu.SignupResponse, error) <span class="cov10" title="5">{
+        if len(in.Username) &lt; 3 || len(in.Password) &lt; 8 </span><span class="cov4" title="2">{
                 return nil, fmt.Errorf("username and password must be at least 3 and 8 characters long")
         }</span>
 
-        <span class="cov5" title="2">hash, err := password.HashPassword(in.Password)
+        <span class="cov7" title="3">hash, err := password.HashPassword(in.Password)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to hash password: %w", err)
         }</span>
 
-        <span class="cov5" title="2">user := models.UserEntry{
+        <span class="cov7" title="3">user := models.UserEntry{
                 Username:     in.Username,
                 PasswordHash: hash,
         }
@@ -1011,9 +1170,23 @@ func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
                 return nil, fmt.Errorf("failed to create user: %w", err)
         }</span>
 
-        <span class="cov1" title="1">token, err := jwt.GenerateJWT(userID, in.Username, s.JWTConfig.Secret)
+        <span class="cov4" title="2">token, err := jwt.GenerateJWT(userID, in.Username, s.JWTConfig.Secret)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to generate token: %w", err)
+        }</span>
+
+        // TODO: нужно записать в потокобезопасную мапу в памяти
+        <span class="cov4" title="2">_, errMasterKey := s.KeyManager.GetOrCreateMasterKey(
+                ctx,
+                userID,
+                in.Password,
+                nil,
+        )
+
+        if errMasterKey != nil </span><span class="cov1" title="1">{
+                slog.Error("failed to generate encrypted master key: " + errMasterKey.Error())
+
+                return nil, errors.New("failed to generate encrypted master key")
         }</span>
 
         <span class="cov1" title="1">return &amp;pbrpcu.SignupResponse{
@@ -1024,7 +1197,11 @@ func (s *ServerAdmin) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
 }
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package grpc
+		<pre class="file" id="file12" style="display: none">// Package grpc provides the gRPC server implementation for the GophKeeper service.
+//
+// This package sets up the gRPC server, configures authentication middleware,
+// registers service handlers, and manages server lifecycle and TLS settings.
+package grpc
 
 import (
         "context"
@@ -1052,21 +1229,57 @@ import (
         pbrpcu "github.com/apetsko/gophkeeper/protogen/api/proto/v1/rpc/user"
 )
 
+// GRPCHandler implements the gRPC server interface for the GophKeeper service.
+//
+// This struct embeds ServerAdmin to delegate business logic for user and data operations.
+// It provides gRPC method handlers for health checks, user authentication, registration,
+// and CRUD operations on user data records.
 type GRPCHandler struct {
         pb.UnimplementedGophKeeperServer
         *handlers.ServerAdmin
 }
 
+// NewGRPCHandler creates a new GRPCHandler instance.
+//
+// Parameters:
+//   - admin: Pointer to ServerAdmin containing business logic.
+//
+// Returns:
+//   - pb.GophKeeperServer: The gRPC server handler.
 func NewGRPCHandler(admin *handlers.ServerAdmin) pb.GophKeeperServer <span class="cov10" title="3">{
         return &amp;GRPCHandler{
                 ServerAdmin: admin,
         }
 }</span>
 
+// Ping handles a health check request for the gRPC service.
+//
+// This method verifies that the server is alive and responding to requests.
+// It delegates the call to ServerAdmin and always returns a successful response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The PingRequest message.
+//
+// Returns:
+//   - *pbrpc.PingResponse: An empty response indicating success.
+//   - error: Always nil.
 func (s *GRPCHandler) Ping(ctx context.Context, in *pbrpc.PingRequest) (*pbrpc.PingResponse, error) <span class="cov6" title="2">{
         return s.ServerAdmin.Ping(ctx, in)
 }</span>
 
+// Login handles the gRPC request for user authentication.
+//
+// This method validates the username and password, checks credentials against the database,
+// generates a JWT token upon successful authentication, and ensures the user's master key exists.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The LoginRequest message with user credentials.
+//
+// Returns:
+//   - *pbrpcu.LoginResponse: User details and authentication token.
+//   - error: An error if authentication fails.
 func (s *GRPCHandler) Login(ctx context.Context, in *pbrpcu.LoginRequest) (*pbrpcu.LoginResponse, error) <span class="cov0" title="0">{
         return s.ServerAdmin.Login(ctx, in)
 }</span>
@@ -1075,23 +1288,84 @@ func (s *GRPCHandler) Signup(ctx context.Context, in *pbrpcu.SignupRequest) (*pb
         return s.ServerAdmin.Signup(ctx, in)
 }</span>
 
+// DataList handles the gRPC request to list all user data records.
+//
+// This method checks user authorization and retrieves a list of data records
+// associated with the authenticated user.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataListRequest message.
+//
+// Returns:
+//   - *pbrpc.DataListResponse: List of user data records.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataList(ctx context.Context, in *pbrpc.DataListRequest) (*pbrpc.DataListResponse, error) <span class="cov1" title="1">{
         return s.ServerAdmin.DataList(ctx, in)
 }</span>
 
+// DataSave handles the gRPC request to create or update a user data record.
+//
+// This method checks user authorization, validates the input, encrypts the data,
+// and saves it to the database or storage.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataSaveRequest message with data to save.
+//
+// Returns:
+//   - *pbrpc.DataSaveResponse: Confirmation of save operation.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataSave(ctx context.Context, in *pbrpc.DataSaveRequest) (*pbrpc.DataSaveResponse, error) <span class="cov0" title="0">{
         return s.ServerAdmin.DataSave(ctx, in)
 }</span>
 
+// DataDelete handles the gRPC request to delete a user's data record.
+//
+// This method checks user authorization, verifies ownership of the data record,
+// and deletes the record from storage if permitted.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataDeleteRequest message with the data record ID.
+//
+// Returns:
+//   - *pbrpc.DataDeleteResponse: Success message if deletion is successful.
+//   - error: A gRPC error if the user is not authorized or an internal error occurs.
 func (s *GRPCHandler) DataDelete(ctx context.Context, in *pbrpc.DataDeleteRequest) (*pbrpc.DataDeleteResponse, error) <span class="cov0" title="0">{
         return s.ServerAdmin.DataDelete(ctx, in)
 }</span>
 
+// DataView handles the gRPC request to retrieve a specific user data record by its ID.
+//
+// This method checks user authorization, fetches the encrypted data from storage,
+// decrypts it, and returns the result in the response.
+//
+// Parameters:
+//   - ctx: The gRPC context.
+//   - in: The DataViewRequest message containing the record ID.
+//
+// Returns:
+//   - *pbrpc.DataViewResponse: The requested user data record.
+//   - error: A gRPC error if access is denied or an internal error occurs.
 func (s *GRPCHandler) DataView(ctx context.Context, in *pbrpc.DataViewRequest) (*pbrpc.DataViewResponse, error) <span class="cov0" title="0">{
         return s.ServerAdmin.DataView(ctx, in)
 }</span>
 
-// RunGRPC запускает gRPC сервер
+// RunGRPC starts the gRPC server for the GophKeeper service.
+//
+// This function configures the gRPC server with optional TLS, authentication middleware,
+// logging interceptors, and registers the service handlers. It listens on the configured
+// address and manages the server lifecycle using an error group.
+//
+// Parameters:
+//   - cfg: Pointer to the application configuration.
+//   - sa: Pointer to ServerAdmin containing business logic.
+//   - log: Logger instance for server logging.
+//
+// Returns:
+//   - *grpc.Server: The running gRPC server instance.
+//   - error: An error if the server fails to start.
 func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) (*grpc.Server, error) <span class="cov1" title="1">{
         lis, err := net.Listen("tcp", cfg.GRPCAddress)
         if err != nil </span><span class="cov0" title="0">{
@@ -1150,6 +1424,18 @@ func RunGRPC(cfg *config.Config, sa *handlers.ServerAdmin, log *logging.Logger) 
         <span class="cov1" title="1">return srv, nil</span>
 }
 
+// authUnaryInterceptor returns a gRPC unary server interceptor for JWT authentication.
+//
+// This interceptor checks if the called method requires authentication. For protected methods,
+// it extracts and validates the JWT from the request metadata, verifies the signing method and claims,
+// and injects the user ID and JWT into the context for downstream handlers.
+//
+// Parameters:
+//   - protected: Map of gRPC method names that require authentication.
+//   - jwtSecret: Secret key used to validate JWT tokens.
+//
+// Returns:
+//   - grpc.UnaryServerInterceptor: The configured authentication interceptor.
 func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.UnaryServerInterceptor <span class="cov1" title="1">{
         slog.Info("Auth interceptor enabled")
 
@@ -1201,7 +1487,12 @@ func authUnaryInterceptor(protected map[string]bool, jwtSecret []byte) grpc.Unar
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package http
+		<pre class="file" id="file13" style="display: none">// Package http provides the HTTP server implementation for the GophKeeper service.
+//
+// It sets up an HTTP server with gRPC-Gateway for proxying RESTful requests to the gRPC backend,
+// configures CORS middleware, and manages TLS support. The package handles server startup,
+// graceful shutdown, and integration with application configuration and logging.
+package http
 
 import (
         "context"
@@ -1224,7 +1515,20 @@ import (
         "google.golang.org/grpc/metadata"
 )
 
-// RunHTTP запускает HTTP сервер с gRPC-Gateway и CORS
+// RunHTTP starts the HTTP server with gRPC-Gateway and CORS support.
+//
+// This function configures the HTTP server to proxy requests to the gRPC backend using gRPC-Gateway,
+// sets up CORS middleware, and manages TLS if enabled. It listens on the configured address and
+// gracefully shuts down the server on context cancellation.
+//
+// Parameters:
+//   - ctx: The context for server lifecycle management.
+//   - cfg: Pointer to the application configuration.
+//   - log: Logger instance for server logging.
+//
+// Returns:
+//   - *http.Server: The running HTTP server instance.
+//   - error: An error if the server fails to start.
 func RunHTTP(ctx context.Context, cfg *config.Config, log *logging.Logger) (*http.Server, error) <span class="cov8" title="1">{
         mux := runtime.NewServeMux(
                 runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD </span><span class="cov8" title="1">{
@@ -1301,7 +1605,12 @@ func RunHTTP(ctx context.Context, cfg *config.Config, log *logging.Logger) (*htt
 }
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package storage
+		<pre class="file" id="file14" style="display: none">// Package storage provides PostgreSQL-backed storage implementation for GophKeeper.
+//
+// This package defines the Storage type and related interfaces for managing users, master keys,
+// and user data in a PostgreSQL database. It handles database migrations, connection pooling,
+// and CRUD operations for application data.
+package storage
 
 import (
         "context"
@@ -1309,6 +1618,8 @@ import (
         "embed"
         "errors"
         "fmt"
+        "log"
+        "time"
 
         "github.com/jackc/pgx/v5"
         "github.com/jackc/pgx/v5/pgconn"
@@ -1320,6 +1631,9 @@ import (
         "github.com/apetsko/gophkeeper/models"
 )
 
+// PgxPoolIface abstracts a subset of pgxpool.Pool methods for database operations.
+//
+// This interface allows for easier testing and mocking of database interactions.
 type PgxPoolIface interface {
         QueryRow(context.Context, string, ...interface{}) pgx.Row
         Query(context.Context, string, ...interface{}) (pgx.Rows, error)
@@ -1329,48 +1643,95 @@ type PgxPoolIface interface {
         Ping(context.Context) error
 }
 
+// migrations embeds SQL migration files for database schema management.
+//
 //go:embed migrations/*.sql
 var migrations embed.FS
 
+// Storage implements the IStorage interface using a PostgreSQL backend.
+//
+// It provides methods for user management, master key storage, and user data operations.
 type Storage struct {
         DB PgxPoolIface
 }
 
-func migrate(conn string) error <span class="cov10" title="20">{
+// migrate applies database migrations using goose and the embedded migration files.
+//
+// Parameters:
+//   - conn: PostgreSQL connection string.
+//
+// Returns:
+//   - error: An error if migrations fail, otherwise nil.
+func migrate(conn string) error <span class="cov8" title="17">{
         goose.SetBaseFS(migrations)
-        db, err := sql.Open("pgx", conn)
-        if err != nil </span><span class="cov0" title="0">{
-                return fmt.Errorf("goose: failed to open DB: %w", err)
+
+        var db *sql.DB
+        var err error
+        for i := 0; i &lt; 10; i++ </span><span class="cov10" title="26">{
+                db, err = sql.Open("pgx", conn)
+                if err == nil </span><span class="cov10" title="26">{
+                        err = db.Ping()
+                        if err == nil </span><span class="cov8" title="16">{
+                                break</span> // подключились!
+                        }
+                }
+                <span class="cov7" title="10">log.Printf("waiting for DB... (%d/10)", i+1)
+                time.Sleep(2 * time.Second)</span>
+        }
+        <span class="cov8" title="17">if err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("goose: failed to connect to DB after retries: %w", err)
         }</span>
-        <span class="cov10" title="20">defer db.Close()
+        <span class="cov8" title="16">defer db.Close()
 
         err = goose.Up(db, "migrations")
-        if err != nil </span><span class="cov4" title="3">{
-                return fmt.Errorf("failed to apply migrations: %w", err)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("goose: migration failed: %w", err)
         }</span>
-
-        <span class="cov9" title="17">return nil</span>
+        <span class="cov8" title="16">return nil</span>
 }
 
-func NewPostgresClient(conn string) (IStorage, error) <span class="cov10" title="20">{
-        if err := migrate(conn); err != nil </span><span class="cov4" title="3">{
+// NewPostgresClient creates a new Storage instance with a PostgreSQL connection pool.
+//
+// It applies database migrations before establishing the connection.
+//
+// Parameters:
+//   - conn: PostgreSQL connection string.
+//
+// Returns:
+//   - IStorage: The initialized storage instance.
+//   - error: An error if migrations or connection fail.
+func NewPostgresClient(conn string) (IStorage, error) <span class="cov8" title="17">{
+        if err := migrate(conn); err != nil </span><span class="cov1" title="1">{
                 return nil, err
         }</span>
 
-        <span class="cov9" title="17">ctx := context.Background()
+        <span class="cov8" title="16">ctx := context.Background()
         pool, err := pgxpool.New(ctx, conn)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("unable to connect to database: %w", err)
         }</span>
 
-        <span class="cov9" title="17">return &amp;Storage{DB: pool}, nil</span>
+        <span class="cov8" title="16">return &amp;Storage{DB: pool}, nil</span>
 }
 
-func (p *Storage) Close() error <span class="cov9" title="17">{
+// Close closes the underlying database connection pool.
+//
+// Returns:
+//   - error: Always nil.
+func (p *Storage) Close() error <span class="cov8" title="16">{
         p.DB.Close()
         return nil
 }</span>
 
+// AddUser inserts a new user into the database.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - u: Pointer to the UserEntry to add.
+//
+// Returns:
+//   - int: The new user's ID.
+//   - error: An error if the user exists or insertion fails.
 func (p *Storage) AddUser(ctx context.Context, u *models.UserEntry) (int, error) <span class="cov5" title="5">{
         const insertUser = `
         INSERT INTO users (username, password_hash, created_at, updated_at)
@@ -1384,14 +1745,23 @@ func (p *Storage) AddUser(ctx context.Context, u *models.UserEntry) (int, error)
 
         switch </span>{
         case err == nil:<span class="cov4" title="3">
-                return id, nil</span> // Успешное создание
+                return id, nil</span> // Successfully created
         case errors.Is(err, pgx.ErrNoRows):<span class="cov1" title="1">
-                return 0, models.ErrUserExists</span> // Конфликт по username
+                return 0, models.ErrUserExists</span> // Username conflict
         default:<span class="cov1" title="1">
-                return 0, fmt.Errorf("failed to insertUser user: %w", err)</span>
+                return 0, fmt.Errorf("failed to insert user: %w", err)</span>
         }
 }
 
+// GetUser retrieves a user by username.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - username: Username to search for.
+//
+// Returns:
+//   - *models.UserEntry: The found user entry.
+//   - error: An error if not found or query fails.
 func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEntry, error) <span class="cov4" title="3">{
         const getUser = `
                 SELECT id, username, password_hash FROM users
@@ -1401,7 +1771,7 @@ func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEnt
         var u models.UserEntry
 
         err := p.DB.QueryRow(ctx, getUser, username).Scan(&amp;u.ID, &amp;u.Username, &amp;u.PasswordHash)
-        if err != nil </span><span class="cov3" title="2">{
+        if err != nil </span><span class="cov2" title="2">{
                 if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
                         return nil, models.ErrUserNotFound
                 }</span>
@@ -1410,12 +1780,23 @@ func (p *Storage) GetUser(ctx context.Context, username string) (*models.UserEnt
         <span class="cov1" title="1">return &amp;u, nil</span>
 }
 
+// SaveMasterKey stores an encrypted master key for a user.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userID: User ID.
+//   - encryptedMK: Encrypted master key bytes.
+//   - nonce: Nonce used for encryption.
+//
+// Returns:
+//   - int: The new record's ID.
+//   - error: An error if the operation fails.
 func (p *Storage) SaveMasterKey(
         ctx context.Context,
         userID int,
         encryptedMK []byte,
         nonce []byte,
-) (int, error) <span class="cov3" title="2">{
+) (int, error) <span class="cov2" title="2">{
         const insertSQL = `
         INSERT INTO user_keys (user_id, encrypted_master_key, nonce) 
         VALUES ($1, $2, $3)
@@ -1432,6 +1813,15 @@ func (p *Storage) SaveMasterKey(
         <span class="cov1" title="1">return id, err</span>
 }
 
+// GetMasterKey retrieves the encrypted master key for a user.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userID: User ID.
+//
+// Returns:
+//   - *models.EncryptedMK: The encrypted master key and nonce.
+//   - error: An error if not found or query fails.
 func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.EncryptedMK, error) <span class="cov4" title="3">{
         const selectSQL = `
         SELECT encrypted_master_key, nonce FROM user_keys 
@@ -1440,7 +1830,7 @@ func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.Encrypt
 
         var encryptedMK models.EncryptedMK
         err := p.DB.QueryRow(ctx, selectSQL, userID).Scan(&amp;encryptedMK.EncryptedMK, &amp;encryptedMK.Nonce)
-        if err != nil </span><span class="cov3" title="2">{
+        if err != nil </span><span class="cov2" title="2">{
                 if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
                         return nil, models.ErrMasterKeyNotFound
                 }</span>
@@ -1450,6 +1840,15 @@ func (p *Storage) GetMasterKey(ctx context.Context, userID int) (*models.Encrypt
         <span class="cov1" title="1">return &amp;encryptedMK, err</span>
 }
 
+// SaveUserData stores encrypted user data in the database.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userData: Pointer to the DBUserData to store.
+//
+// Returns:
+//   - int: The new record's ID.
+//   - error: An error if the operation fails.
 func (p *Storage) SaveUserData(ctx context.Context, userData *models.DBUserData) (int, error) <span class="cov1" title="1">{
         const insertSQL = `
         INSERT INTO user_data (user_id, type, minio_object_id, encrypted_data, data_nonce, encrypted_dek, dek_nonce, meta) 
@@ -1478,7 +1877,16 @@ func (p *Storage) SaveUserData(ctx context.Context, userData *models.DBUserData)
         <span class="cov0" title="0">return id, err</span>
 }
 
-func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DBUserData, error) <span class="cov3" title="2">{
+// GetUserData retrieves a user data record by its ID.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userDataID: ID of the user data record.
+//
+// Returns:
+//   - *models.DBUserData: The user data record.
+//   - error: An error if not found or query fails.
+func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DBUserData, error) <span class="cov2" title="2">{
         const selectSQL = `
         SELECT user_id, 
                type,
@@ -1503,13 +1911,22 @@ func (p *Storage) GetUserData(ctx context.Context, userDataID int) (*models.DBUs
                 &amp;userData.DekNonce,
                 &amp;userData.Meta,
         )
-        if err != nil </span><span class="cov3" title="2">{
+        if err != nil </span><span class="cov2" title="2">{
                 return &amp;userData, fmt.Errorf("failed to get user data: %w", err)
         }</span>
 
         <span class="cov0" title="0">return &amp;userData, err</span>
 }
 
+// GetUserDataList returns a list of user data items for a given user.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userID: User ID.
+//
+// Returns:
+//   - []models.UserDataListItem: List of user data items.
+//   - error: An error if the query fails.
 func (p *Storage) GetUserDataList(ctx context.Context, userID int) ([]models.UserDataListItem, error) <span class="cov1" title="1">{
         const selectSQL = `
         SELECT id,
@@ -1551,7 +1968,15 @@ func (p *Storage) GetUserDataList(ctx context.Context, userID int) ([]models.Use
         <span class="cov0" title="0">return result, nil</span>
 }
 
-func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error <span class="cov3" title="2">{
+// DeleteUserData deletes a user data record by its ID.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - userDataID: ID of the user data record to delete.
+//
+// Returns:
+//   - error: An error if not found or deletion fails.
+func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error <span class="cov2" title="2">{
         const deleteSQL = `
         DELETE FROM user_data 
         WHERE id = $1
@@ -1560,7 +1985,7 @@ func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error <spa
 
         var deletedID int
         err := p.DB.QueryRow(ctx, deleteSQL, userDataID).Scan(&amp;deletedID)
-        if err != nil </span><span class="cov3" title="2">{
+        if err != nil </span><span class="cov2" title="2">{
                 if errors.Is(err, pgx.ErrNoRows) </span><span class="cov1" title="1">{
                         return fmt.Errorf("user data with ID %d not found", userDataID)
                 }</span>
@@ -1571,13 +1996,17 @@ func (p *Storage) DeleteUserData(ctx context.Context, userDataID int) error <spa
 }
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package storage
+		<pre class="file" id="file15" style="display: none">// Package storage provides S3-compatible object storage integration for GophKeeper.
+//
+// This package implements an S3 client using MinIO for uploading and retrieving encrypted user files.
+package storage
 
 import (
         "bytes"
         "context"
         "fmt"
         "io"
+        "log"
         "time"
 
         "github.com/minio/minio-go/v7"
@@ -1587,16 +2016,33 @@ import (
         "github.com/apetsko/gophkeeper/models"
 )
 
+// S3Client defines the interface for S3-compatible object storage operations.
+//
+// It abstracts file upload and retrieval for easier testing and mocking.
 type S3Client interface {
         Upload(ctx context.Context, data []byte, s3UploadData *models.S3UploadData) (*minio.UploadInfo, error)
         GetObject(ctx context.Context, objectName string) ([]byte, *minio.ObjectInfo, error)
 }
 
+// S3 implements the S3Client interface using a MinIO client.
+//
+// It provides methods to upload and retrieve objects from the configured bucket.
 type S3 struct {
         MinioClient *minio.Client
         MinioBucket string
 }
 
+// NewS3Client initializes a new S3 client with the given configuration.
+//
+// It connects to the MinIO server, checks for the existence of the bucket, and creates it if necessary.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - cfg: S3Config with endpoint, credentials, and bucket name.
+//
+// Returns:
+//   - *S3: The initialized S3 client.
+//   - error: An error if initialization fails.
 func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) <span class="cov1" title="1">{
         var err error
 
@@ -1604,17 +2050,19 @@ func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) <span cl
                 Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
                 Secure: false,
         })
-
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("error init minio client: %v", err)
         }</span>
 
-        <span class="cov1" title="1">bucketExists, err := minioClient.BucketExists(ctx, cfg.Bucket)
+        <span class="cov1" title="1">log.Printf("Checking if bucket %s exists...", cfg.Bucket)
+        bucketExists, err := minioClient.BucketExists(ctx, cfg.Bucket)
+        log.Printf("BucketExists call returned: %v, err: %v", bucketExists, err)
+
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to check bucket existence: %v", err)
         }</span>
 
-        <span class="cov1" title="1">if !bucketExists </span><span class="cov0" title="0">{
+        <span class="cov1" title="1">if !bucketExists </span><span class="cov1" title="1">{
                 if errMakeBucket := minioClient.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); errMakeBucket != nil </span><span class="cov0" title="0">{
                         return nil, fmt.Errorf("failed to create bucket: %v", errMakeBucket)
                 }</span>
@@ -1626,6 +2074,16 @@ func NewS3Client(ctx context.Context, cfg config.S3Config) (*S3, error) <span cl
         }, err</span>
 }
 
+// Upload uploads data to the S3 bucket with the specified metadata.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - data: File data to upload.
+//   - s3UploadData: Metadata and object information.
+//
+// Returns:
+//   - *minio.UploadInfo: Information about the uploaded object.
+//   - error: An error if the upload fails.
 func (s *S3) Upload(
         ctx context.Context,
         data []byte,
@@ -1655,6 +2113,16 @@ func (s *S3) Upload(
         <span class="cov1" title="1">return &amp;info, nil</span>
 }
 
+// GetObject retrieves an object from the S3 bucket by its name.
+//
+// Parameters:
+//   - ctx: Context for the operation.
+//   - objectName: Name of the object to retrieve.
+//
+// Returns:
+//   - []byte: The object data.
+//   - *minio.ObjectInfo: Metadata about the object.
+//   - error: An error if retrieval fails.
 func (s *S3) GetObject(
         ctx context.Context,
         objectName string,
@@ -1685,7 +2153,9 @@ func (s *S3) GetObject(
 }
 </pre>
 		
-		<pre class="file" id="file16" style="display: none">package jwt
+		<pre class="file" id="file16" style="display: none">// Package jwt offers utilities for generating and handling JSON Web Tokens (JWT)
+// for authentication and authorization.
+package jwt
 
 import (
         "time"
@@ -1693,7 +2163,12 @@ import (
         "github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(userID int, username, jwtSecret string) (string, error) <span class="cov10" title="4">{
+// GenerateJWT creates a signed JWT token for the given user ID and username.
+//
+// The token uses HS256 signing and includes user ID, username, and issued-at claims.
+//
+// Returns the signed JWT string or an error if signing fails.
+func GenerateJWT(userID int, username, jwtSecret string) (string, error) <span class="cov10" title="5">{
         claims := jwt.MapClaims{
                 "user_id": userID,
                 "name":    username,
@@ -1706,7 +2181,9 @@ func GenerateJWT(userID int, username, jwtSecret string) (string, error) <span c
 }</span>
 </pre>
 		
-		<pre class="file" id="file17" style="display: none">package logging
+		<pre class="file" id="file17" style="display: none">// Package logging provides structured logging utilities and wrappers around slog,
+// including convenience methods and gRPC middleware integration.
+package logging
 
 import (
         "context"
@@ -1719,13 +2196,18 @@ import (
         grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 )
 
+// GenerateJWT creates a signed JWT token for the given user ID and username.
+//
+// The token uses HS256 signing and includes user ID, username, and issued-at claims.
+//
+// Returns the signed JWT string or an error if signing fails.
 func LogHandler(level slog.Level) *slog.Logger <span class="cov5" title="9">{
         handler := slog.NewJSONHandler(os.Stdout, &amp;slog.HandlerOptions{
                 Level:     level,
                 AddSource: true,
-                ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr </span><span class="cov10" title="100">{
-                        if a.Key == slog.TimeKey </span><span class="cov6" title="19">{
-                                if t, ok := a.Value.Any().(time.Time); ok </span><span class="cov6" title="19">{
+                ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr </span><span class="cov10" title="96">{
+                        if a.Key == slog.TimeKey </span><span class="cov6" title="18">{
+                                if t, ok := a.Value.Any().(time.Time); ok </span><span class="cov6" title="18">{
                                         a = slog.Attr{
                                                 Key:   a.Key,
                                                 Value: slog.StringValue(t.Format("2006-01-02T15:04:05.000Z07:00")),
@@ -1733,9 +2215,9 @@ func LogHandler(level slog.Level) *slog.Logger <span class="cov5" title="9">{
                                 }</span>
                         }
 
-                        <span class="cov10" title="100">if a.Key == slog.SourceKey </span><span class="cov6" title="19">{
+                        <span class="cov10" title="96">if a.Key == slog.SourceKey </span><span class="cov6" title="18">{
                                 src, ok := a.Value.Any().(*slog.Source)
-                                if ok </span><span class="cov6" title="19">{
+                                if ok </span><span class="cov6" title="18">{
                                         link := fmt.Sprintf("file://%s:%d", src.File, src.Line)
                                         a = slog.Attr{
                                                 Key:   filepath.Base(src.Function),
@@ -1743,53 +2225,61 @@ func LogHandler(level slog.Level) *slog.Logger <span class="cov5" title="9">{
                                         }
                                 }</span>
                         }
-                        <span class="cov10" title="100">return a</span>
+                        <span class="cov10" title="96">return a</span>
                 },
         })
         <span class="cov5" title="9">return slog.New(handler)</span>
 }
 
+// Logger wraps slog.Logger and provides convenience methods for formatted logging.
 type Logger struct {
         *slog.Logger
 }
 
+// NewLogger creates a new Logger with the specified log level.
 func NewLogger(level slog.Level) *Logger <span class="cov5" title="9">{
         base := LogHandler(level)
         return &amp;Logger{Logger: base}
 }</span>
 
+// Debugf logs a debug-level message with formatting.
 func (l *Logger) Debugf(format string, args ...any) <span class="cov1" title="1">{
         l.Debug(fmt.Sprintf(format, args...))
 }</span>
 
+// Infof logs an info-level message with formatting.
 func (l *Logger) Infof(format string, args ...any) <span class="cov1" title="1">{
         l.Info(fmt.Sprintf(format, args...))
 }</span>
 
+// Warnf logs a warning-level message with formatting.
 func (l *Logger) Warnf(format string, args ...any) <span class="cov1" title="1">{
         l.Warn(fmt.Sprintf(format, args...))
 }</span>
 
+// Errorf logs an error-level message with formatting.
 func (l *Logger) Errorf(format string, args ...any) <span class="cov1" title="1">{
         l.Error(fmt.Sprintf(format, args...))
 }</span>
 
+// Fatal logs an error-level message and exits the application.
 func (l *Logger) Fatal(msg string) <span class="cov1" title="1">{
         l.Log(context.Background(), slog.LevelError, msg)
         os.Exit(1)
 }</span>
 
+// Fatalf logs a formatted error-level message and exits the application.
 func (l *Logger) Fatalf(format string, args ...any) <span class="cov1" title="1">{
         l.Log(context.Background(), slog.LevelError, fmt.Sprintf(format, args...))
         os.Exit(1)
 }</span>
 
-// InterceptorLogger returns a grpc-compatible slog logger.
+// InterceptorLogger returns a grpc_logging.Logger compatible with slog for gRPC middleware.
 func InterceptorLogger(l *Logger) grpc_logging.Logger <span class="cov2" title="2">{
         return grpc_logging.LoggerFunc(func(ctx context.Context, lvl grpc_logging.Level, msg string, fields ...any) </span><span class="cov4" title="6">{
                 args := make([]any, 0, len(fields))
 
-                for i := 0; i &lt; len(fields); i += 2 </span><span class="cov6" title="21">{
+                for i := 0; i &lt; len(fields); i += 2 </span><span class="cov7" title="21">{
                         key := fields[i]
                         value := fields[i+1]
                         args = append(args, key, value)
@@ -1811,24 +2301,53 @@ func InterceptorLogger(l *Logger) grpc_logging.Logger <span class="cov2" title="
 }
 </pre>
 		
-		<pre class="file" id="file18" style="display: none">package password
+		<pre class="file" id="file18" style="display: none">// Package password provides password hashing and verification utilities using bcrypt.
+package password
 
 import "golang.org/x/crypto/bcrypt"
 
 const passwordCost = 14
 
-func HashPassword(password string) (string, error) <span class="cov8" title="4">{
+// HashPassword hashes the given password using bcrypt with a predefined cost.
+//
+// Returns the hashed password as a string or an error if hashing fails.
+func HashPassword(password string) (string, error) <span class="cov10" title="5">{
         bytes, err := bcrypt.GenerateFromPassword([]byte(password), passwordCost)
         return string(bytes), err
 }</span>
 
+// CheckPasswordHash compares a bcrypt hashed password with its possible plaintext equivalent.
+//
+// Returns true if the password matches the hash, false otherwise.
 func CheckPasswordHash(password, hash string) bool <span class="cov10" title="5">{
         err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
         return err == nil
 }</span>
 </pre>
 		
-		<pre class="file" id="file19" style="display: none">package utils
+		<pre class="file" id="file19" style="display: none">// Package version contains build-time version information for the application.
+package version
+
+import (
+        "fmt"
+)
+
+// Version is the current application version.
+var Version = ""
+
+// BuildDate is the date when the application was built.
+var BuildTime = ""
+
+// CommitHash is the git commit hash of the build.
+var CommitHash = ""
+
+func PrintVersion() <span class="cov0" title="0">{
+        fmt.Printf("Version: %s\nBuild time: %s\nCommitHash: %s\n", Version, BuildTime, CommitHash)
+}</span>
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">// Package utils contains helper functions for password hashing, ID generation, and struct validation.
+package utils
 
 import (
         "crypto/sha256"
@@ -1838,30 +2357,54 @@ import (
         "golang.org/x/crypto/bcrypt"
 )
 
+// PasswordHasher defines the interface for password hashing implementations.
+//
+// Implementations should provide a method to hash a plaintext password.
 type PasswordHasher interface {
+        // HashPassword hashes the given plaintext password and returns the hash or an error.
         HashPassword(password string) ([]byte, error)
 }
 
+// BcryptHasher implements the PasswordHasher interface using bcrypt.
 type BcryptHasher struct{}
 
+// HashPassword hashes the given password using bcrypt.
+//
+// Returns the hashed password as a byte slice or an error if hashing fails.
 func (b *BcryptHasher) HashPassword(password string) ([]byte, error) <span class="cov1" title="1">{
         return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }</span>
 
+// ComparePassword compares a bcrypt hashed password with its possible plaintext equivalent.
+//
+// Returns true if the password matches the hash, false otherwise.
 func ComparePassword(hash, password string) bool <span class="cov4" title="2">{
         return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }</span>
 
+// HashPassword hashes the given password using bcrypt with the default cost.
+//
+// Returns the hashed password as a byte slice or an error if hashing fails.
 func HashPassword(password string) ([]byte, error) <span class="cov4" title="2">{
         return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }</span>
 
+// GenerateID generates a base64-encoded, URL-safe ID of the specified length from the SHA-256 hash of the input string.
+//
+// Parameters:
+//   - s: The input string to hash.
+//   - length: The desired length of the resulting ID.
+//
+// Returns the generated ID as a string.
 func GenerateID(s string, length int) (id string) <span class="cov4" title="2">{
         hash := sha256.Sum256([]byte(s))
         id = base64.RawURLEncoding.EncodeToString(hash[:length])[:length]
         return
 }</span>
 
+// ValidateStruct validates a struct using the go-playground/validator package.
+//
+// Returns an error if validation fails, or nil if the struct is valid.
 func ValidateStruct(a any) error <span class="cov10" title="7">{
         return validator.New().Struct(a)
 }</span>

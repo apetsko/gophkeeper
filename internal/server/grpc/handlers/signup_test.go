@@ -20,36 +20,54 @@ func TestServerAdmin_Signup(t *testing.T) {
 		secret      = "secret"
 	)
 	tests := []struct {
-		name       string
-		req        *pbrpcu.SignupRequest
-		setupMocks func(st *mocks.IStorage)
-		wantErr    bool
+		name         string
+		req          *pbrpcu.SignupRequest
+		setupStorage func(st *mocks.IStorage)
+		setupKeys    func(km *mocks.KeyManagerInterface)
+		wantErr      bool
 	}{
 		{
 			name: "success",
 			req:  &pbrpcu.SignupRequest{Username: username, Password: passwordStr},
-			setupMocks: func(st *mocks.IStorage) {
+			setupStorage: func(st *mocks.IStorage) {
 				st.On("AddUser", mock.Anything, mock.AnythingOfType("*models.UserEntry")).Return(userID, nil)
+			},
+			setupKeys: func(km *mocks.KeyManagerInterface) {
+				km.On("GetOrCreateMasterKey", mock.Anything, userID, passwordStr, mock.Anything).Return([]byte("key"), nil)
 			},
 			wantErr: false,
 		},
 		{
-			name:       "short username",
-			req:        &pbrpcu.SignupRequest{Username: "ab", Password: passwordStr},
-			setupMocks: func(st *mocks.IStorage) {},
-			wantErr:    true,
+			name:         "short username",
+			req:          &pbrpcu.SignupRequest{Username: "ab", Password: passwordStr},
+			setupStorage: func(st *mocks.IStorage) {},
+			setupKeys:    func(km *mocks.KeyManagerInterface) {},
+			wantErr:      true,
 		},
 		{
-			name:       "short password",
-			req:        &pbrpcu.SignupRequest{Username: username, Password: "short"},
-			setupMocks: func(st *mocks.IStorage) {},
-			wantErr:    true,
+			name:         "short password",
+			req:          &pbrpcu.SignupRequest{Username: username, Password: "short"},
+			setupStorage: func(st *mocks.IStorage) {},
+			setupKeys:    func(km *mocks.KeyManagerInterface) {},
+			wantErr:      true,
 		},
 		{
 			name: "storage error",
 			req:  &pbrpcu.SignupRequest{Username: username, Password: passwordStr},
-			setupMocks: func(st *mocks.IStorage) {
+			setupStorage: func(st *mocks.IStorage) {
 				st.On("AddUser", mock.Anything, mock.AnythingOfType("*models.UserEntry")).Return(0, errors.New("db error"))
+			},
+			setupKeys: func(km *mocks.KeyManagerInterface) {},
+			wantErr:   true,
+		},
+		{
+			name: "key manager error",
+			req:  &pbrpcu.SignupRequest{Username: username, Password: passwordStr},
+			setupStorage: func(st *mocks.IStorage) {
+				st.On("AddUser", mock.Anything, mock.AnythingOfType("*models.UserEntry")).Return(userID, nil)
+			},
+			setupKeys: func(km *mocks.KeyManagerInterface) {
+				km.On("GetOrCreateMasterKey", mock.Anything, userID, passwordStr, mock.Anything).Return(nil, errors.New("key error"))
 			},
 			wantErr: true,
 		},
@@ -58,11 +76,14 @@ func TestServerAdmin_Signup(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			st := mocks.NewIStorage(t)
-			tt.setupMocks(st)
+			km := mocks.NewKeyManagerInterface(t)
+			tt.setupStorage(st)
+			tt.setupKeys(km)
 
 			srv := &ServerAdmin{
-				Storage:   st,
-				JWTConfig: config.JWTConfig{Secret: secret},
+				Storage:    st,
+				JWTConfig:  config.JWTConfig{Secret: secret},
+				KeyManager: km,
 			}
 
 			resp, err := srv.Signup(context.Background(), tt.req)
