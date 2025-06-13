@@ -5,15 +5,15 @@ import (
 	"fmt"
 )
 
-// Version is the current application version.
-var Version = ""
+// version is the current application version.
+var version = ""
 
-// BuildDate is the date when the application was built.
-var BuildTime = ""
+// buildDate is the date when the application was built.
+var buildTime = ""
 
-// CommitHash is the git commit hash of the build.
-var CommitHash = ""
+// commitHash is the git commit hash of the build.
+var commitHash = ""
 
 func PrintVersion() {
-	fmt.Printf("Version: %s\nBuild time: %s\nCommitHash: %s\n", Version, BuildTime, CommitHash)
+	fmt.Printf("Version: %s\nBuild time: %s\nCommitHash: %s\n", version, buildTime, commitHash)
 }

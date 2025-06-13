@@ -21,7 +21,12 @@ tasks:
       - dev:storage-up
       - gen-certs
     cmds:
-      - go run cmd/server/main.go -f config.yaml
+       - |
+          go run -ldflags "\
+          -X 'gophkeeper/pkg/version.Version=1.0.0' \
+          -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+          -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+          cmd/server/main.go -f config.yaml
     silent: true
 
   wgos:
@@ -93,9 +98,9 @@ tasks:
     cmds:
       - |
         go build -ldflags "\
-        -X 'github.com/apetsko/gophkeeper/pkg/version.Version=1.0.0' \
-        -X 'github.com/apetsko/gophkeeper/pkg/version.CommitHash=$(git rev-parse --short HEAD)' \
-        -X 'github.com/apetsko/gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+        -X 'github.com/apetsko/gophkeeper/pkg/version.version=1.0.0' \
+        -X 'github.com/apetsko/gophkeeper/pkg/version.commitHash=$(git rev-parse --short HEAD)' \
+        -X 'github.com/apetsko/gophkeeper/pkg/version.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
         -o ./bin/server
       - echo "Doner"
     silent: true
