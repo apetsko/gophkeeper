@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package api.proto.v1;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1";
+
+import "api/proto/v1/rpc/ping.proto";
+import "api/proto/v1/rpc/data_save.proto";
+import "api/proto/v1/rpc/data_list.proto";
+import "api/proto/v1/rpc/data_delete.proto";
+import "api/proto/v1/rpc/data_view.proto";
+import "api/proto/v1/rpc/user/login.proto";
+import "api/proto/v1/rpc/user/signup.proto";
+
+import "google/api/annotations.proto";
+
+service GophKeeper {
+  rpc Login(api.proto.v1.rpc.user.LoginRequest) returns (api.proto.v1.rpc.user.LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "*"
+    };
+  };
+
+  rpc Signup(api.proto.v1.rpc.user.SignupRequest) returns (api.proto.v1.rpc.user.SignupResponse) {
+    option (google.api.http) = {
+      post: "/v1/signup"
+      body: "*"
+    };
+  };
+
+  rpc Ping(api.proto.v1.rpc.PingRequest) returns (api.proto.v1.rpc.PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/ping"
+    };
+  };
+
+  rpc DataSave(api.proto.v1.rpc.DataSaveRequest) returns (api.proto.v1.rpc.DataSaveResponse) {
+    option (google.api.http) = {
+      post: "/v1/data/save"
+      body: "*"
+    };
+  };
+
+  rpc DataDelete(api.proto.v1.rpc.DataDeleteRequest) returns (api.proto.v1.rpc.DataDeleteResponse) {
+    option (google.api.http) = {
+      delete: "/v1/data/delete"
+    };
+  };
+
+  rpc DataList(api.proto.v1.rpc.DataListRequest) returns (api.proto.v1.rpc.DataListResponse) {
+    option (google.api.http) = {
+      get: "/v1/data/list"
+    };
+  };
+
+  rpc DataView(api.proto.v1.rpc.DataViewRequest) returns (api.proto.v1.rpc.DataViewResponse) {
+    option (google.api.http) = {
+      get: "/v1/data/view"
+    };
+  };
+}

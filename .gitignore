@@ -1,0 +1,15 @@
+.idea
+/gophstorage/
+.env
+uploads/*
+certs/*
+/cover.tmp.out
+/cover.out
+/cmd/server/bin/
+/server
+/deployment/certs/server.crt
+/deployment/certs/server.key
+/gophstorage_docker/*
+/deployment/frontend/certs/server.crt
+/deployment/frontend/certs/server.key
+/testdata/

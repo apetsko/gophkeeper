@@ -1,0 +1,30 @@
+services:
+  dev_minio:
+    image: minio/minio:latest
+    container_name: dev_gophkeeper_minio
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+#    networks:
+#      - gophkeeper_net
+
+  dev_postgres:
+    image: postgres:17
+    container_name: dev_gophkeeper_postgres
+    restart: always
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_USER: gophkeeper_user
+      POSTGRES_PASSWORD: gophkeeper_pass
+      POSTGRES_DB: gophkeeper_db
+#    networks:
+#      - gophkeeper_net
+
+#networks:
+#  gophkeeper_net:
+#    driver: bridge

@@ -1,0 +1,160 @@
+version: "3"
+
+tasks:
+  run:
+    desc: run all
+    deps:
+      - run-server
+      - front
+
+
+  front:
+    desc: run local gophkeeper
+    dir: front
+    cmds:
+      - npm install
+      - npm run dev -- --port 3000 --host
+
+  run-server:
+    desc: run server
+    deps:
+      - dev:storage-up
+      - gen-certs
+    cmds:
+       - |
+          go run -ldflags "\
+          -X 'gophkeeper/pkg/version.Version=1.0.0' \
+          -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+          -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+          cmd/server/main.go -f config.yaml
+    silent: true
+
+  wgos:
+    desc: run server
+    deps:
+      - storage-up
+      - gen-certs
+    cmds:
+      # go install github.com/bokwoon95/wgo@latest раннер wgo
+      - wgo run cmd/server/main.go -f config.yaml
+    silent: true
+
+  protoc:
+    desc: Generate grpc files from proto/gophkeeper.proto
+    deps:
+      - clean-gen-proto
+    cmds:
+      - |
+        FILES=$(find api/proto/v1 -name '*.proto')
+        protoc \
+          -I. \
+          -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis \
+          --go_out=./protogen/ \
+          --go_opt=paths=source_relative \
+          --go-grpc_out=./protogen/ \
+          --go-grpc_opt=paths=source_relative \
+          --grpc-gateway_out ./protogen/ \
+          --grpc-gateway_opt paths=source_relative \
+          $FILES
+    silent: true
+
+  clean-gen-proto:
+    desc: Delete generate files
+    cmds:
+      - find protogen -type f ! -name "*proto" -delete
+
+  gen-certs:
+    cmds:
+      - |
+        if [ ! -f certs/server.crt ] || ! openssl x509 -checkend 86400 -noout -in certs/server.crt; then
+          mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 192.168.1.129 192.168.1.175 127.0.0.1 ::1
+        else
+          echo "Certificate is still valid."
+        fi
+    generates:
+      - certs/server.crt
+      - certs/server.key
+    silent: true
+
+  lint:
+    desc: Run linters using golangci-lint
+    cmds:
+      - golangci-lint run --config .golangci.yml
+    silent: true
+
+  cover:
+    desc: Check test coverage
+    cmds:
+      - go test ./... -coverprofile=./cover.tmp.out -covermode=atomic -coverpkg=./...
+      - grep -vE "/(mocks|main|google|protogen|client)" cover.tmp.out > cover.out #exception by name in filepath
+      - go-test-coverage --config=./testcoverage.yml
+      - go tool cover -html=cover.out -o coverage.html
+    silent: true
+
+
+  buildserver:
+    desc: build server
+    dir: cmd/server
+    cmds:
+      - |
+        go build -ldflags "\
+        -X 'github.com/apetsko/gophkeeper/pkg/version.version=1.0.0' \
+        -X 'github.com/apetsko/gophkeeper/pkg/version.commitHash=$(git rev-parse --short HEAD)' \
+        -X 'github.com/apetsko/gophkeeper/pkg/version.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+        -o ./bin/server
+      - echo "Doner"
+    silent: true
+
+  buildclient:
+    desc: build client
+    dir: cmd/client
+    cmds:
+      - |
+        go build -ldflags "\
+        -X 'gophkeeper/pkg/version.Version=1.0.0' \
+        -X 'gophkeeper/pkg/version.Commit=$(git rev-parse --short HEAD)' \
+        -X 'gophkeeper/pkg/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'" \
+        -o bin/gophkeeper/cmd/client cmd/client/main.go
+      - echo "Doner"
+    silent: true
+
+  test:
+    desc: run tests
+    cmds:
+      - go test ./...
+
+  dev:storage-up:
+    desc: run docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml up -d
+
+  dev:storage-down:
+    desc: stop docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml down
+
+
+  storage-up:
+    desc: run docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml up -d
+
+  storage-down:
+    desc: stop docker minio & postgresql
+    cmds:
+      - docker compose -f ./deployment/docker-compose.storage.yaml down
+
+
+  docker-up:
+    deps:
+      - storage-up
+    desc: build and run everything in docker
+    dir: deployment
+    cmds:
+      - mkdir certs -p
+      - mkcert -cert-file certs/server.crt -key-file certs/server.key localhost 127.0.0.1 ::1
+      - docker compose build --no-cache
+      - docker compose up
+
+
+

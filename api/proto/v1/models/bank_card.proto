@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package api.proto.v1.models;
+
+option go_package = "github.com/apetsko/gophkeeper/protogen/api/proto/v1/models";
+
+message BankCard {
+  string card_number = 1;
+  string expiry_date = 2;
+  string cvv = 3;
+  string cardholder = 4;
+}

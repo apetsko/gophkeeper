@@ -1,0 +1,26 @@
+services:
+  frontend:
+    depends_on:
+      - backend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:443"
+    container_name: gophkeeper_frontend
+    volumes:
+      - certs_data:/usr/share/nginx/html/certs
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8082:8082"
+    container_name: gophkeeper_backend
+    volumes:
+      - certs_data:/app/certs
+
+volumes:
+  certs_data:
+    driver: local
